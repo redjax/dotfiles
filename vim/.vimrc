@@ -59,6 +59,9 @@
     " Show matching brackets when text indicator is over them
     set showmatch
 
+    " Screw swap files. Cluttering up my files...
+    set noswapfile
+    
     " How many tenths of a second to blink when matching brackets
     set matchtime=1
 
