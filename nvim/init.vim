@@ -24,15 +24,19 @@ if !filereadable(vimplug_exists)
 endif
 
 " Required:
-call plug#begin(expand('~/.config/nvim/plugged'))
+call plug#begin('~/.config/nvim/plugged')
+" expand('~/.config/nvim/plugged')
 
 "*****************************************************************************
 "" Plug install packages
 "*****************************************************************************
 Plug 'scrooloose/nerdtree'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'scrooloose/syntastic'
 Plug 'jistr/vim-nerdtree-tabs'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
+Plug 'vim-airblade/vim-gitgutter'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'airblade/vim-gitgutter'
@@ -178,7 +182,7 @@ if !exists('g:not_finish_vimplug')
     "colorscheme Spink
     "colorscheme Tomorrow-Night-Blue
     "colorscheme Tomorrow-Night-Bright
-    "colorscheme Tomorrow-Night-Eighties
+    colorscheme Tomorrow-Night-Eighties
     "colorscheme Tomorrow-Night
     "colorscheme Tomorrow
     "colorscheme adobe
@@ -199,13 +203,12 @@ if !exists('g:not_finish_vimplug')
     "colorscheme darkZ
     "colorscheme dusk
     "colorscheme flatland
-    "colorscheme flatlandia
     "colorscheme flattended_dark
     "colorscheme flattr
     "colorscheme flatui
     "colorscheme impact
     "colorscheme itg_flat
-    colorscheme lucid
+    "colorscheme lucid
     "colorscheme material-theme
     "colorscheme material
     "colorscheme materialbox
@@ -226,7 +229,6 @@ if !exists('g:not_finish_vimplug')
     "colorscheme tangox
     "colorscheme spacegray
     "colorscheme soda
-    "colorscheme Tomorrow-Night
 endif
 
 set mousemodel=popup
@@ -524,6 +526,7 @@ let g:jedi#rename_command = "<leader>r"
 let g:jedi#show_call_signatures = "0"
 let g:jedi#completions_command = "<C-Space>"
 let g:jedi#smart_auto_mappings = 0
+let g:jedi#force_py_version=3
 
 " syntastic
 let g:syntastic_python_checkers=['python', 'flake8']
@@ -536,6 +539,24 @@ let g:airline#extensions#virtualenv#enabled = 1
 let g:polyglot_disabled = ['python']
 let python_highlight_all = 1
 
+" Syntastic conf
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_python_checkers = ['flake8'] " Python checking
+let g:syntastic_aggregate_errors = 1 " Display errors from all checkers at once
+
+" Vim-Gitgutter settings
+set updatetime=250
+let g:gitgutter_max_signs = 500 " Max changes before Gitgutter stops working to save performance
+
+" Indent guides
+let g:indent_guides_enable_on_vim_startup = 1
 
 "*****************************************************************************
 "*****************************************************************************
