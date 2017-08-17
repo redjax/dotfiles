@@ -1,0 +1,2 @@
+[submodule "nvim/bundle/YouCompleteMe"]
+	url = git@github.com:redjax/dotfiles.git
