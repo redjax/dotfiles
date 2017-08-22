@@ -1,109 +1,6 @@
 " vim-bootstrap 224c6cc
 
-set foldmethod=marker
-
-"*****************************************************************************
-"" Vim-PLug core
-"*****************************************************************************
-if has('vim_starting')
-  set nocompatible               " Be iMproved
-endif
-
-let vimplug_exists=expand('~/.config/nvim/autoload/plug.vim')
-
-let g:vim_bootstrap_langs = "python"
-let g:vim_bootstrap_editor = "nvim"				" nvim or vim
-
-if !filereadable(vimplug_exists)
-  echo "Installing Vim-Plug..."
-  echo ""
-  silent !\curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  let g:not_finish_vimplug = "yes"
-
-  autocmd VimEnter * PlugInstall
-endif
-
-" Required:
-call plug#begin('~/.config/nvim/plugged')
-" expand('~/.config/nvim/plugged')
-
-"*****************************************************************************
-"" Plug install packages
-"*****************************************************************************
-Plug 'scrooloose/nerdtree'
-Plug 'nathanaelkane/vim-indent-guides'
-Plug 'scrooloose/syntastic'
-Plug 'jistr/vim-nerdtree-tabs'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-fugitive'
-Plug 'vim-airblade/vim-gitgutter'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'airblade/vim-gitgutter'
-Plug 'vim-scripts/grep.vim'
-Plug 'vim-scripts/CSApprox'
-Plug 'bronson/vim-trailing-whitespace'
-Plug 'Raimondi/delimitMate'
-Plug 'majutsushi/tagbar'
-Plug 'scrooloose/syntastic'
-Plug 'Yggdroot/indentLine'
-Plug 'avelino/vim-bootstrap-updater'
-Plug 'sheerun/vim-polyglot'
-Plug 'altercation/vim-colors-solarized'
-Plug 'flazz/vim-colorschemes'
-Plug 'xolox/vim-colorscheme-switcher'
-if isdirectory('/usr/local/opt/fzf')
-  Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
-else
-  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
-  Plug 'junegunn/fzf.vim'
-endif
-let g:make = 'gmake'
-if exists('make')
-        let g:make = 'make'
-endif
-Plug 'Shougo/vimproc.vim', {'do': g:make}
-
-"" Vim-Session
-Plug 'xolox/vim-misc'
-Plug 'xolox/vim-session'
-
-if v:version >= 703
-  Plug 'Shougo/vimshell.vim'
-endif
-
-if v:version >= 704
-  "" Snippets
-  Plug 'SirVer/ultisnips'
-endif
-
-Plug 'honza/vim-snippets'
-
-"" Color
-Plug 'tomasr/molokai'
-
-"*****************************************************************************
-"" Custom bundles
-"*****************************************************************************
-
-" python
-"" Python Bundle
-Plug 'davidhalter/jedi-vim'
-
-
-"*****************************************************************************
-"*****************************************************************************
-
-"" Include user's extra bundle
-if filereadable(expand("~/.config/nvim/local_bundles.vim"))
-  source ~/.config/nvim/local_bundles.vim
-endif
-
-call plug#end()
-
-" Required:
-filetype plugin indent on
-
+" {{{ Basic Setup
 
 "*****************************************************************************
 "" Basic Setup
@@ -115,6 +12,7 @@ set fileencodings=utf-8
 set bomb
 set binary
 
+set foldmethod=marker
 
 "" Fix backspace indent
 set backspace=indent,eol,start
@@ -156,6 +54,119 @@ let g:session_autoload = "no"
 let g:session_autosave = "no"
 let g:session_command_aliases = 1
 
+" }}}
+
+" {{{ Vim-Plug
+
+" {{{ Vim-Plug core settings
+"*****************************************************************************
+"" Vim-PLug core
+"*****************************************************************************
+if has('vim_starting')
+  set nocompatible               " Be iMproved
+endif
+
+let vimplug_exists=expand('~/.config/nvim/autoload/plug.vim')
+
+let g:vim_bootstrap_langs = "python"
+let g:vim_bootstrap_editor = "nvim"				" nvim or vim
+
+if !filereadable(vimplug_exists)
+  echo "Installing Vim-Plug..."
+  echo ""
+  silent !\curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  let g:not_finish_vimplug = "yes"
+
+  autocmd VimEnter * PlugInstall
+endif
+
+" Required:
+call plug#begin('~/.config/nvim/plugged')
+" expand('~/.config/nvim/plugged')
+
+" }}}
+
+" {{{ Plug Packages Install
+"*****************************************************************************
+"" Plug install packages
+"*****************************************************************************
+Plug 'scrooloose/nerdtree'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'scrooloose/syntastic'
+Plug 'jistr/vim-nerdtree-tabs'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-fugitive'
+Plug 'vim-airblade/vim-gitgutter'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'airblade/vim-gitgutter'
+Plug 'vim-scripts/grep.vim'
+Plug 'vim-scripts/CSApprox'
+Plug 'bronson/vim-trailing-whitespace'
+Plug 'Raimondi/delimitMate'
+Plug 'majutsushi/tagbar'
+Plug 'scrooloose/syntastic'
+Plug 'Yggdroot/indentLine'
+Plug 'avelino/vim-bootstrap-updater'
+Plug 'sheerun/vim-polyglot'
+Plug 'altercation/vim-colors-solarized'
+Plug 'flazz/vim-colorschemes'
+Plug 'xolox/vim-colorscheme-switcher'
+Plug 'yuttie/comfortable-motion.vim'
+Plug 'davidhalter/jedi-vim'
+
+" {{{ Plug Configuration
+if isdirectory('/usr/local/opt/fzf')
+  Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
+else
+  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --bin' }
+  Plug 'junegunn/fzf.vim'
+endif
+let g:make = 'gmake'
+if exists('make')
+        let g:make = 'make'
+endif
+Plug 'Shougo/vimproc.vim', {'do': g:make}
+
+"" Vim-Session
+Plug 'xolox/vim-misc'
+Plug 'xolox/vim-session'
+
+if v:version >= 703
+  Plug 'Shougo/vimshell.vim'
+endif
+
+if v:version >= 704
+  "" Snippets
+  Plug 'SirVer/ultisnips'
+endif
+
+Plug 'honza/vim-snippets'
+
+"" Color
+Plug 'tomasr/molokai'
+
+" }}}
+
+"*****************************************************************************
+"*****************************************************************************
+
+"" Include user's extra bundle
+if filereadable(expand("~/.config/nvim/local_bundles.vim"))
+  source ~/.config/nvim/local_bundles.vim
+endif
+
+call plug#end()
+
+" Required:
+filetype plugin indent on
+
+" }}}
+
+" }}}
+
+" {{{  Visual Settings
+
 "*****************************************************************************
 "" Visual Settings
 "*****************************************************************************
@@ -165,6 +176,9 @@ set number
 
 let no_buffers_menu=1
 if !exists('g:not_finish_vimplug')
+
+" {{{ Colorschemes
+
     "colorscheme solarized
     "colorscheme 0x7A69_dark
     "colorscheme 256-grayvim
@@ -229,6 +243,9 @@ if !exists('g:not_finish_vimplug')
     "colorscheme tangox
     "colorscheme spacegray
     "colorscheme soda
+
+" }}}
+
 endif
 
 set mousemodel=popup
@@ -252,8 +269,6 @@ else
 
 
 endif
-
-
 
 "" Disable the blinking cursor.
 set gcr=a:blinkon0
@@ -281,13 +296,9 @@ if exists("*fugitive#statusline")
   set statusline+=%{fugitive#statusline()}
 endif
 
-" vim-airline
-let g:airline_theme = 'powerlineish'
-let g:airline#extensions#syntastic#enabled = 1
-let g:airline#extensions#branch#enabled = 1
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tagbar#enabled = 1
-let g:airline_skip_empty_sections = 1
+" }}}
+
+" {{{ Abbreviations
 
 "*****************************************************************************
 "" Abbreviations
@@ -304,34 +315,9 @@ cnoreabbrev W w
 cnoreabbrev Q q
 cnoreabbrev Qall qall
 
-"" NERDTree configuration
-let g:NERDTreeChDirMode=2
-let g:NERDTreeIgnore=['\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
-let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
-let g:NERDTreeShowBookmarks=1
-let g:nerdtree_tabs_focus_on_files=1
-let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 50
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
-nnoremap <silent> <F2> :NERDTreeFind<CR>
-noremap <F3> :NERDTreeToggle<CR>
+" }}}
 
-" grep.vim
-nnoremap <silent> <leader>f :Rgrep<CR>
-let Grep_Default_Options = '-IR'
-let Grep_Skip_Files = '*.log *.db'
-let Grep_Skip_Dirs = '.git node_modules'
-
-" vimshell.vim
-let g:vimshell_user_prompt = 'fnamemodify(getcwd(), ":~")'
-let g:vimshell_prompt =  '$ '
-
-" terminal emulation
-if g:vim_bootstrap_editor == 'nvim'
-  nnoremap <silent> <leader>sh :terminal<CR>
-else
-  nnoremap <silent> <leader>sh :VimShellCreate<CR>
-endif
+" {{{ Functions
 
 "*****************************************************************************
 "" Functions
@@ -343,6 +329,10 @@ if !exists('*s:setupWrapping')
     set textwidth=79
   endfunction
 endif
+
+" }}}
+
+" {{{ Autocmd Rules
 
 "*****************************************************************************
 "" Autocmd Rules
@@ -373,6 +363,10 @@ augroup vimrc-make-cmake
 augroup END
 
 set autoread
+
+" }}}
+
+" {{{ Mappings
 
 "*****************************************************************************
 "" Mappings
@@ -503,6 +497,10 @@ vnoremap K :m '<-2<CR>gv=gv
 "" Open current line on GitHub
 nnoremap <Leader>o :.Gbrowse<CR>
 
+" }}}
+
+" {{{ Custom Configs
+
 "*****************************************************************************
 "" Custom configs
 "*****************************************************************************
@@ -516,50 +514,116 @@ augroup vimrc-python
       \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 augroup END
 
-" jedi-vim
-let g:jedi#popup_on_dot = 0
-let g:jedi#goto_assignments_command = "<leader>g"
-let g:jedi#goto_definitions_command = "<leader>d"
-let g:jedi#documentation_command = "K"
-let g:jedi#usages_command = "<leader>n"
-let g:jedi#rename_command = "<leader>r"
-let g:jedi#show_call_signatures = "0"
-let g:jedi#completions_command = "<C-Space>"
-let g:jedi#smart_auto_mappings = 0
-let g:jedi#force_py_version=3
+" {{{ Addon Plugins
 
-" syntastic
-let g:syntastic_python_checkers=['python', 'flake8']
+    " {{{ jedi-vim
 
-" vim-airline
-let g:airline#extensions#virtualenv#enabled = 1
+    let g:jedi#popup_on_dot = 0
+    let g:jedi#goto_assignments_command = "<leader>g"
+    let g:jedi#goto_definitions_command = "<leader>d"
+    let g:jedi#documentation_command = "K"
+    let g:jedi#usages_command = "<leader>n"
+    let g:jedi#rename_command = "<leader>r"
+    let g:jedi#show_call_signatures = "0"
+    let g:jedi#completions_command = "<C-Space>"
+    let g:jedi#smart_auto_mappings = 0
+    let g:jedi#force_py_version=3
 
-" Syntax highlight
-" Default highlight is better than polyglot
-let g:polyglot_disabled = ['python']
-let python_highlight_all = 1
+    " }}}
 
-" Syntastic conf
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+    " {{{ syntastic
 
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_python_checkers = ['flake8'] " Python checking
-let g:syntastic_aggregate_errors = 1 " Display errors from all checkers at once
+    let g:syntastic_python_checkers=['python', 'flake8']
 
-" Vim-Gitgutter settings
-set updatetime=250
-let g:gitgutter_max_signs = 500 " Max changes before Gitgutter stops working to save performance
+    " }}}
 
-" Indent guides
-let g:indent_guides_enable_on_vim_startup = 1
+    " {{{ vim-airline
+
+    let g:airline#extensions#virtualenv#enabled = 1
+
+    " }}}
+
+    " {{{ Syntax
+
+        " Default highlight is better than polyglot
+        let g:polyglot_disabled = ['python']
+        let python_highlight_all = 1
+
+        " Syntastic conf
+        set statusline+=%#warningmsg#
+        set statusline+=%{SyntasticStatuslineFlag()}
+        set statusline+=%*
+
+        let g:syntastic_always_populate_loc_list = 1
+        let g:syntastic_auto_loc_list = 1
+        let g:syntastic_check_on_open = 1
+        let g:syntastic_check_on_wq = 0
+        let g:syntastic_python_checkers = ['flake8'] " Python checking
+        let g:syntastic_aggregate_errors = 1 " Display errors from all checkers at once
+
+    " }}}
+
+    " {{{ Vim-Gitgutter settings
+    set updatetime=250
+    let g:gitgutter_max_signs = 500 " Max changes before Gitgutter stops working to save performance
+
+    " }}}
+
+    " Colorscheme-switcher settings
+    let g:colorscheme_switcher_exclude = ['flatland', 'flatland-dark']
+
+    " Indent guides
+    let g:indent_guides_enable_on_vim_startup = 1
+
+    " {{{ Comfortable-Motion (smooth/physics-based scrolling
+    noremap <silent> <ScrollWheelDown> :call comfortable_motion#flick(40)<CR>
+    noremap <silent> <ScrollWheelUp>   :call comfortable_motion#flick(-40)<CR>
+    " }}}
+
+    " {{{ vim-airline
+    let g:airline_theme = 'powerlineish'
+    let g:airline#extensions#syntastic#enabled = 1
+    let g:airline#extensions#branch#enabled = 1
+    let g:airline#extensions#tabline#enabled = 1
+    let g:airline#extensions#tagbar#enabled = 1
+    let g:airline_skip_empty_sections = 1
+    " }}}
+
+    "" {{{ NERDTree configuration
+    let g:NERDTreeChDirMode=2
+    let g:NERDTreeIgnore=['\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+    let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
+    let g:NERDTreeShowBookmarks=1
+    let g:nerdtree_tabs_focus_on_files=1
+    let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
+    let g:NERDTreeWinSize = 50
+    set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
+    nnoremap <silent> <F2> :NERDTreeFind<CR>
+    noremap <F3> :NERDTreeToggle<CR>
+    " }}}
+
+    " {{{ grep.vim
+    nnoremap <silent> <leader>f :Rgrep<CR>
+    let Grep_Default_Options = '-IR'
+    let Grep_Skip_Files = '*.log *.db'
+    let Grep_Skip_Dirs = '.git node_modules'
+    " }}}
+
+    " vimshell.vim
+    let g:vimshell_user_prompt = 'fnamemodify(getcwd(), ":~")'
+    let g:vimshell_prompt =  '$ '
+
+    " terminal emulation
+    if g:vim_bootstrap_editor == 'nvim'
+      nnoremap <silent> <leader>sh :terminal<CR>
+    else
+      nnoremap <silent> <leader>sh :VimShellCreate<CR>
+    endif
 
 "*****************************************************************************
 "*****************************************************************************
+
+" }}}
 
 "" Include user's local vim config
 if filereadable(expand("~/.config/nvim/local_init.vim"))
