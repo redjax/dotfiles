@@ -39,6 +39,19 @@ dnf install -y neovim
 
 # --------------------------------------------------------------
 
+# Install Tmux
+dnf install -y tmux
+
+# Create Tmux conf
+cp ~/Documents/github/dotfiles/.tmux.conf ~/
+
+# --------------------------------------------------------------
+
+# Install Terminator
+dnf install -y terminator
+
+# --------------------------------------------------------------
+
 # Git install
 dnf install -y git
 
