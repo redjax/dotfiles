@@ -14,10 +14,15 @@ set binary
 
 set foldmethod=marker
 
+" Editor appearance
+set colorcolumn=90
+set number
+set termguicolors
+
 "" Fix backspace indent
 set backspace=indent,eol,start
 
-"" Tabs. May be overriten by autocmd rules
+"" Tabs. May be overwritten by autocmd rules
 set tabstop=4
 set softtabstop=0
 set shiftwidth=4
@@ -35,7 +40,7 @@ set incsearch
 set ignorecase
 set smartcase
 
-"" Directories for swp files
+"" Directories for swap files
 set nobackup
 set noswapfile
 
