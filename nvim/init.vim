@@ -119,6 +119,10 @@ Plug 'flazz/vim-colorschemes'
 Plug 'xolox/vim-colorscheme-switcher'
 Plug 'yuttie/comfortable-motion.vim'
 Plug 'davidhalter/jedi-vim'
+Plug 'vim-scripts/indentpython.vim'
+Plug 'scrooloose/syntastic'
+Plug 'jnurmine/Zenburn'
+Plug 'altercation/vim-colors-solarized'
 
 " {{{ Plug Configuration
 if isdirectory('/usr/local/opt/fzf')
@@ -178,9 +182,19 @@ filetype plugin indent on
 syntax on
 set ruler
 set number
+set cursorline
 
 let no_buffers_menu=1
 if !exists('g:not_finish_vimplug')
+
+" allows cursor change in tmux mode
+if exists('$TMUX')
+    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+else
+    let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+    let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+endif
 
 " {{{ Colorschemes
 
@@ -334,6 +348,13 @@ if !exists('*s:setupWrapping')
     set textwidth=79
   endfunction
 endif
+
+" Backups
+set backup
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set backupskip=/tmp/*,/private/tmp/*
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set writebackup
 
 " }}}
 
@@ -510,14 +531,47 @@ nnoremap <Leader>o :.Gbrowse<CR>
 "" Custom configs
 "*****************************************************************************
 
-" python
-" vim-python
-augroup vimrc-python
-  autocmd!
-  autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
+" {{{ Python Settings
+ 
+    " vim-python
+    augroup vimrc-python
+    autocmd!
+    autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
       \ formatoptions+=croq softtabstop=4
       \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 augroup END
+
+    " PEP8 Indentation
+    au BufNewFile,BufRead *.py
+        \ set tabstop=4
+        \ set softtabstop=4
+        \ set shiftwidth=4
+        \ set textwidth=79
+        \ set expandtab
+        \ set autoindent
+        \ set fileformat=unix
+
+    " Match and remove extra white space
+    au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+
+    "Syntastic/vim-flake8 Syntax Settings
+    let python_highlight_all=1
+    syntax on
+
+    " Show matching parentheses/brackets/braces (may be redundant)
+    set showmatch
+
+" }}}
+
+" {{{ JS, HTML, CSS Settings
+
+    " 2 tabs
+    au BufNewFile,BufRead *.js, *.html, *.css
+        \ set tabstop=2
+        \ set softtabstop=2
+        \ set shiftwidth=2
+
+" }}}
 
 " {{{ Addon Plugins
 
@@ -639,7 +693,7 @@ endif
 "" Convenience variables
 "*****************************************************************************
 
-" vim-airline
+" {{{ vim-airline
 if !exists('g:airline_symbols')
   let g:airline_symbols = {}
 endif
@@ -674,4 +728,4 @@ else
   let g:airline_symbols.readonly = ''
   let g:airline_symbols.linenr = ''
 endif
-
+" }}}
