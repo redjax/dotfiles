@@ -62,6 +62,9 @@ dnf install -y terminator
 # Git install
 dnf install -y git
 
+# Install Teamviewer -- Fedora
+dnf install -y https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+
 # --------------------------------------------------------------
 
 # Themes, Fonts, and Icons
