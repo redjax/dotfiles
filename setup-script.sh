@@ -69,6 +69,18 @@ cp ~/Documents/github/dotfiles/.tmux.conf ~/
 # Install Python Virtualenv
     # Fedora
     dnf install -y python-virtualenv
+
+# OpenVPN/NordVPN Install
+    dnf install -y openvpn
+
+    cd /etc/openvpn
+    wget https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip
+
+    dnf install -y ca-certificates
+    dnf install -y unzip
+
+    unzip ovpn.zip
+    rm zip
 # --------------------------------------------------------------
 
 # Themes, Fonts, and Icons
