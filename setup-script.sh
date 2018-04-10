@@ -9,7 +9,15 @@
 ##########
 
 # Install Fedy
-sh -c 'curl https://www.folkswithhats.org/installer | bash'
+dnf install https://dl.folkswithhats.org/fedora/$(rpm -E %fedora)/RPMS/folkswithhats-release.noarch.rpm
+dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+dnf install fedy
+
+# Launch Fedy
+./usr/bin/fedy
+
+# Gitkraken fix after installing via Fedy
+sudo ln -s /usr/lib64/libcurl.so.4 /opt/gitkraken/libcurl-gnutls.so.4
 
 # -------------------------------------------------------------
 
