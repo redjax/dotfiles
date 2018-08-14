@@ -48,6 +48,9 @@ systemctl enable preload.service
 pacman -S neovim --noconfirm
 . ~/Documents/git/dotfiles/nvim/createvimfiles.sh
 
+# Install Wifite2
+./wifite2install.sh
+
 # +------------------------------------------------+
 
 # Fonts
