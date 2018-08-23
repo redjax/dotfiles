@@ -47,6 +47,10 @@ systemctl enable preload.service
 # Install Neovim
 pacman -S neovim --noconfirm
 . ~/Documents/git/dotfiles/nvim/createvimfiles.sh
+  # Install pip neovim to stop Python error message
+  pacman -S python-pip
+  pip install --upgrade pip
+  pip install neovim
 
 # Install Wifite2
 ./wifite2install.sh
