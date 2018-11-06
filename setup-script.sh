@@ -17,7 +17,7 @@ dnf install fedy
 ./usr/bin/fedy
 
 # Gitkraken fix after installing via Fedy
-sudo ln -s /usr/lib64/libcurl.so.4 /opt/gitkraken/libcurl-gnutls.so.4
+#sudo ln -s /usr/lib64/libcurl.so.4 /opt/gitkraken/libcurl-gnutls.so.4
 
 # -------------------------------------------------------------
 
@@ -50,7 +50,7 @@ dnf install -y neovim
 
 # Configure neovim
 
-. ~/Documents/github/dotfiles/nvim/createvimfiles.sh
+. ~/Documents/git/dotfiles/nvim/createvimfiles.sh
 
 # --------------------------------------------------------------
 
@@ -58,17 +58,17 @@ dnf install -y neovim
 dnf install -y tmux
 
 # Create Tmux conf
-cp ~/Documents/github/dotfiles/.tmux.conf ~/
+cp ~/Documents/git/dotfiles/.tmux.conf ~/
 
 # --------------------------------------------------------------
 
 # Install Terminator
-#dnf install -y terminator
+dnf install -y terminator
 
 # --------------------------------------------------------------
 
 # Git install
-#dnf install -y git
+dnf install -y git
 
 # Install Python
     # Fedora
@@ -87,23 +87,15 @@ cp ~/Documents/github/dotfiles/.tmux.conf ~/
     dnf install -y ca-certificates
     dnf install -y unzip
 
-<<<<<<< HEAD
-# Install Teamviewer -- Fedora
-dnf install -y https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
-
-=======
-    unzip ovpn.zip
-    rm zip
->>>>>>> master
 # --------------------------------------------------------------
 
 # Themes, Fonts, and Icons
 
 # Clone repo
-#git clone https://github.com/redjax/jaxlinuxlooks.git ~/Documents/github/
+git clone --progress https://github.com/redjax/jaxlinuxlooks.git ~/Documents/git/
 
 # -Themes
-#. ~/Documents/github/jaxlinuxlooks/themesinstall.sh
+. ~/Documents/git/jaxlinuxlooks/themesinstall.sh
 
 # -Fonts
-#. ~/Documents/github/jaxlinuxlooks/fontsinstall.sh
+. ~/Documents/git/jaxlinuxlooks/fontsinstall.sh
