@@ -12,6 +12,8 @@ OSRELEASE="$(lsb_release -sr)"
 if [[  $OS=="Fedora" ]]
 then
 
+    echo "You are using Fedora."
+
     # If Fedora 22 or higher, use DNF
     if [[ $OSRELEASE>21 ]]
         then
@@ -20,7 +22,8 @@ then
 
     elif [[ $OSRELEASE<22 ]]
         then
-            . ~/Documents/github/dotfiles/setup-scripts/fedora-setup.sh
+            echo "Your release is less than 22."
+            #. ~/Documents/github/dotfiles/setup-scripts/fedora-setup.sh
     fi
 
 elif [[ $OS=="Ubuntu" ]]
