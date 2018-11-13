@@ -22,6 +22,7 @@ os_check(){
     fi
 }
 
+
 package_man(){
     # Determine which package manager to use & build commands
     osname=$(os_check)
@@ -67,4 +68,11 @@ package_funcs() {
     # $($install $noconfirm <pkg_var>)  # Install package
 }
 
-package_funcs
+
+gitops(){
+    # Run git operations when installing/downloading from, i.e., Github
+    gitclone="git clone --progress --verbose"
+    themesfolder="/usr/share/themes"
+    iconsfolder="/usr/share/icons"
+    fontsfolder="/usr/share/fonts"
+}
