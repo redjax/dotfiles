@@ -77,6 +77,11 @@ dnf install -y alacarte
 
 # --------------------------------------------------------------
 
+# Android Tools (ADB, Fastboot)
+dnf install -y android-tools
+
+# --------------------------------------------------------------
+
 # Themes, Fonts, and Icons
 
 # Clone repo
