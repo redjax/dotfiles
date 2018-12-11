@@ -28,6 +28,19 @@ dnf install -y sublime-text
 
 # --------------------------------------------------------------
 
+# Create Cron jobs
+
+  # Create folder in /opt and copy scripts to it
+  mkdir /opt/backup-scripts
+  cp -R crontasks/backup-scripts/* /opt/backup-scripts
+
+  # Create cron job for backing up Gnome
+  echo "0 0 */3 * * /opt/backup-scripts/backup-gnome.sh" | crontab -
+
+  # Restore Gnome settings on new installation
+  ./opt/backup-scripts/restore-gnome.sh
+# --------------------------------------------------------------
+
 # NeoVim
 
 # Install nvim
