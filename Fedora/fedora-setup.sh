@@ -1,5 +1,9 @@
 #!/bin/bash
 
+usr='jack'
+home='/home/${usr}'
+gitcl='${gitcl} --verbose'
+
 # Setup script for installing a new distro.
 # ToDo: Make script distro-aware for running different commands based on
 # what type of Linux I'm running the script on.
@@ -12,6 +16,12 @@
 sh -c 'curl https://www.folkswithhats.org/installer | bash'
 
 # -------------------------------------------------------------
+
+# Install Brave Browser Dev
+dnf config-manager --add-repo https://brave-browser-rpm-dev.s3.brave.com/x86_64/
+rpm --import https://brave-browser-rpm-dev.s3.brave.com/brave-core-nightly.asc
+dnf install -y brave-browser-dev
+# ------------------------------------------------------------
 
 # Install Sublime Text
 # -Install GPG Key
@@ -48,7 +58,7 @@ dnf install -y neovim
 
 # Configure neovim
 
-. ~/Documents/git/dotfiles/nvim/createvimfiles.sh
+. ${home}/Documents/git/dotfiles/nvim/createvimfiles.sh
 
 # --------------------------------------------------------------
 
@@ -56,7 +66,7 @@ dnf install -y neovim
 dnf install -y tmux
 
 # Create Tmux conf
-cp ~/Documents/git/dotfiles/.tmux.conf ~/
+cp ${home}/Documents/git/dotfiles/.tmux.conf ~/
 
 # --------------------------------------------------------------
 
@@ -98,10 +108,10 @@ dnf install -y android-tools
 # Themes, Fonts, and Icons
 
 # Clone repo
-git clone --progress https://github.com/redjax/jaxlinuxlooks.git ~/Documents/git/
+${gitcl} https://github.com/redjax/jaxlinuxlooks.git ${home}/Documents/git/
 
 # -Themes
-. ~/Documents/github/jaxlinuxlooks/themesinstall.sh
+. ${home}/Documents/git/jaxlinuxlooks/themesinstall.sh
 
 # -Fonts
-. ~/Documents/github/jaxlinuxlooks/fontsinstall.sh
+. ${home}/Documents/git/jaxlinuxlooks/fontsinstall.sh
