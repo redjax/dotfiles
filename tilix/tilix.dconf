@@ -1,0 +1,20 @@
+[/]
+prompt-on-close=true
+terminal-title-style='small'
+new-instance-mode='new-session'
+quake-specific-monitor=0
+theme-variant='dark'
+
+[profiles/9e3179ba-68c1-4274-8de1-017f6048d663]
+visible-name='jack'
+background-transparency-percent=9
+cursor-shape='ibeam'
+dim-transparency-percent=0
+terminal-title='${id} ${directory}'
+terminal-bell='none'
+
+[profiles]
+list=['2b7c4080-0ddd-46c5-8f23-563fd3ba789d', '9e3179ba-68c1-4274-8de1-017f6048d663']
+
+[profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d]
+visible-name='Default'

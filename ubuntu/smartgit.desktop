@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Smartgit
+Comment=Git manager
+Exec=/opt/smartgit/bin/smartgit.sh
+Terminal=false
+Type=Application
+Icon=/opt/smartgit/bin/smartgit.svg
+Categories=Utility;Programming;TextEditor;
+Keywords=text;editor;development;git
