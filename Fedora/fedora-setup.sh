@@ -1,5 +1,9 @@
 #!/bin/bash
 
+usr='jack'
+home='/home/${usr}'
+gitcl='${gitcl} --verbose'
+
 # Setup script for installing a new distro.
 # ToDo: Make script distro-aware for running different commands based on
 # what type of Linux I'm running the script on.
@@ -12,6 +16,18 @@
 sh -c 'curl https://www.folkswithhats.org/installer | bash'
 
 # -------------------------------------------------------------
+
+# Install Brave Browser Dev
+# dnf config-manager --add-repo https://brave-browser-rpm-dev.s3.brave.com/x86_64/
+# rpm --import https://brave-browser-rpm-dev.s3.brave.com/brave-core-nightly.asc
+# dnf install -y brave-browser-dev
+
+# Brave Browser Beta
+dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
+rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+dnf install brave-browser brave-keyring
+
+# ------------------------------------------------------------
 
 # Install Sublime Text
 # -Install GPG Key
@@ -28,6 +44,19 @@ dnf install -y sublime-text
 
 # --------------------------------------------------------------
 
+# Create Cron jobs
+
+  # Create folder in /opt and copy scripts to it
+  mkdir /opt/backup-scripts
+  cp -R crontasks/backup-scripts/* /opt/backup-scripts
+
+  # Create cron job for backing up Gnome
+  echo "0 0 */3 * * /opt/backup-scripts/backup-gnome.sh" | crontab -
+
+  # Restore Gnome settings on new installation
+  ./opt/backup-scripts/restore-gnome.sh
+# --------------------------------------------------------------
+
 # NeoVim
 
 # Install nvim
@@ -35,7 +64,7 @@ dnf install -y neovim
 
 # Configure neovim
 
-. ~/Documents/git/dotfiles/nvim/createvimfiles.sh
+. ${home}/Documents/git/dotfiles/nvim/createvimfiles.sh
 
 # --------------------------------------------------------------
 
@@ -43,12 +72,34 @@ dnf install -y neovim
 dnf install -y tmux
 
 # Create Tmux conf
-cp ~/Documents/git/dotfiles/.tmux.conf ~/
+cp ${home}/Documents/git/dotfiles/.tmux.conf ~/
 
 # --------------------------------------------------------------
 
 # Install Terminator
 dnf install -y terminator
+
+# --------------------------------------------------------------
+
+# Install tilix
+dnf install -y tilix
+
+# --------------------------------------------------------------
+
+# Install TLP, laptop battery saving
+dnf install -y tlp tlp-rdw
+
+  # Thinkpad-specific
+  dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+
+  dnf install http://repo.linrunner.de/fedora/tlp/repos/releases/tlp-release.fc$(rpm -E %fedora).noarch.rpm
+
+  # Optional
+
+    # akmod-tp_smapi (battery charge threshold, recalibration
+    # akmod-acpi_call (X220/T420, X230/T430, etc)
+    # kernel-devel (needed for akmod packages)
+    dnf install -y akmod-tp_smapi akmod-acpi_call kernel-devel
 
 # --------------------------------------------------------------
 
@@ -77,13 +128,18 @@ dnf install -y alacarte
 
 # --------------------------------------------------------------
 
+# Android Tools (ADB, Fastboot)
+dnf install -y android-tools
+
+# --------------------------------------------------------------
+
 # Themes, Fonts, and Icons
 
 # Clone repo
-git clone --progress https://github.com/redjax/jaxlinuxlooks.git ~/Documents/git/
+${gitcl} https://github.com/redjax/jaxlinuxlooks.git ${home}/Documents/git/
 
 # -Themes
-. ~/Documents/github/jaxlinuxlooks/themesinstall.sh
+. ${home}/Documents/git/jaxlinuxlooks/themesinstall.sh
 
 # -Fonts
-. ~/Documents/github/jaxlinuxlooks/fontsinstall.sh
+. ${home}/Documents/git/jaxlinuxlooks/fontsinstall.sh
