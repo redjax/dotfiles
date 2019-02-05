@@ -3,4 +3,4 @@
 usr="jack"
 
 # Restore the configuration
-dconf load /org/gnome/shell/extensions/ < /home/$usr/gnome/gnome_backup.txt
+dconf load /org/gnome/shell/extensions/ < /home/$usr/Documents/backup/gnome_backup.txt
