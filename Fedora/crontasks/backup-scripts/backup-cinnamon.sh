@@ -3,4 +3,4 @@
 usr="jack"
 
 # Backup Cinnamon settings
-dconf dump /org/cinnamon > /home/$usr/cinnamon-backup.txt
+dconf dump /org/cinnamon > /home/$usr/Documents/backup/cinnamon-backup.txt
