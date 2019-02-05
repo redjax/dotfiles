@@ -20,7 +20,14 @@ dnf install fedy
 #sudo ln -s /usr/lib64/libcurl.so.4 /opt/gitkraken/libcurl-gnutls.so.4
 
 # -------------------------------------------------------------
+# Change Hostname
+# hostnamectl set-hostname --static “”
+# --------------------------------------------------------------
 
+#  Add Fusion repository
+rpm -ivh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-26.noarch.rpm
+
+# --------------------------------------------------------------
 # Install Sublime Text
 # -Install GPG Key
 rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
@@ -65,6 +72,10 @@ cp ~/Documents/git/dotfiles/.tmux.conf ~/
 # Install Terminator
 dnf install -y terminator
 
+# ---------------------------------------------------------------
+
+dnf install -y vlc
+
 # --------------------------------------------------------------
 
 # Git install
@@ -87,6 +98,8 @@ dnf install -y git
     dnf install -y ca-certificates
     dnf install -y unzip
 
+# Java/Java Web
+dnf install -y icedtea-web java-openjdk
 # --------------------------------------------------------------
 
 # Themes, Fonts, and Icons

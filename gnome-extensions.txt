@@ -1,0 +1,40 @@
+List of Gnome Extensions I Usually Install
+
+1. Activities Configurator
+https://extensions.gnome.org/extension/358/activities-configurator/
+
+2. Alternate Tab
+https://extensions.gnome.org/extension/15/alternatetab/
+
+3. Appfolders Management
+https://extensions.gnome.org/extension/1217/appfolders-manager/
+
+4. Autohide Battery
+https://extensions.gnome.org/extension/595/autohide-battery/
+
+5. Caffiene
+https://extensions.gnome.org/extension/517/caffeine/
+
+6. Dash to Dock
+https://extensions.gnome.org/extension/307/dash-to-dock/
+
+7. Extension Update Notifier
+https://extensions.gnome.org/extension/1166/extension-update-notifier/
+
+8. Impatience
+https://extensions.gnome.org/extension/277/impatience/
+
+9. Refresh Wifi Connections
+https://extensions.gnome.org/extension/905/refresh-wifi-connections/
+
+10. Suspend & Lock Button
+https://extensions.gnome.org/extension/930/suspend-and-lock-button/
+
+11. Transparent Window Moving
+https://extensions.gnome.org/extension/930/suspend-and-lock-button/
+
+12. User Themes
+https://extensions.gnome.org/extension/19/user-themes/
+
+13. Window is Ready - Notification Remover
+https://extensions.gnome.org/extension/1007/window-is-ready-notification-remover/
