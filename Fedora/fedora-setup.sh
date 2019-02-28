@@ -114,7 +114,12 @@ dnf check-update
 dnf install -y code
 
 # --------------------------------------------------------------
+# Joaoapps Join
+# curl "http://autoremotejoaomgcd.appspot.com/registerpc?key=YOUR_KEY&name=NAME_TO_APPEAR_ON_YOUR_PHONE&id=ANY_UNIQUE_ID&type=linux&publicip=YOUR_PUBLIC_IP_OR_HOST_NAME&localip=$(sudo ifconfig eth0 |grep "inet addr" |awk '{print $2}' |awk -F: '{print $2}')"<Paste>
 
+# Still need to get personal key and finish steup
+
+# --------------------------------------------------------------
 # Albert Launcher
 rpm --import \ # Add repo
   https://build.opensuse.org/projects/home:manuelschneid3r/public_key
