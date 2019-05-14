@@ -17,9 +17,9 @@ apt install -y screen
 # NVIM
 
     # Add ppa
-add-apt-repository -y ppa:neovim-ppa/stable
-apt-get update
-apt-get install -y neovim
+add-apt-repository ppa:neovim-ppa/unstable
+apt update -y
+apt install -y neovim
 
     # Add dependencies for plugins
 apt-get install -y python-dev python-pip python3-dev python3-pip
