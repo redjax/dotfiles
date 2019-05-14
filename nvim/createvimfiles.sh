@@ -15,5 +15,9 @@ cp -R autoload ~/.config/nvim/
 curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
+# Install Python neovim package for UltiSnips error
+apt-install -y python3-pip
+pip3 install --user neovim
+
 # Then, we'll run the VIM command to install all the Plug plugins
 nvim +PlugInstall
