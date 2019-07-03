@@ -17,3 +17,7 @@ curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs \
 
 # Then, we'll run the VIM command to install all the Plug plugins
 nvim +PlugInstall
+
+# Install deoplete requirements for Python
+pip install pynvim
+pip install jedi
