@@ -1,8 +1,10 @@
-"" Plugin module
+﻿"" Plugin module
 " List of plugins to install/update with :Plug<Install/Update>
 " Comment a "Plug <>" line to stop loading of plugin
 
 " {{{ Vim Plug settings
+
+" {{{ Vim Plug Defaults
 if has('vim_starting')
   set nocompatible               " Be iMproved
 endif
@@ -20,6 +22,7 @@ if !filereadable(vimplug_exists)
 
   autocmd VimEnter * PlugInstall
 endif
+" }}}
 
 " Required:
 call plug#begin('~/.config/nvim/plugged')
@@ -28,8 +31,6 @@ call plug#begin('~/.config/nvim/plugged')
 
     " {{{ Plug installs
     Plug 'scrooloose/nerdtree'
-    "Plug 'SirVer/ultisnips'
-    "Plug 'ycm-core/YouCompleteMe'
     Plug 'junegunn/fzf'
     Plug 'nathanaelkane/vim-indent-guides'
     Plug 'scrooloose/syntastic'
@@ -41,7 +42,6 @@ call plug#begin('~/.config/nvim/plugged')
     Plug 'altercation/vim-colors-solarized'
     Plug 'flazz/vim-colorschemes'
     Plug 'yuttie/comfortable-motion.vim'
-    Plug 'davidhalter/jedi-vim'
     Plug 'vim-scripts/indentpython.vim'
     Plug 'honza/vim-snippets'
     " }}}
@@ -58,27 +58,12 @@ call plug#end()
 " {{{ NERDTree
 "
 " Open NERDTree automatically if empty nvim window
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+"autocmd StdinReadPre * let s:std_in=1
+"autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 " Close nvim if only open window left is NERDTree
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 " Keybind for opening NERDTree
 map <C-b> :NERDTreeToggle<CR>
-" }}}
-
-" {{{ jedi-vim
-
-    let g:jedi#popup_on_dot = 0
-    let g:jedi#goto_assignments_command = "<leader>g"
-    let g:jedi#goto_definitions_command = "<leader>d"
-    let g:jedi#documentation_command = "K"
-    let g:jedi#usages_command = "<leader>n"
-    let g:jedi#rename_command = "<leader>r"
-    let g:jedi#show_call_signatures = "0"
-    let g:jedi#completions_command = "<C-Space>"
-    let g:jedi#smart_auto_mappings = 0
-    let g:jedi#force_py_version=3
-
 " }}}
 
 " {{{ syntastic
@@ -107,4 +92,6 @@ map <C-b> :NERDTreeToggle<CR>
     let g:airline_skip_empty_sections = 1
 " }}}
 
-
+" {{{ Deoplete
+"let g:deoplete#enable_at_startup = 1
+" }}}
