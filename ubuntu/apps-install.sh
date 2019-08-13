@@ -10,15 +10,15 @@ ubuntuvers = "Ubuntu_18.10"
 
 # General apps
 apt install -y alacarte
-apt install -y snapd
+# apt install -y snapd
 apt install -y screen
 # --------------------------------------------------------------------------------------
 
 # NVIM
 
     # Add ppa
-add-apt-repository -y ppa:neovim-ppa/stable
-apt-get update
+# add-apt-repository -y ppa:neovim-ppa/stable
+# apt-get update
 apt-get install -y neovim
 
     # Add dependencies for plugins
@@ -44,8 +44,8 @@ nvim +PlugInstall
 # --------------------------------------------------------------------------------------
 
 # Tmux
-apt install -y tmux
-cp $dotfiles/.tmux.conf ~/
+# apt install -y tmux
+# cp $dotfiles/.tmux.conf ~/
 
 # --------------------------------------------------------------------------------------
 
@@ -69,40 +69,40 @@ cp $userhome/Documents/git/dotfiles/ubuntu/smartgit.desktop /usr/share/applicati
 # --------------------------------------------------------------------------------------
 
 # VSCode
-cd $userhome/Downloads
+# cd $userhome/Downloads
 
-echo "Opening VSCode Download page"
-echo "Choose to save the download instead of opening with the package manager."
-read -p "Press Enter to open download page: "
-xdg-open https://code.visualstudio.com/
-read -p "Press enter after download has completed: "
-dpkg -i $userhome/Downloads/code_*.deb && apt-get install -f
+# echo "Opening VSCode Download page"
+# echo "Choose to save the download instead of opening with the package manager."
+# read -p "Press Enter to open download page: "
+# xdg-open https://code.visualstudio.com/
+# read -p "Press enter after download has completed: "
+# dpkg -i $userhome/Downloads/code_*.deb && apt-get install -f
 
 # --------------------------------------------------------------------------------------
 
 # Sublime Text
 
     # Add key
-wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
+# wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
 
     # Add repo
-echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
-apt update
-apt install -y sublime-text
+# echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+# apt update
+# apt install -y sublime-text
 
 # --------------------------------------------------------------------------------------
 
 # Tilix
     # Add repo
-add-apt-repository ppa:webupd8team/terminix
-apt update
-apt install -y tilix
+# add-apt-repository ppa:webupd8team/terminix
+# apt update
+# apt install -y tilix
 
     # Create symlink to avoid error when editing settings
-ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
+# ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
 
 # Restore conf
-dconf load /com/gexperts/Tilix/ < $dotfiles/tilix/tilix.dconf
+# dconf load /com/gexperts/Tilix/ < $dotfiles/tilix/tilix.dconf
 
 # Stop screen startup message
 echo 'startup_message off' >> $userhome/.screenrc
@@ -110,19 +110,19 @@ echo 'startup_message off' >> $userhome/.screenrc
 # --------------------------------------------------------------------------------------
 
 # Discord
-snap install discord
+# snap install discord
 
 # --------------------------------------------------------------------------------------
 
 # Albert
     # Add key
-#curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
+curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
 
-#pause -r "Make sure to change release version to current Ubuntu version equivalent."
-#pause -r "Press CTRL-C to cancel script execution if change needed"
-#sh -c "echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/x$ubuntuvers/ /' > /etc/apt/sources.list.d/home:manuelschneid3r.list"
-#apt update
-#apt install -y albert
+pause -r "Make sure to change release version to current Ubuntu version equivalent."
+pause -r "Press CTRL-C to cancel script execution if change needed"
+sh -c "echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/x$ubuntuvers/ /' > /etc/apt/sources.list.d/home:manuelschneid3r.list"
+apt update
+apt install -y albert
 
 # --------------------------------------------------------------------------------------
 
@@ -138,15 +138,15 @@ snap install discord
 # cd $userhome/Documents/git/jaxlinuxlooks/ && ./fontsinstall.sh
 
     # Arc theme
-add-apt-repository ppa:noobslab/themes
+# add-apt-repository ppa:noobslab/themes
 
     # Arc icons
-add-apt-repository ppa:noobslab/icons
-apt update
-apt install -y arc-icons arc-theme
+# add-apt-repository ppa:noobslab/icons
+# apt update
+# apt install -y arc-icons arc-theme
 
 # --------------------------------------------------------------------------------------
 
 # Cron tasks
-cd $dotfiles/cronscripts
-./createcronjobs.sh
+# cd $dotfiles/cronscripts
+# ./createcronjobs.sh
