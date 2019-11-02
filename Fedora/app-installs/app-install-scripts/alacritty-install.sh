@@ -3,7 +3,7 @@
 # Install Alacritty per the Github install how-to
 
 # Prepare working directory
-cd ~/Downloads
+cd "$HOME/Downloads"
 git clone https://github.com/jwilm/alacritty.git
 cd alacritty
 

@@ -1,8 +1,9 @@
 #!/bin/bash
-
-usr='jack'
-home='/home/${usr}'
 gitcl='${gitcl} --verbose'
+this_dir="$(dirname "$(readlink -f "$0")")"
+app_installs="$this_dir/app-installs"
+app_install_scripts="$app_installs/app-install-scripts"
+crontasks_dir="$this_dir/crontasks"
 
 # Setup script for installing a new distro.
 # ToDo: Make script distro-aware for running different commands based on
@@ -12,35 +13,18 @@ gitcl='${gitcl} --verbose'
 # Fedora #
 ##########
 
-# Install Fedy
-sh -c 'curl https://www.folkswithhats.org/installer | bash'
+# Install dependencies for the rest of the script
+sudo dnf install -y git curl python3 python3-pip
 
-# -------------------------------------------------------------
-
-# Install Brave Browser Dev
-# dnf config-manager --add-repo https://brave-browser-rpm-dev.s3.brave.com/x86_64/
-# rpm --import https://brave-browser-rpm-dev.s3.brave.com/brave-core-nightly.asc
-# dnf install -y brave-browser-dev
-
-# Brave Browser Beta
-dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/x86_64/
-rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-dnf install brave-browser brave-keyring
+# Install nvim
+nvim_installer="$app_installs/nvim-setup.sh"
+./$nvim_installer
 
 # ------------------------------------------------------------
 
 # Install Sublime Text
-# -Install GPG Key
-rpm -v --import https://download.sublimetext.com/sublimehq-rpm-pub.gpg
-
-# -Select Channel (choose 1)
-#   -STABLE
-dnf config-manager --add-repo https://download.sublimetext.com/rpm/stable/x86_64/sublime-text.repo
-#   -DEV
-#dnf config-manager --add-repo https://download.sublimetext.com/rpm/dev/x86_64/sublime-text.repo
-
-# Update DNF and install Sublime
-dnf install -y sublime-text
+sublime_installer="$app_install_scripts/sublime-text-install.sh"
+./$sublime_installer
 
 # --------------------------------------------------------------
 
@@ -48,98 +32,67 @@ dnf install -y sublime-text
 
   # Create folder in /opt and copy scripts to it
   mkdir /opt/backup-scripts
-  cp -R crontasks/backup-scripts/* /opt/backup-scripts
+  cp -R "$crontasks_dir/backup-scripts/*" /opt/backup-scripts
 
   # Create cron job for backing up Gnome
   echo "0 0 */3 * * /opt/backup-scripts/backup-gnome.sh" | crontab -
 
   # Restore Gnome settings on new installation
-  ./opt/backup-scripts/restore-gnome.sh
-# --------------------------------------------------------------
-
-# NeoVim
-
-# Install nvim
-dnf install -y neovim
-
-# Configure neovim
-
-. ${home}/Documents/git/dotfiles/nvim/createvimfiles.sh
-
+  # ./opt/backup-scripts/restore-gnome.sh
 # --------------------------------------------------------------
 
 # Install Tmux
-dnf install -y tmux
+sudo dnf install -y tmux
 
 # Create Tmux conf
-cp ${home}/Documents/git/dotfiles/.tmux.conf ~/
+cp "$HOME/Documents/git/dotfiles/.tmux.conf ~/"
 
 # --------------------------------------------------------------
 
 # Install Terminator
-dnf install -y terminator
+sudo dnf install -y terminator
 
 # --------------------------------------------------------------
 
 # Install tilix
-dnf install -y tilix
+sudo dnf install -y tilix
 
 # --------------------------------------------------------------
 
 # Install TLP, laptop battery saving
-dnf install -y tlp tlp-rdw
-
-  # Thinkpad-specific
-  dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-
-  dnf install http://repo.linrunner.de/fedora/tlp/repos/releases/tlp-release.fc$(rpm -E %fedora).noarch.rpm
-
-  # Optional
-
-    # akmod-tp_smapi (battery charge threshold, recalibration
-    # akmod-acpi_call (X220/T420, X230/T430, etc)
-    # kernel-devel (needed for akmod packages)
-    dnf install -y akmod-tp_smapi akmod-acpi_call kernel-devel
-
+tlp_installer="$app_install_scripts/tlp-install.sh"
+./$tlp_installer
 # --------------------------------------------------------------
 
-# Git install
-dnf install -y git
-
 # VSCode Install
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-
-dnf check-update
-dnf install -y code
+vscode_installer="$app_install_scripts/vscode-install.sh"
+./$vscode_installer
 
 # --------------------------------------------------------------
 
 # Albert Launcher
-rpm --import \ # Add repo
-  https://build.opensuse.org/projects/home:manuelschneid3r/public_key
-
-dnf install -y albert
+albert_installer="$app_install_scripts/albert-installer.sh"
+./$albert_installer
 
 # --------------------------------------------------------------
 
 # Alacarte
-dnf install -y alacarte
+sudo dnf install -y alacarte
 
 # --------------------------------------------------------------
 
 # Android Tools (ADB, Fastboot)
-dnf install -y android-tools
+sudo dnf install -y android-tools
 
 # --------------------------------------------------------------
 
 # Themes, Fonts, and Icons
 
 # Clone repo
-${gitcl} https://github.com/redjax/jaxlinuxlooks.git ${home}/Documents/git/
+# ${gitcl} https://github.com/redjax/jaxlinuxlooks.git ${home}/Documents/git/
 
-# -Themes
-. ${home}/Documents/git/jaxlinuxlooks/themesinstall.sh
+# # -Themes
+# . ${home}/Documents/git/jaxlinuxlooks/themesinstall.sh
 
-# -Fonts
-. ${home}/Documents/git/jaxlinuxlooks/fontsinstall.sh
+# # -Fonts
+# . ${home}/Documents/git/jaxlinuxlooks/fontsinstall.sh
