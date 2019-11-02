@@ -1,90 +1,56 @@
 #!/bin/bash
+# Setup script for Fedora
+#
+#
+
+# Create variables
 gitcl='${gitcl} --verbose'
 this_dir="$(dirname "$(readlink -f "$0")")"
 app_installs="$this_dir/app-installs"
 app_install_scripts="$app_installs/app-install-scripts"
 crontasks_dir="$this_dir/crontasks"
 
-# Setup script for installing a new distro.
-# ToDo: Make script distro-aware for running different commands based on
-# what type of Linux I'm running the script on.
-
-##########
-# Fedora #
-##########
-
-# Install dependencies for the rest of the script
-sudo dnf install -y git curl python3 python3-pip
-
-# Install nvim
-nvim_installer="$app_installs/nvim-setup.sh"
-./$nvim_installer
-
-# ------------------------------------------------------------
-
-# Install Sublime Text
-sublime_installer="$app_install_scripts/sublime-text-install.sh"
-./$sublime_installer
-
 # --------------------------------------------------------------
 
-# Create Cron jobs
+function install_dnf_apps () {
+    # Install apps via dnf if no app-install script exists
+    apps="git curl python3 python3-pip tmux terminator tilix alacarte android-tools"
+    sudo dnf install -y $apps
+}
 
-  # Create folder in /opt and copy scripts to it
-  mkdir /opt/backup-scripts
-  cp -R "$crontasks_dir/backup-scripts/*" /opt/backup-scripts
+function install_apps () {
+    # Loop over app-installs dir & run app install scripts
+    for script in $app_install_scripts
+    do
+        $(./$script)
+    done
+}
 
-  # Create cron job for backing up Gnome
-  echo "0 0 */3 * * /opt/backup-scripts/backup-gnome.sh" | crontab -
+function install_nvim () {
+    # Install nvim
+    nvim_installer="$app_installs/nvim-setup.sh"
+    exec $nvim_installer
+}
 
-  # Restore Gnome settings on new installation
-  # ./opt/backup-scripts/restore-gnome.sh
-# --------------------------------------------------------------
+function create_cron_jobs () {
+    # Move cron jobs into cron dir & create cron jobs
 
-# Install Tmux
-sudo dnf install -y tmux
+    # Create folder in /opt and copy scripts to it
+    $(mkdir /opt/backup-scripts)
+    cp -R "$crontasks_dir/backup-scripts/*" /opt/backup-scripts
 
-# Create Tmux conf
-cp "$HOME/Documents/git/dotfiles/.tmux.conf ~/"
+    # Create cron job for backing up Gnome
+    echo "0 0 */3 * * /opt/backup-scripts/backup-gnome.sh" | crontab -
 
-# --------------------------------------------------------------
+    # Restore Gnome settings on new installation
+    # ./opt/backup-scripts/restore-gnome.sh
+}
 
-# Install Terminator
-sudo dnf install -y terminator
+# Install dnf apps first
+install_dnf_apps
 
-# --------------------------------------------------------------
-
-# Install tilix
-sudo dnf install -y tilix
-
-# --------------------------------------------------------------
-
-# Install TLP, laptop battery saving
-tlp_installer="$app_install_scripts/tlp-install.sh"
-./$tlp_installer
-# --------------------------------------------------------------
-
-# VSCode Install
-vscode_installer="$app_install_scripts/vscode-install.sh"
-./$vscode_installer
-
-# --------------------------------------------------------------
-
-# Albert Launcher
-albert_installer="$app_install_scripts/albert-installer.sh"
-./$albert_installer
-
-# --------------------------------------------------------------
-
-# Alacarte
-sudo dnf install -y alacarte
-
-# --------------------------------------------------------------
-
-# Android Tools (ADB, Fastboot)
-sudo dnf install -y android-tools
-
-# --------------------------------------------------------------
+# Run nvim install script
+install_nvim
 
 # Themes, Fonts, and Icons
 
