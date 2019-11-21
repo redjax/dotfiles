@@ -65,8 +65,12 @@ alias psg='ps aux | grep -v grep | grep -i -e VSZ -e'
 # Tmux #
 ########
 
+# List running tmux sessions
 alias tmuxls='tmux ls'
+# Re-attach tmux session
 alias tmuxa='tmux a -t $1'
+# Source tmux conf file
+alias tmuxs='tmux source-file $HOME/.tmux.conf'
 
 ##########
 # Custom #
