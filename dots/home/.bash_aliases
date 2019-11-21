@@ -58,6 +58,9 @@ alias diff='colodiff'
 # Resume wget downloads by default
 alias wget='wget -c'
 
+# Search for running process
+alias psg='ps aux | grep -v grep | grep -i -e VSZ -e'
+
 ########
 # Tmux #
 ########
