@@ -1,0 +1,4 @@
+pane	0	0	:nvim	1	:*	0	:/home/jack/Documents/git/dotfiles/Fedora/app-installs/app-install-scripts	0	nvim	:nvim /home/jack/.tmux.conf
+pane	0	0	:nvim	1	:*	1	:/home/jack/Documents/git/dotfiles/dots/home/config	1	bash	:
+window	0	0	1	:*	85b4,132x41,0,0{66x41,0,0,0,65x41,67,0,3}
+state	0	

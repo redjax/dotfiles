@@ -16,7 +16,7 @@ create_sym () {
     home_dots="$this_dir/home"
 
     cd $HOME
-    ln -s $home_dots/$1
+    ln -s -f $home_dots/$1
 
 }
 
