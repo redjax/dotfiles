@@ -7,7 +7,7 @@ autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
 augroup END
 
 " PEP8 Indentation
-au BufNewFile,BufRead *.py
+au BufNewFile, BufRead *.py
     \ set tabstop=4
     \ set softtabstop=4
     \ set shiftwidth=4
@@ -17,7 +17,7 @@ au BufNewFile,BufRead *.py
     \ set fileformat=unix
 
 " Match and remove extra white space
-au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+au BufRead, BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 
 "Syntastic/vim-flake8 Syntax Settings
 let python_highlight_all=1
