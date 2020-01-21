@@ -1,0 +1,1 @@
+/home/jack/git/dotfiles/Ubuntu_server/dots/home/.bash_aliases
