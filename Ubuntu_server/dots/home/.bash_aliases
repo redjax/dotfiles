@@ -1,7 +1,9 @@
 alias apt="apt-fast"
 alias bashrcs=". ~/.bashrc"
+
 alias docker="sudo docker"
 alias docker-compose="sudo docker-compose"
+alias dc="sudo docker-compose"
 
 alias ls='ls --color=auto'
 alias lsa='ls -a --color=auto'

@@ -30,3 +30,16 @@ then
     sudo mv /etc/fail2ban/jail.local /etc/fail2ban/jail.local.bak
     sudo ln -s ${PWD}/etc/fail2ban/jail.local /etc/fail2ban/jail.local
 fi
+
+# Symlink ~/.local/share directory
+if [[ -e $HOME/.local/share/nano ]];
+then
+    sudo mv $HOME/.local/share/nano $HOME/.local/share/nano-bak
+    ln -s ${PWD}/.local/share/nano/ $HOME/.local/share/nano
+fi
+
+if [[ -e $HOME/.local/share/nvim ]];
+then
+    sudo mv $HOME/.local/share/nvim $HOME/.local/share/nvim-bak
+    ln -s ${PWD}/.local/share/nvim $HOME/.local/share/nvim
+fi
