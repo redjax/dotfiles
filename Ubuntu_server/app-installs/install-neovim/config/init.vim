@@ -12,8 +12,8 @@
 "        Code completion & syntax
 " 3. Plugin settings
 " 4. Other
-
-" Quick Hits
+" -------------------------------------------------------------------------
+" Quick Hints
 "   Search and replace:
 "     :%s/orig/replace/g (or /gc for confirmation)
 "     :%s/\<orig\>/replace/g - replace only exact matches
@@ -45,7 +45,7 @@
 "    { and } to navigate paragraphs
 "    % to move to next/previous related item (i.e. brackets, comments, etc)
 "
-
+" -------------------------------------------------------------------------
 "
 " Begin init.vim
 "
@@ -58,6 +58,19 @@
   else
     let g:plugged_home = '~/.local/share/nvim/plugged'
   endif
+
+  " Allow cursor change in tmux
+  let no_buffers_menu=1
+  if !exists('g:not_finish_vimplug')
+    if exists('$TMUX')
+      let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+      let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+    else
+      let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+      let &t_EI ="\<Esc>]50;CursorShape=0\x7"
+    endif
+  endif
+      
   "}}}
 
   " code folding
@@ -68,6 +81,7 @@
   " syntax
   syntax on
   syntax enable
+  set ruler
 
   " colorscheme {{{
    
@@ -80,10 +94,23 @@
       colorscheme hybrid
   "}}}
   
+  " change window title to current file being edited
+  set title
+  " disable error beeps
+  set noerrorbells
+  " display cli tab complete options as menu
+  set wildmenu
+  
   " True Color support if available
   if has("termguicolors")
     set termguicolors
   endif
+  
+  " text rendering options
+  set encoding=utf-8
+  set fileencoding=utf-8
+  set linebreak " avoid wrapping line in middle of a word
+  set wrap " enable line wrapping
 
   " line numbers
   set number
@@ -92,45 +119,100 @@
 
   " open invisible buffer on start
   set hidden
+  " show the last command
+  set showcmd
   " mouse support
   set mouse=a
   " Do not show -- INSERTION -- in command line
   set noshowmode
   set noshowmatch
-  set nolazyredraw
-
-  " Turn off backup
-  set nobackup
-  set noswapfile
-  set nowritebackup
+  set lazyredraw
 
   " Improve searching within file
   set ignorecase
   set smartcase
+  set hlsearch " search highlighting
+  set incsearch " incremental search/partial matches
 
   " Tab and indent configuration
   set expandtab
   set tabstop=4
   set shiftwidth=4
+  set shiftround " round indentation to nearest multiple of shiftwidth
+  set smarttab " insert tabstop number of spaces when tab is pressed
 
+  " Performance options
+    set complete-=i " limit files searched for autocomplete
+    " Turn off backup
+    set nobackup
+    set noswapfile
+    set nowritebackup 
+  
   " vim-autoformat
   noremap <F3> :Autoformat<CR>
-  
+ 
+  " Misc
+  set autoread " automatically re-read if unmodified version is open in nvim
+  set backspace=indent,eol,start " allow backspacing over indents, line breaks, inserts
+  set confirm " prompt when closing without saving
+  set history=1000 " increase undo limit
+  set wildignore+=.pyc,.swp " ignored file extensions
+  set bomb " editing between Windows & Linux
+  let mapleader=',' " not sure what this does
+
+  " Tries to set shell from env, defaults to bash
+  if exists('$SHELL')
+    set shell=$SHELL
+  else
+    set shell=/bin/sh
+  endif
+
+  " session management
+  " let g:session_directory = "~/.config/nvim/session"  
+
 "}}}
 
 " Vim plug {{{
+
+" Vim PlugDefaults {{{
+    if has('vim_starting') 
+        set nocompatible " Be iMproved
+    endif
+
+    let vimplug_exists=expand('~/.config/nvim/autoload/plug.vim')
+
+    let g:vim_bootstrap_langs = "python"
+    let g:vim_bootstrap_editor = "nvim"
+
+    " Install vim-plug if it's not already installed {{{
+    if !filereadable(vimplug_exists)
+        echo "Installing Vim Plug..."
+        echo ""
+        silent !\curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        let g:not_finish_vimplug = "yes"
+
+        autocmd VimEnter * PlugInstall
+    endif
+    "}}}
+    
+" }}}
+
 call plug#begin(g:plugged_home)
 
-" Plugin installs/activations
-  
+" Plugin installs/activations {{{
+
   " UI {{{
     
     " Airline
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     
+    " Smooth scrolling motion
+    Plug 'yuttie/comfortable-motion.vim' 
     " Awesome vim colorschemes
     Plug 'rafi/awesome-vim-colorschemes'
+    " Vim colorpack
+    Plug 'flazz/vim-colorschemes' 
     " vim-themes
     Plug 'mswift42/vim-themes'
     " Highlight yank (copy) area
@@ -139,6 +221,8 @@ call plug#begin(g:plugged_home)
     Plug 'tmhedberg/SimpylFold'
   "}}}
   
+"}}}
+
   " Code completion & syntax {{{
     
     " jedi-vim
@@ -153,11 +237,27 @@ call plug#begin(g:plugged_home)
     Plug 'sbdchd/neoformat'
     " neomake, mostly for linting with pylint
     Plug 'neomake/neomake'
+    " display indents with thin lines
+    Plug 'Yggdroot/indentline'
+    " Collectionof language packs for (n)vim
+    Plug 'sheerun/vim-polyglot'
     " nerdtree for file-browsing
     Plug 'scrooloose/nerdtree'
     " Formatter
     Plug 'Chiel92/vim-autoformat'
+    " Syntax checker/linter
+    Plug 'scrooloose/syntastic'
+    " Auto-indent rules for Python
+    Plug 'vim-scripts/indentpython.vim'
+    " Highlight whitespace with red, fix with :FixWhitespace
+    " Plug 'bronson/vim-trailing-whitespace'
+
   "}}}
+
+" Include user's extra bundle(s)
+if filereadable(expand('~/.config/nvim/local_bundles.vim'))
+    source ~/.config/nvim/local_bundles.vim
+endif
 
 " End Vim plug
 call plug#end()
@@ -180,6 +280,9 @@ call plug#end()
     let g:airline#extensions#hunks#enabled=0
     let g:airline#extensions#branch#enabled=1
     let g:powerline_pycmd="py3"
+    let g:airline_skip_empty_sections = 1
+    let g:airline#extensions#tagbar#enabled = 1
+    let g:airline#extensions#syntastic#enabled = 1
 
   " airline theme {{{
     " let g:airline_theme='dark'
@@ -235,7 +338,24 @@ call plug#end()
     " highlight duration, measured in ms
     let g:highlightedyank_highlight_duration = 1000
   "}}}
-  
+ 
+    " syntastic {{{
+        set statusline+=%#warningmsg#
+        set statusline+=%{SyntasticStatuslineFlag()}
+        set statusline+=%*
+        
+        let g:syntastic_python_checkers = ['python', 'flake8']
+        let g:syntastic_always_populate_loc_list = 1
+        let g:syntastic_auto_loc_list = 1
+        let g:syntastic_check_on_open = 1
+        let g:syntastic_check_on_wq = 0
+    "}}}
+
+    " comfortable-motion {{{
+        noremap <silent> <ScrollWheelDown> :call comfortable_motion#flick(40)<CR>
+        noremap <silent> <ScrollWheelUp> :call comfortable_motion#flick(-40)<CR>
+    "}}}
+    
 "}}}
 
 " Other {{{
@@ -248,3 +368,45 @@ call plug#end()
     let g:neomake_python_enabled_makers = ['flake8', 'pylint']
     
 "}}}
+
+" AutoCMD Rules {{{
+
+    " This PC is fast enough, do syntax highlight synching from start, unless 200 lines
+    augroup vimrc-sync-fromstart
+        autocmd!
+        autocmd BufEnter * :syntax sync maxlines=200
+    augroup END
+
+    " Remember cursor position
+    augroup vimrc-remember-cursor-position
+        autocmd!
+        autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+    augroup END
+
+    " txt
+    augroup vimrc-wrapping
+        autocmd!
+        autocmd BufRead,BufNewFile *.txt call s:setupWrapping()
+    augroup END
+
+    " make/cmake
+    augroup vimrc-make-cmake
+        autocmd!
+        autocmd FileType make setlocal noexpandtab
+        autocmd BufNewFile,BufRead CMakeLists.txt setlocal filetype=cmake
+    augroup END
+"}}}
+
+" Mappings {{{
+    " Split
+    noremap <Leader>h :<C-u>split<CR>
+    noremap <Leader>v :<C-u>vsplit<CR>
+
+    " Session management
+    nnoremap <leader>so :OpenSession<Space>
+    nnoremap <leader>ss :SaveSession<Space>
+    nnoremap <leader>sd :DeleteSession<CR>
+    nnoremap <leader>sc :CloseSession<CR>
+
+"}}}
+

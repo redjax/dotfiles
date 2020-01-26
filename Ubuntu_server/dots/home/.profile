@@ -26,3 +26,5 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+export EDITOR=nvim
+export OVPN_DATA="ovpn-data-cerebro"
