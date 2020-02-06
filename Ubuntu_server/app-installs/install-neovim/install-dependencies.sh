@@ -10,7 +10,8 @@ detect_os_install_packages() {
 			              "python3-pip"
 			              "git"
 			              "python-autopep8"
-			              "tidy" # HTML formatting
+			              "tidy", # HTML formatting
+                          "fonts-powerline"
 			              )
 
   # List of pip installs

@@ -1,4 +1,4 @@
-﻿" init.vim contents
+" init.vim contents
 "   tip: use search (:/%s) to jump to sections quickly
 "
 " 1. Neovim environment
@@ -226,13 +226,11 @@ call plug#begin(g:plugged_home)
   " Code completion & syntax {{{
     
     " jedi-vim
-    " Plug 'davidhalter/jedi-vim'
+    Plug 'davidhalter/jedi-vim'
     " deoplete
-    " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+    Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
     " deoplete-jedi
-    " Plug 'zchee/deoplete-jedi'
-    " coc (code instellisense)
-    Plug 'neoclide/coc.nvim'
+    Plug 'zchee/deoplete-jedi'
     " autopairs for quote/bracket completion
     Plug 'jiangmiao/auto-pairs'
     " auto-format for code formatting
@@ -250,7 +248,7 @@ call plug#begin(g:plugged_home)
     " Syntax checker/linter
     Plug 'scrooloose/syntastic'
     " Auto-indent rules for Python
-    " Plug 'vim-scripts/indentpython.vim'
+    Plug 'vim-scripts/indentpython.vim'
     " Highlight whitespace with red, fix with :FixWhitespace
     " Plug 'bronson/vim-trailing-whitespace'
 
@@ -300,9 +298,9 @@ call plug#end()
 
 " deoplete {{{
 
-    " let g:deoplete#enable_at_startup = 1
+    let g:deoplete#enable_at_startup = 1
     " deoplete: set preview completion window to auto-close
-    " autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
+    autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
     " deopelete: tab navigation
     inoremap <expr><tab> pumvisible() ?"\<c-n>" : "\<tab>"
   "}}}
@@ -320,9 +318,9 @@ call plug#end()
   " jedi {{{
     
     " jedi: disable autocompletion, which we use deoplete for
-    " let g:jedi#completions_enabled = 0
+    let g:jedi#completions_enabled = 0
     " jedi: open go-to function in split, not another buffer
-    " let g:jedi#use_splits_not_buffers = "right"
+    let g:jedi#use_splits_not_buffers = "right"
   "}}}
   
   " nerdtree {{{
@@ -342,15 +340,15 @@ call plug#end()
   "}}}
  
     " syntastic {{{
-        " set statusline+=%#warningmsg#
-        " set statusline+=%{SyntasticStatuslineFlag()}
-        " set statusline+=%*
+        set statusline+=%#warningmsg#
+        set statusline+=%{SyntasticStatuslineFlag()}
+        set statusline+=%*
         
-        " let g:syntastic_python_checkers = ['python', 'flake8']
-        " let g:syntastic_always_populate_loc_list = 1
-        " let g:syntastic_auto_loc_list = 1
-        " let g:syntastic_check_on_open = 1
-        " let g:syntastic_check_on_wq = 0
+        let g:syntastic_python_checkers = ['python', 'flake8']
+        let g:syntastic_always_populate_loc_list = 1
+        let g:syntastic_auto_loc_list = 1
+        let g:syntastic_check_on_open = 1
+        let g:syntastic_check_on_wq = 0
     "}}}
 
     " comfortable-motion {{{
@@ -365,9 +363,9 @@ call plug#end()
   " pylint
     
     " when to activate neomake
-    " call neomake#configure#automake('nrw', 50)
+    call neomake#configure#automake('nrw', 50)
     " Enable pylint in neovim
-    " let g:neomake_python_enabled_makers = ['flake8', 'pylint']
+    let g:neomake_python_enabled_makers = ['flake8', 'pylint']
     
 "}}}
 

@@ -1,0 +1,5 @@
+pane	0	0	:bash	1	:*	0	:/home/jack/git/dotfiles	1	bash	:
+pane	1	0	:bash	1	:*	0	:/home/jack/git/dotfiles/Ubuntu_server/dots/home/config/nvim	1	bash	:
+window	0	0	1	:*	c9bd,192x47,0,0,0
+window	1	0	1	:*	b15f,234x60,0,0,2
+state	1	

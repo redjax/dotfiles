@@ -26,5 +26,10 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+# If I've created ~/.profile_custom, source it
+if [ -f "$HOME/.profile_custom" ];
+then
+    . "$HOME/.profile_custom"
+fi
+
 export EDITOR=nvim
-export OVPN_DATA="ovpn-data-cerebro"

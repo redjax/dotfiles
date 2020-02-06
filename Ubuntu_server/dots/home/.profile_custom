@@ -1,0 +1,8 @@
+﻿# Use this custom profile as an example.
+#
+# Using this specific .profile_custom file may
+# cause issues between distributions, if you
+# link it without making any system-specific
+# changes.
+
+export EDITOR=nvim
