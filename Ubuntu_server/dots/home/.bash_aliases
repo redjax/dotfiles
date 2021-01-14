@@ -1,4 +1,3 @@
-alias apt="apt-fast"
 alias bashrcs=". ~/.bashrc"
 
 alias docker="sudo docker"
