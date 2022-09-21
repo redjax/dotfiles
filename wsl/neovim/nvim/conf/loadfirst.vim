@@ -103,3 +103,22 @@ endif
 
 " Session management
 let g:session_directory = "~/.config/nvim/session"
+
+" Options
+set clipboard=unnamedplus
+set completeopt=noinsert,menuone,noselect
+set cursorline
+set hidden
+set inccommand=split
+set relativenumber
+set splitbelow splitright
+set title
+set ttimeoutlen=0
+
+" Syntax
+filetype plugin indent on
+
+"Enable 256color
+set t_Co=256
+
+
