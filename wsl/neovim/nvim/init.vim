@@ -1,0 +1,147 @@
+"Options
+
+set background=dark
+set clipboard=unnamedplus
+set completeopt=noinsert,menuone,noselect
+set cursorline
+set hidden
+set inccommand=split
+set mouse=a
+set number
+set relativenumber
+set splitbelow splitright
+set title
+set ttimeoutlen=0
+set wildmenu
+
+" Tabs size
+set expandtab
+set shiftwidth=2
+set tabstop=2
+
+" Syntax
+filetype plugin indent on
+syntax on
+
+" Enable 256 color
+set t_Co=256
+
+" True color, if available
+let term_program=$TERM_PROGRAM
+
+if $term_program !=? 'Apple_Terminal'
+  set termguicolors
+else
+  if $TERM !=? 'xterm-256color'
+    set termguicolors
+  endif
+endif
+
+" Italics support
+let &t_ZH="\e[3m"
+let &t_ZR="\e[23m"
+
+" File browser
+let g:netrw_banner=0
+let g:netrw_liststyle=0
+let g:netrw_browse_split=4
+let g:netrw_altv=1
+let g:netrw_winsize=25
+let g:netrw_keepdir=0
+let g:netrw_localcopydircmd="cp -r"
+
+" Create file without opening buffer
+function! CreateInPreview()
+  let l:filename = input('Please enter a filename: ')
+  execute 'silent !touch ' . b:netrw_curdir.'/'.l.filename
+  redraw!
+endfunction
+
+" Netrw: create file using touch instead of opening new buffer
+function! Netrw_mappings()
+  noremap <buffer>% :call CreateInPreview()<cr>
+endfunction
+
+augroup auto_commands
+  autocmd filetype netrw call Netrw_mappings()
+augroup END
+
+" Vimplug
+call plug#begin()
+
+  " Appearance
+  Plug 'vim-airline/vim-airline'
+  Plug 'ryanoasis/vim-devicons'
+
+  " Utilities
+  Plug 'sheerun/vim-polyglot'
+  Plug 'jiangmiao/auto-pairs'
+  Plug 'ap/vim-css-color'
+  Plug 'preservim/nerdtree'
+
+  " Completion/linters/formatters
+  Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': 'yarn install'}
+  Plug 'plasticboy/vim-markdown'
+
+  " Snippet engine
+  Plug 'dcampos/cmp-snippy'
+  Plug 'dcampos/nvim-snippy'
+  Plug 'honza/vim-snippets'
+
+  " Fuzzy finder
+  Plug 'nvim-lua/popup.nvim'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-telescope/telescope.nvim'
+
+  " Jinja syntax highlighting
+  Plug 'lepture/vim-jinja'
+
+  " Git
+  Plug 'airblade/vim-gitgutter'
+
+call plug#end()
+
+" NERDTree: show hidden files
+let NERDTreeShowHidden=1
+
+" Search open files with CTRL-P like VSCode
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+
+" Disable math tex conceal feature
+let g:tex_conceal = ''
+let g:vim_markdown_math = 1
+
+" Markdown
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_conceal = 0
+let g:vim_markdown_fenced_languages = ["tsx=typescriptreact"]
+
+" Auto format with Prettier on save
+command! -nargs=0 Prettier :call CocAction('runCommand', 'prettier.formatFile')
+
+" Key mappings
+
+" Quit nvim on CTRL+Q
+nnoremap <C-q> :q!<CR>
+" NERDTree toggle F5
+nnoremap <F5> :NERDTreeToggle<CR>
+" Open terminal in nvim F6
+nnoremap <F6> :sp<CR>:terminal<CR>
+
+" Tab button
+
+" Switch to previous tab SHIFT+TAB
+nnoremap <S-Tab> gT
+" Create new tab SHIFT+T
+nnoremap <Tab> gt
+" Switch to next open tab TAB
+nnoremap <silent> <S-t> :tabnew<CR>
+
+" Auto commands
+
+" Format python files on save
+augroup auto_commands
+  autocmd BufWrite *.py call CocAction('format')
+  autocmd FileType scss setlocal iskeyword+=@-@
+augroup END
