@@ -3,3 +3,21 @@
 [data]
     email = {{ $email | quote }}
 
+[templates]
+  ## Os-specific templates
+  {{ if eq .chezmoi.os "linux" }}
+  linux = true
+  {{ else if eq .chezmoi.os "windows" }}
+  windows = true
+  {{ end }}
+
+[source]
+  ## Point to platform-specific directory
+  {{- if eq .chezmoi.os "linux" }}
+  directory = "{{ .chezmoi.sourceDir }}/linux"
+  {{ else if eq .chezmoi.os "windows" }}
+  directory = "{{ .chezmoi.sourceDir }}/windows"
+  {{ else }}
+  directory = "{{ .chezmoi.sourceDir }}"
+  {{ end }}
+
