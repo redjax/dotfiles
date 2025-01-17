@@ -1,3 +1,6 @@
+## File managed by Chezmoi.
+#  Do not directly modify this file. Instead, use 'chezmoi edit <path to this file>'
+
 alias ls="ls --color=auto"
 alias lsa="ls -a --color=auto"
 alias lsl="ls -l --color=auto"
