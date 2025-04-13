@@ -145,7 +145,7 @@ if command -v nvm > /dev/null 2>&1; then
 fi
 
 ## Astral uv
-if command -v uv > /dev/null 2>1; then
+if command -v uv > /dev/null 2>&1; then
     eval "$(uv generate-shell-completion bash)"
     eval "$(uvx --generate-shell-completion bash)"
 fi
