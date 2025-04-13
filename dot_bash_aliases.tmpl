@@ -1,0 +1,12 @@
+## get dir/file's chmod
+alias getchmod="stat --format '%a' "
+
+## Use rsync instead of cp if installed
+if [ -x /usr/bin/rsync ]; then
+  alias cp='rsync --progress -auHxvz '
+fi
+
+## Source .bash_dots_loader file
+if [[ -f ~/.bash_loader ]]; then
+  . ~/.bash_loader
+fi

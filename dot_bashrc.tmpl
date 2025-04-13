@@ -1,45 +1,58 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.
-
-## File managed by Chezmoi.
-#  Do not directly modify this file. Instead, use 'chezmoi edit <path to this file>'
-
-# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
-# for examples
-
-# If not running interactively, don't do anything
+## If not running interactively, don't do anything
 case $- in
     *i*) ;;
       *) return;;
 esac
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
+## Exit if not running bash
+[ -z "$BASH_VERSION" ] && return
+
+## Common aliases
+alias ll='ls -la'
+{{ if eq .chezmoi.os "linux" }}
+alias ls="ls --color=auto"
+alias lsa="ls -a --color=auto"
+alias lsl="ls -l --color=auto"
+alias lsla="ls -la --color=auto"
+{{ else if eq .chezmoi.os "darwin" }}
+alias ls="ls -G"
+alias lsa="ls -a -G"
+alias lsl="ls -l -G"
+alias lsla="ls -la -G"
+{{ end }}
+
+## Set PATH dynamically based on OS
+{{ if eq .chezmoi.os "linux" }}
+export PATH="$PATH:/usr/local/bin"
+alias open="xdg-open"
+{{ else if eq .chezmoi.os "darwin" }}
+export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+alias open="open"
+{{ end }}
+
+## History settings
+# Ignore duplicates and leading spaces
 HISTCONTROL=ignoreboth
-
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+# Number of commands to remember in history
 HISTSIZE=1000
+# Max size of history file
 HISTFILESIZE=2000
+# Add timestamps to history (useful for debugging)
+HISTTIMEFORMAT="%F %T "
 
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
+## Update window size after each command.
 shopt -s checkwinsize
 
-# If set, the pattern "**" used in a pathname expansion context will
-# match all files and zero or more directories and subdirectories.
-#shopt -s globstar
-
-# make less more friendly for non-text input files, see lesspipe(1)
-#[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# set variable identifying the chroot you work in (used in the prompt below)
+## Generic chroot/container detection
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
+elif [ -f /.dockerenv ]; then
+    debian_chroot="docker"
+elif grep -q container= /proc/1/environ 2>/dev/null; then
+    debian_chroot="container"
 fi
 
-# set a fancy prompt (non-color, unless we know we "want" color)
+## Fancy prompt with color support
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
 esac
@@ -67,7 +80,7 @@ else
 fi
 unset color_prompt force_color_prompt
 
-# If this is an xterm set the title to user@host:dir
+## If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
     PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
@@ -76,7 +89,7 @@ xterm*|rxvt*)
     ;;
 esac
 
-# enable color support of ls and also add handy aliases
+## enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
@@ -88,19 +101,7 @@ if [ -x /usr/bin/dircolors ]; then
     #alias egrep='egrep --color=auto'
 fi
 
-# colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-# some more ls aliases
-#alias ll='ls -l'
-#alias la='ls -A'
-#alias l='ls -CF'
-
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
+## Source .bash_aliases if it exists
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
@@ -118,9 +119,9 @@ fi
 ## Set the $EDITOR value
 export EDITOR="$VISUAL"
 
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
+## enable programmable completion features (you don't need to enable
+#  this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+#  sources /etc/bash.bashrc).
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
@@ -142,3 +143,20 @@ if command -v nvm > /dev/null 2>&1; then
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
+
+## Astral uv
+if command -v uv > /dev/null 2>1; then
+    eval "$(uv generate-shell-completion bash)"
+    eval "$(uvx --generate-shell-completion bash)"
+fi
+
+## Enable x-cmd if it's installed
+[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X"
+
+## Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Disable Homebrew analytics
+export HOMEBREW_NO_ANALYTICS=1
+
+## Source ~/.local/bin/env if it exists
+[ ! -f "$HOME/.local/bin/env" ] || . "$HOME/.local/bin/env"
