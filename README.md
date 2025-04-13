@@ -15,6 +15,21 @@ My dotfiles, managed by [chezmoi](https://www.chezmoi.io). Despite the silly nam
 - Check what changes `chezmoi` will make to your home directory with: `chezmoi diff`
 - When you are comfortable with the changes, run `chezmoi apply -v`
 
+## Usage
+
+After installing `chezmoi` and initializing your home directory with `chezmoi apply -v`, you should no longer directly edit `chezmoi`-managed dotfiles. Instead, use the `chezmoi edit $FILE` command. For example, to edit your `~/.bashrc`, run `chezmoi edit ~/.bashrc`.
+
+Sometimes a program will either automatically append lines to your `~/.bashrc`, or will suggest you do so and provide commands you can copy/paste to automatically add the required init lines. This will cause conflicts with your `chezmoi`-managed version of the file. To fix this, use the `chezmoi merge $FILE` command, i.e. `chezmoi merge ~/.bashrc`. This will open a merge tool (`vimdiff` by default), where you can compare the changes and automatically add them to your `chezmoi` template file (`dot_filename.tmpl`).
+
+After making a change to the `chezmoi` repository, follow these steps to commit them (note: you can add individual files with `git add $filename` instead of adding all changes with `git add *`):
+
+```bash
+chezmoi cd
+git add *
+git commit -m "Update bashrc template with merged changes"
+git push origin main
+```
+
 ## Links
 
 - [Chezmoi home](https://www.chezmoi.io)
