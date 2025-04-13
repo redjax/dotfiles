@@ -143,3 +143,20 @@ if command -v nvm > /dev/null 2>&1; then
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 fi
+
+## Astral uv
+if command -v uv > /dev/null 2>1; then
+    eval "$(uv generate-shell-completion bash)"
+    eval "$(uvx --generate-shell-completion bash)"
+fi
+
+## Enable x-cmd if it's installed
+[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X"
+
+## Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Disable Homebrew analytics
+export HOMEBREW_NO_ANALYTICS=1
+
+## Source ~/.local/bin/env if it exists
+[ ! -f "$HOME/.local/bin/env" ] || . "$HOME/.local/bin/env"
