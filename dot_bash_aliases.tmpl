@@ -30,8 +30,8 @@ if command -v rsync -v 2>&1 /dev/null; then
 fi
 
 ## Source .bash_dots_loader file
-if [[ -f ~/.bash_loader ]]; then
-  . ~/.bash_loader
+if [[ -f ~/.bash_loader/main ]]; then
+  . ~/.bash_loader/main
 fi
 
 ## Tmux
@@ -43,8 +43,3 @@ alias tmuxa='tmux a -t $1'
 alias nvimi="nvim --headless +PlugInstall +qa"
 alias nvimu="nvim --headless +PlugUpdate +qa"
 alias snvim="sudo -E nvim"
-
-## Source .bash_functions if it exists
-if [[ -f "$HOME/.bash_functions" ]]; then
-  . "$HOME/.bash_functions"
-fi
