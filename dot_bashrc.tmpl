@@ -7,28 +7,14 @@ esac
 ## Exit if not running bash
 [ -z "$BASH_VERSION" ] && return
 
-## Common aliases
-alias ll='ls -la'
-{{ if eq .chezmoi.os "linux" }}
-alias ls="ls --color=auto"
-alias lsa="ls -a --color=auto"
-alias lsl="ls -l --color=auto"
-alias lsla="ls -la --color=auto"
-{{ else if eq .chezmoi.os "darwin" }}
-alias ls="ls -G"
-alias lsa="ls -a -G"
-alias lsl="ls -l -G"
-alias lsla="ls -la -G"
-{{ end }}
-
 ## Set PATH dynamically based on OS
-{{ if eq .chezmoi.os "linux" }}
+{{ if eq .chezmoi.os "linux" -}}
 export PATH="$PATH:/usr/local/bin"
 alias open="xdg-open"
-{{ else if eq .chezmoi.os "darwin" }}
+{{ else if eq .chezmoi.os "darwin" -}}
 export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 alias open="open"
-{{ end }}
+{{ end -}}
 
 ## History settings
 # Ignore duplicates and leading spaces

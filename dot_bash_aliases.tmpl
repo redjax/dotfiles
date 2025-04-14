@@ -1,3 +1,16 @@
+## ls aliases
+alias ll='ls -la'
+{{ if eq .chezmoi.os "linux" -}}
+alias ls="ls --color=auto"
+alias lsa="ls -a --color=auto"
+alias lsl="ls -l --color=auto"
+alias lsla="ls -la --color=auto"
+{{ else if eq .chezmoi.os "darwin" -}}
+alias ls="ls -G"
+alias lsa="ls -a -G"
+alias lsl="ls -l -G"
+alias lsla="ls -la -G"
+{{ end }}
 ## get dir/file's chmod
 alias getchmod="stat --format '%a' "
 
