@@ -1,8 +1,7 @@
 ## Fix colors over ssh
-set -g default-terminal "screen-256color"
-{{- if eq .chezmoi.os "linux" -}}
+{{ if eq .chezmoi.os "linux" }}
 set -g default-terminal "tmux-256color"
-{{- end -}}
+{{ end -}}
 
 ## Fix arrow keys not working in PuTTY
 set -g terminal-overrides "xterm*:kLFT5=\eOD:kRIT5=\eOC:kUP5=\eOA:kDN5=\eOB:smkx@:rmkx@"
