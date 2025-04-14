@@ -7,15 +7,19 @@ esac
 ## Exit if not running bash
 [ -z "$BASH_VERSION" ] && return
 
-## Set PATH dynamically based on OS
 {{ if eq .chezmoi.os "linux" -}}
+## Append user's bin dir to PATH
 export PATH="$PATH:/usr/local/bin"
+## Set alias for xdg-open
 alias open="xdg-open"
 {{ else if eq .chezmoi.os "darwin" -}}
-export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
-alias open="open"
-{{ end -}}
-
+## Add homebrew bin to path
+if command -v brew -v 2>&1 /dev/null; then
+  export PATH="$PATH:/opt/homebrew/bin"
+fi
+## Append user's bin dir to PATH
+export PATH="$PATH:/usr/local/bin"
+{{ end }}
 ## History settings
 # Ignore duplicates and leading spaces
 HISTCONTROL=ignoreboth
