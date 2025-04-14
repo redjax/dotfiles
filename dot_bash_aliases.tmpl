@@ -1,10 +1,13 @@
 ## ls aliases
-alias ll='ls -la'
 {{ if eq .chezmoi.os "linux" -}}
-alias ls="ls --color=auto"
+alias ll='ls -la --color=auto'
 alias lsa="ls -a --color=auto"
 alias lsl="ls -l --color=auto"
 alias lsla="ls -la --color=auto"
+
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 {{ else if eq .chezmoi.os "darwin" -}}
 alias ls="ls -G"
 alias lsa="ls -a -G"
@@ -15,23 +18,11 @@ alias lsla="ls -la -G"
 alias getchmod="stat --format '%a' "
 
 ## Use rsync instead of cp if installed
-if [ -x /usr/bin/rsync ]; then
+if command -v rsync -v 2>&1 /dev/null; then
   alias cp='rsync --progress -auHxvz '
 fi
 
 ## Source .bash_dots_loader file
 if [[ -f ~/.bash_loader ]]; then
   . ~/.bash_loader
-fi
-
-## enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
-    #alias grep='grep --color=auto'
-    #alias fgrep='fgrep --color=auto'
-    #alias egrep='egrep --color=auto'
 fi
