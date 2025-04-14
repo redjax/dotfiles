@@ -106,8 +106,8 @@ if [ -f ~/.bash_aliases ]; then
 fi
 
 ## Source .bash_loader if it exists
-if [ -f ~/.bash_loader ]; then
-  . ~/.bash_loader > /dev/null
+if [ -f ~/.bash_loader/main ]; then
+  . ~/.bash_loader/main > /dev/null
 fi
 
 ## Enable programmable completion features (you don't need to enable
