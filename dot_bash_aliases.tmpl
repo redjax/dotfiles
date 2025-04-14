@@ -1,7 +1,14 @@
+## Reload your shell
+alias reload="exec $SHELL"
+
+## Automatically create child paths with mkdir
+alias mkdir='mkdir -pv'
+
 ## ls aliases
 {{ if eq .chezmoi.os "linux" -}}
-alias ll='ls -la --color=auto'
-alias lsa="ls -a --color=auto"
+alias l='ls -CF'
+alias ll='ls -laF --color=auto'
+alias lsa="ls -A --color=auto"
 alias lsl="ls -l --color=auto"
 alias lsla="ls -la --color=auto"
 
@@ -26,3 +33,13 @@ fi
 if [[ -f ~/.bash_loader ]]; then
   . ~/.bash_loader
 fi
+
+## Tmux
+alias tmux="TERM=screen-256color-bce tmux"
+alias tmuxls='tmux ls'
+alias tmuxa='tmux a -t $1'
+
+## Neovim/nvim
+alias nvimi="nvim --headless +PlugInstall +qa"
+alias nvimu="nvim --headless +PlugUpdate +qa"
+alias snvim="sudo -E nvim"
