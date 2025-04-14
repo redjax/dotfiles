@@ -30,8 +30,8 @@ if command -v rsync -v 2>&1 /dev/null; then
 fi
 
 ## Source .bash_dots_loader file
-if [[ -f ~/.bash_loader ]]; then
-  . ~/.bash_loader
+if [[ -f ~/.bash_loader/main ]]; then
+  . ~/.bash_loader/main
 fi
 
 ## Tmux
