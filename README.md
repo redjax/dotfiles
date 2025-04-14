@@ -1,19 +1,15 @@
-# Dotfiles
+# Dotfiles <!-- omit in toc -->
 
-My dotfiles, managed by [chezmoi](https://www.chezmoi.io). Despite the silly name, this tool makes managing dotfiles across platforms and machines easier :)
+My dotfiles, managed by [chezmoi](https://www.chezmoi.io). While I am not a fan of its name, this tool simplifies managing Linux/Mac dotfiles across multiple machines much easier.
 
-## Setup
+## Table of Contents
 
-- Install `chezmoi`
-  - Install to `~/.local/bin`: `sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin`
-- Initialize `chezmoi`
-  - If you cloned this repository, i.e. to `~/git/dotfiles`, initialize like:
-    - `chezmoi init --source ~/git/dotfiles` (replace `~/git/dotfiles` with the path to this repository)
-  - If you did not clone this repository, initialize like:
-    - (HTTP) `chezmoi init https://github.com/redjax/dotfiles.git`
-    - (SSH) `chezmoi init git@github.com:redjax/dotfiles.git`
-- Check what changes `chezmoi` will make to your home directory with: `chezmoi diff`
-- When you are comfortable with the changes, run `chezmoi apply -v`
+- [Table of Contents](#table-of-contents)
+- [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Synchronizing Changes](#synchronizing-changes)
+  - [Cheat-Sheet](#cheat-sheet)
+- [Links](#links)
 
 ## Quick Start
 
@@ -34,14 +30,13 @@ Now that your dotfiles are managed by `chezmoi`, you do not (read: *should* not)
 
 If you do make manual changes (either out of habit, or installing a program/running an Ansible script that edits a file managed by `chezmoi`), you can run `chezmoi merge $FILE` and manually merge those changes into the `chezmoi` template/file.
 
-Any time you make changes to your `chezmoi` repository
+Any time you make changes to your `chezmoi` repository, you should also [synchronize the changes](#synchronizing-changes).
 
 ## Usage
 
 After installing `chezmoi` and initializing your home directory with `chezmoi apply -v`, you should no longer directly edit `chezmoi`-managed dotfiles. Instead, use the `chezmoi edit $FILE` command. For example, to edit your `~/.bashrc`, run `chezmoi edit ~/.bashrc`.
 
-You can do a "dry run" of the `chezmoi apply` command to see everything that would change before actually applying those changes. Use the command `chezmoi apply --dry-run --verbose
-` to do a dry run.
+You can do a "dry run" of the `chezmoi apply` command to see everything that would change before actually applying those changes. Use the command: `chezmoi apply --dry-run --verbose` to do a dry run.
 
 Sometimes a program will either automatically append lines to your `~/.bashrc`, or will suggest you do so and provide commands you can copy/paste to automatically add the required init lines. This will cause conflicts with your `chezmoi`-managed version of the file. To fix this, use the `chezmoi merge $FILE` command, i.e. `chezmoi merge ~/.bashrc`. This will open a merge tool (`vimdiff` by default), where you can compare the changes and automatically add them to your `chezmoi` template file (`dot_filename.tmpl`).
 
@@ -56,9 +51,29 @@ git commit -m "Update bashrc template with merged changes"
 git push origin main
 ```
 
+### Cheat-Sheet
+
+| Command                                                                 | Description                                                                                                                                           | Notes                                                                                                                                                                                                                                                              |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin`           | Install `chezmoi` to `~/.local/bin`                                                                                                                   |                                                                                                                                                                                                                                                                    |
+| `chezmoi update`                                                        | Pull latest changes from your repository and apply them.                                                                                              |                                                                                                                                                                                                                                                                    |
+| `chezmoi cd`                                                            | Change directory to your `chezmoi` repository                                                                                                         |                                                                                                                                                                                                                                                                    |
+| `chezmoi edit $FILE`                                                    | Edit a `chezmoi`-managed file                                                                                                                         | Add `--apply` to automatically run `chezmoi apply` when finished editing. Add `--watch` to automatically run `chezmoi apply` on every save                                                                                                                         |
+| `chezmoi add $FILE`                                                     | Add an existing file to your `chezmoi` repository.                                                                                                    |                                                                                                                                                                                                                                                                    |
+| `chezmoi re-add $FILE`                                                  | Re-add file to `chezmoi` repository after manually editing it at its location (i.e. instead of editing the file in the `chezmoi` repository).         |                                                                                                                                                                                                                                                                    |
+| `chezmoi init https://github.com/$GITHUB_USERNAME/$REPOSITORY_NAME.git` | Clone a `chezmoi` repository via HTTP                                                                                                                 |                                                                                                                                                                                                                                                                    |
+| `chezmoi init git@github.com:$GITHUB_USERNAME/$REPOSITORY_NAME.git`     | Clone a `chezmoi` repository via SSH                                                                                                                  |                                                                                                                                                                                                                                                                    |
+| `chezmoi init $GITHUB_USERNAME`                                         | Searches a given user's public repos for one named `dotfiles` and assumes it's a `chezmoi` repository                                                 |                                                                                                                                                                                                                                                                    |
+| `chezmoi diff`                                                          | See what changes will be made if you run `chezmoi apply`                                                                                              |                                                                                                                                                                                                                                                                    |
+| `chezmoi apply`                                                         | Apply `chezmoi`-managed dotfiles.                                                                                                                     |                                                                                                                                                                                                                                                                    |
+| `chezmoi merge $FILE`                                                   | Merge changes in source file with `chezmoi`-managed version. If merge cannot occur automatically, you will be able to edit the merge before applying. |                                                                                                                                                                                                                                                                    |
+| `chezmoi git pull -- --autostash --rebase && chezmoi diff`              | Pull latest changes from repo & see what would change without actually applying the changes.                                                          | This runs git pull --autostash --rebase in your source directory and chezmoi diff then shows the difference between the target state computed from your source directory and the actual state.  If you're happy with the changes, then you can run `chezmoi apply` |
+
 ## Links
 
 - [Chezmoi home](https://www.chezmoi.io)
 - [Chezmoi Github](https://github.com/twpayne/chezmoi)
 - [Chezmoi docs: quickstart](https://www.chezmoi.io/quick-start/)
 - [Chezmoi docs: user guide](https://www.chezmoi.io/user-guide/command-overview/)
+- [Chezmoi docs: usage instructions](https://www.chezmoi.io/user-guide/frequently-asked-questions/usage/)
+- [Chezmoi docs: include files from elsewhere (3rd party sources, Github URLs, etc)](https://www.chezmoi.io/user-guide/include-files-from-elsewhere/#include-a-subdirectory-from-a-url)
