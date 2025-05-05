@@ -2,3 +2,4 @@
 #  Chezmoi will not render files/dirs matching these patterns
 README.md
 scripts/*
+.gitignore
