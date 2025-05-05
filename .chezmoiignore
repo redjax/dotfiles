@@ -1,2 +1,4 @@
-## Do not render repository's README to the home path
+## Ignore patterns for chezmoi.
+#  Chezmoi will not render files/dirs matching these patterns
 README.md
+scripts/*
