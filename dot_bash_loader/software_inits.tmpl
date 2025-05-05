@@ -26,4 +26,6 @@ if command -v brew -v > /dev/null 2>&1; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
     # Disable Homebrew analytics
     export HOMEBREW_NO_ANALYTICS=1
+
+    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 fi
