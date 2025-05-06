@@ -22,7 +22,7 @@ fi
 [ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X"
 
 ## Homebrew
-if command -v brew -v > /dev/null 2>&1; then
+if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
     # Disable Homebrew analytics
     export HOMEBREW_NO_ANALYTICS=1
