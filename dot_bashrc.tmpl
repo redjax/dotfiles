@@ -118,3 +118,13 @@ fi
 
 ## Source ~/.local/bin/env if it exists
 [ ! -f "$HOME/.local/bin/env" ] || . "$HOME/.local/bin/env"
+
+## Add nvm to shell
+if command -v nvm --version 2>&1 /dev/null; then
+  export NVM_DIR="$HOME/.nvm"
+  ## Load nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  ## This loads nvm bash_completion
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
+fi
+
