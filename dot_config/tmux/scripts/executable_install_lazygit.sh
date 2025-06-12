@@ -29,6 +29,15 @@ function install_lazygit {
   curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
   tar xf lazygit.tar.gz lazygit
   sudo install lazygit -D -t /usr/local/bin/
+
+  ## Cleanup
+  if [[ -f lazygit.tar.gz ]]; then
+    rm lazygit.tar.gz
+  fi
+
+  if [[ -f lazygit ]]; then
+    rm lazygit
+  fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
