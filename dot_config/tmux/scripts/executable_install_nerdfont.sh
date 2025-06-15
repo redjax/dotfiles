@@ -57,8 +57,10 @@ function install_nerdfont {
     
     if [[ ${#INSTALL_FONT_URLS[@]} -eq 0 ]]; then
         INSTALL_FONT_URLS=(
-            "https://github.com/ryanoasis/nerd-fonts/raw/HEAD/patched-fonts/Hack/Hack-Regular.ttf"
+            "https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/Hack/Regular/HackNerdFont-Regular.ttf"
             "https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/FiraMono/Regular/FiraMonoNerdFont-Regular.otf"
+            "https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode/Regular/FiraCodeNerdFontMono-Regular.ttf"
+            "https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts/FiraCode/Regular/FiraCodeNerdFont-Regular.ttf"
         )
     fi
 
