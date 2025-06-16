@@ -128,3 +128,10 @@ if [[ -d "$HOME/.nvm" ]]; then
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
 fi
 
+## Add Go path to $PATH if Go is installed
+if [[ -f $HOME/.go/bin/go ]]; then
+  export GOROOT=$HOME/.go
+  export GOPATH=$HOME/go
+  export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+fi
+
