@@ -1,9 +1,6 @@
 ## Pyenv
 if command -v pyenv > /dev/null 2>&1; then
-  if [[ ":$PATH:" != "*$HOME/.pyenv/bin" ]]; then
-    export PATH="$HOME/.pyenv/bin:$PATH"
-  fi
-  
+  export PATH="$HOME/.pyenv/bin:$PATH"
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
 fi
@@ -30,55 +27,23 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     # Disable Homebrew analytics
     export HOMEBREW_NO_ANALYTICS=1
 
-    if [[ ":$PATH:" != "*/home/linuxbrew/.linuxbrew/bin" ]]; then
-      export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
-    fi
+    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 fi
 
 ## Add Go to PATH
 if [[ -d /usr/local/go ]]; then
-  if [[ ":$PATH:" != "*/usr/local/bin" ]]; then
-    export PATH="$PATH:/usr/local/go/bin"
-  fi
+  export PATH="$PATH:/usr/local/go/bin"
 
   if [[ -d /opt/gobins ]]; then
-    if [[ ":$PATH:" != "*/opt/gobins" ]]; then
-      export PATH="$PATH:/opt/gobins"
-    fi
+    export PATH="$PATH:/opt/gobins"
   fi
 fi
 
 ## Add chezmoi to PATH
 if [[ -f $HOME/.local/bin/chezmoi ]]; then
-  if [[ ":$PATH:" != "*$HOME/.local/bin" ]]; then
-    export PATH="$PATH:$HOME/.local/bin"
-  fi
+  export PATH="$PATH:$HOME/.local/bin"
 fi
 # This is chezmoi's default path
 if [[ -f $HOME/bin/chezmoi ]]; then
-  if [[ ":$PATH:" != "*$HOME/bin" ]]; then
-    export PATH="$PATH:$HOME/bin"
-  fi
-fi
-
-if [[ -d "$HOME/.nvm" ]]; then
-  ## Add nvm to shell
-  export NVM_DIR="$HOME/.nvm"
-  ## Load nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  ## This loads nvm bash_completion
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
-fi
-
-## Add Go path to $PATH if Go is installed
-if [[ -f $HOME/.go/bin/go ]]; then
-  export GOROOT=$HOME/.go
-  export GOPATH=$HOME/go
-  export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-
-  ## Source 'gobins' dir, if it exists.
-  #  I use /opt/gobins to build my Go projects for use in my terminal.
-  if [[ -d /opt/gobins ]]; then
-    export PATH="$PATH:/opt/gobins"
-  fi
+  export PATH="$PATH:$HOME/bin"
 fi
