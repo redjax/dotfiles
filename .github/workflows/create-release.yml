@@ -59,25 +59,21 @@ jobs:
           chezmoi archive --format=tar.gz --init --recursive --output=dotfiles-$DATE.tar.gz
           chezmoi archive --format=zip --init --recursive --output=dotfiles-$DATE.zip
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            dotfiles.tar.gz
-            dotfiles.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      ## Create the tag and push it
       - name: Create git tag
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
           git tag "v${{ steps.bump_version.outputs.new_version }}"
           git push origin "v${{ steps.bump_version.outputs.new_version }}"
 
+      ## Create the GitHub release with the new tag, auto-generated release notes, and assets
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.bump_version.outputs.new_version }}"
           name: "v${{ steps.bump_version.outputs.new_version }}"
+          generate_release_notes: true
           files: |
             dotfiles-$DATE.tar.gz
             dotfiles-$DATE.zip
