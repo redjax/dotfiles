@@ -1,5 +1,34 @@
 # Dotfiles <!-- omit in toc -->
 
+<!-- Repo image -->
+<!-- <p align="center">
+  <a href="https://github.com/redjax/dotfiles">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="#">
+      <img src="#" height="100">
+    </picture>
+  </a>
+</p> -->
+
+<!-- Git badges -->
+<p align="center">
+  <a href="https://github.com/redjax/dotfiles">
+    <img alt="Created At" src="https://img.shields.io/github/created-at/redjax/dotfiles">
+  </a>
+  <a href="https://github.com/redjax/dotfiles/commit">
+    <img alt="Last Commit" src="https://img.shields.io/github/last-commit/redjax/dotfiles">
+  </a>
+  <a href="https://github.com/redjax/dotfiles/commit">
+    <img alt="Commits this year" src="https://img.shields.io/github/commit-activity/y/redjax/dotfiles">
+  </a>
+  <a href="https://github.com/redjax/dotfiles">
+    <img alt="Repo size" src="https://img.shields.io/github/repo-size/redjax/dotfiles">
+  </a>
+  <!-- ![GitHub Latest Release](https://img.shields.io/github/release-date/redjax/dotfiles) -->
+  <!-- ![GitHub commits since latest release](https://img.shields.io/github/commits-since/redjax/dotfiles/latest) -->
+  <!-- ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redjax/dotfiles/tests.yml) -->
+</p>
+
 My dotfiles, managed by [chezmoi](https://www.chezmoi.io). While I am not a fan of its name, this tool simplifies managing Linux/Mac dotfiles across multiple machines much easier.
 
 ## Table of Contents
