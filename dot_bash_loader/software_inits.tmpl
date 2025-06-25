@@ -1,0 +1,49 @@
+## Pyenv
+if command -v pyenv > /dev/null 2>&1; then
+  export PATH="$HOME/.pyenv/bin:$PATH"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+fi
+
+## NVM
+if command -v nvm > /dev/null 2>&1; then
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
+
+## Astral uv
+if command -v uv > /dev/null 2>&1; then
+    eval "$(uv generate-shell-completion bash)"
+    eval "$(uvx --generate-shell-completion bash)"
+fi
+
+## Enable x-cmd if it's installed
+[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X"
+
+## Homebrew
+if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    # Disable Homebrew analytics
+    export HOMEBREW_NO_ANALYTICS=1
+
+    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+fi
+
+## Add Go to PATH
+if [[ -d /usr/local/go ]]; then
+  export PATH="$PATH:/usr/local/go/bin"
+
+  if [[ -d /opt/gobins ]]; then
+    export PATH="$PATH:/opt/gobins"
+  fi
+fi
+
+## Add chezmoi to PATH
+if [[ -f $HOME/.local/bin/chezmoi ]]; then
+  export PATH="$PATH:$HOME/.local/bin/chezmoi"
+fi
+# This is chezmoi's default path
+if [[ -f $HOME/bin/chezmoi ]]; then
+  export PATH="$PATH:$HOME/bin"
+fi
