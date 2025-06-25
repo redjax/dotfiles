@@ -1,0 +1,45 @@
+## Source .bash_dots_loader file
+if [[ -f ~/.bash_loader/main ]]; then
+  . ~/.bash_loader/main
+fi
+
+## Reload your shell
+alias reload="exec $SHELL"
+
+## Automatically create child paths with mkdir
+alias mkdir='mkdir -pv'
+
+## ls aliases
+{{ if eq .chezmoi.os "linux" -}}
+alias l='ls -CF'
+alias ll='ls -laF --color=auto'
+alias lsa="ls -A --color=auto"
+alias lsl="ls -l --color=auto"
+alias lsla="ls -la --color=auto"
+
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+{{ else if eq .chezmoi.os "darwin" -}}
+alias ls="ls -G"
+alias lsa="ls -a -G"
+alias lsl="ls -l -G"
+alias lsla="ls -la -G"
+{{ end }}
+## get dir/file's chmod
+alias getchmod="stat --format '%a' "
+
+## Use rsync instead of cp if installed
+if command -v rsync -v > /dev/null 2>&1; then
+  alias cp='rsync --progress -auHxvz '
+fi
+
+## Tmux
+# alias tmux="TERM=screen-256color-bce tmux"
+alias tmuxls='tmux ls'
+alias tmuxa='tmux a -t $1'
+
+## Neovim/nvim
+alias nvimi="nvim --headless +PlugInstall +qa"
+alias nvimu="nvim --headless +PlugUpdate +qa"
+alias snvim="sudo -E nvim"
