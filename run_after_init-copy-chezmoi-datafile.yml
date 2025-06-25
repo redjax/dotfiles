@@ -1,0 +1,16 @@
+#!/bin/bash
+
+THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SOURCE_FILE="$HOME/.local/share/chezmoi/.chezmoidata.yml"
+DEST_FILE="$HOME/.local/share/chezmoi/.chezmoidata.local.yml"
+
+if [ -f "$SOURCE_FILE" ]; then
+    if [ ! -f "$DEST_FILE" ]; then
+        cp "$SOURCE_FILE" "$DEST_FILE"
+        echo "Copied $SOURCE_FILE to $DEST_FILE"
+    fi
+fi
+
+if [ ! -f "$HOME/.chezmoi_repo" ]; then
+  ln -s $HOME/.local/share/chezmoi $HOME/.chezmoi_repo
+fi
