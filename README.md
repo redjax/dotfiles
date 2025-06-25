@@ -31,6 +31,8 @@
 
 My dotfiles, managed by [chezmoi](https://www.chezmoi.io). While I am not a fan of its name, this tool simplifies managing Linux/Mac dotfiles across multiple machines much easier.
 
+This is a continuation of a dotfiles repository I originally hosted on Gitlab, [starting in 2016](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb). The original code is retained in [an archive branch](https://github.com/redjax/dotfiles/tree/archive/2025-06-24).
+
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
