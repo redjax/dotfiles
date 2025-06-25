@@ -1,12 +1,16 @@
 #!/bin/bash
 
 THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-SOURCE_FILE="$HOME/.local/share/chezmoi/.chezmoidata.yml"
-DEST_FILE="$HOME/.local/share/chezmoi/.chezmoidata.local.yml"
 
-if [ -f "$SOURCE_FILE" ]; then
-    if [ ! -f "$DEST_FILE" ]; then
-        cp "$SOURCE_FILE" "$DEST_FILE"
-        echo "Copied $SOURCE_FILE to $DEST_FILE"
+CHEZMOIDATA_SRC="$HOME/.local/share/chezmoi/.chezmoidata.yml"
+CHEZMOIDATA_DEST="$HOME/.local/share/chezmoi/.chezmoidata.local.yml"
+CHEZMOI_STAGE_DIR="$HOME/.chezmoi_staging"
+
+if [ -f "$CHEZMOIDATA_SRC" ]; then
+    if [ ! -f "$CHEZMOIDATA_DEST" ]; then
+        cp "$CHEZMOIDATA_SRC" "$CHEZMOIDATA_DEST"
+        echo "Copied $CHEZMOIDATA_SRC to $CHEZMOIDATA_DEST"
     fi
 fi
+
+rm -r $CHEZMOI_STAGE_DIR
