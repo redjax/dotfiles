@@ -1,0 +1,46 @@
+#######################################################################
+# Source this file in your ~/.bashrc, ~/.bash_aliases, or ~/.profile. #
+#   i.e. . ~/.bash_loader/main.sh                                     #
+# What:                                                               #
+#   This script dynamically adds functionality to your shell, based   #
+#    on software installed & the presence of filepaths.               #
+#                                                                     #
+#   For example, this loader file will initialize tools like uv, nvm, #
+#    etc. It can also inject aliases & export env vars based on the   #
+#     existence of a .shell_env.extra file (you have to create this). #
+#######################################################################
+
+# ------------------------------------------------------------------- #
+
+#############
+# CONFIGURE #
+#############
+
+## Check for and source OS alias overrides
+declare -a HOST_OS=( "ubuntu" "debian" "fedora" )
+for OS in "${HOST_OS[@]}"
+do
+  if [[ -f ~/.bash_aliases_$OS_override ]]; then
+    . ~/.bash_aliases_$OS_override
+  fi
+done
+
+## Source bash_loader aliases
+if [[ -f "$HOME/.bash_loader/bash_aliases" ]]; then
+  . "$HOME/.bash_loader/aliases"
+fi
+
+## Source bash_loader env
+if [[ -f "$HOME/.bash_loader/env" ]]; then
+  . "$HOME/.bash_loader/env"
+fi
+
+## Source bash_loader software inits
+if [[ -f "$HOME/.bash_loader/software_inits" ]]; then
+  . "$HOME/.bash_loader/software_inits"
+fi
+
+## Source bash_loader functions
+if [[ -f "$HOME/.bash_loader/functions" ]]; then
+  . "$HOME/.bash_loader/functions"
+fi
