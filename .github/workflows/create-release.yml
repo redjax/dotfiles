@@ -30,13 +30,6 @@ jobs:
       - name: Add chezmoi to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # - name: Get current version
-      #   id: current_version
-      #   run: |
-      #     ## Get the latest git tag, or default to 'v0.0.0'
-      #     CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-      #     echo "current_version=${CURRENT_TAG:1}" >> $GITHUB_OUTPUT
-
       ## Get the latest tag for version bump
       - name: Get latest tag
         id: get_tag
@@ -78,7 +71,7 @@ jobs:
 
       - name: Archive dotfiles with date
         run: |
-          VERSION="${{ steps.bump_version.outputs.new_version }}"
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
           
           ## Generate install script to add to repo
           chezmoi generate install.sh > install.sh
@@ -88,7 +81,7 @@ jobs:
           mkdir -p release_assets
 
           ## Create zip
-          zip -r "release_assets/dotfiles-${{ steps.bump_version.outputs.new_version }}.zip" . -x \
+          zip -r "release_assets/dotfiles-${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
             ".git/*" \
             "scripts/prune_git_branches.sh"
 
@@ -103,19 +96,19 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.bump_version.outputs.new_version }}"
-          git push origin "v${{ steps.bump_version.outputs.new_version }}"
+          git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
 
       ## Create the GitHub release with the new tag, auto-generated release notes, and assets
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v${{ steps.bump_version.outputs.new_version }}"
-          name: "v${{ steps.bump_version.outputs.new_version }}"
+          tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
           generate_release_notes: true
           token: ${{ secrets.RELEASE_TOKEN }}
           files: |
-            release_assets/dotfiles-${{ steps.bump_version.outputs.new_version }}.tar.gz
-            release_assets/dotfiles-${{ steps.bump_version.outputs.new_version }}.zip
+            release_assets/dotfiles-${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
+            release_assets/dotfiles-${{ steps.bump_version.outputs.NEW_TAG }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
