@@ -173,7 +173,10 @@ jobs:
           name: rendered-files
 
       - name: Create release assets directory
-        run: mkdir -p release_assets/
+        run: |
+          mkdir -p release_assets/
+          mkdir -p rendered/
+          mkdir -p self_contained/
 
       - name: Create ZIP archive of self-contained chezmoi dotfiles
         run: |
