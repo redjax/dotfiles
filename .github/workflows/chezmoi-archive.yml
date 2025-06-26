@@ -69,29 +69,24 @@ jobs:
           echo "New tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create chezmoi archive
+      - name: Create chezmoi config for CI
         run: |
           VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
           GIT_USER="github-actions[bot]"
           GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
 
-          ## Remove existing chezmoi config
           cat <<EOF > .chezmoi.toml
           [data]
             name = "${GIT_USER}"
             email = "${GIT_EMAIL}"
-
           EOF
 
-          ## Generate install script to add to repo
-          # chezmoi generate install.sh > install.sh
-          # Create a help file
-          # echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
-          # echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
-
-          ## Create chezmoi output directory
+      - name: Create rendered output directory
+        run: |
           mkdir -p rendered/
 
+      - name: Render dotfiles to output directory
+        run: |
           chezmoi apply \
             --source $(pwd) \
             --config .chezmoi.toml \
@@ -102,25 +97,36 @@ jobs:
             --verbose \
             --force
 
+      - name: List files for debugging
+        run: |
           echo "$(pwd) files:"
           ls -la .
+          echo ""
 
           echo "$HOME files:"
           ls -la $HOME
+          echo ""
 
           echo "Rendered files:"
           ls -la rendered/
 
-          # ## Create zip
-          # zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
-          #   ".git/*" \
-          #   "scripts/prune_git_branches.sh"
+      - name: Create release assets directory
+        run: |
+          mkdir -p release_assets/
 
-          # ## Create tar
-          # tar -czvf "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
-          #   --exclude=".git/*" \
-          #   --exclude="scripts/prune_git_branches.sh" \
-          #   .
+      - name: Create ZIP archive of rendered dotfiles
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          ZIP_NAME="dotfiles-v${VERSION}.zip"
+
+          (cd rendered && zip -r "../release_assets/${ZIP_NAME}" .)
+
+      - name: Create TAR archive of rendered dotfiles
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          TAR_NAME="dotfiles-v${VERSION}.tar.gz"
+
+          (cd rendered && tar -czf "../release_assets/${TAR_NAME}" .)
 
       # ## Create the tag and push it
       # - name: Create git tag
