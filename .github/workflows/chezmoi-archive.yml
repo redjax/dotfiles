@@ -89,6 +89,7 @@ jobs:
           # echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
           # echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
 
+          chezmoi init --source $(pwd)
           chezmoi apply
 
           echo "$(pwd) files:"
