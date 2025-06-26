@@ -117,7 +117,7 @@ jobs:
 
           cd rendered
           zip -r "../release_assets/${ZIP_NAME}" . -x \
-            "rendered/"
+            "rendered/" \
             ".gitconfig"
 
       - name: Create TAR archive of rendered dotfiles
