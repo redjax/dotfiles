@@ -1,0 +1,133 @@
+---
+name: Manual chezmoi archive
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type (patch, minor, major)"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        id: install_chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
+        shell: bash
+
+      - name: Add chezmoi to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      ## Get the latest tag for version bump
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+
+          echo "Latest tag: $LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      ## Bump release version (v0.0.X -> v0.0.X+1)
+      - name: Bump version
+        id: bump_version
+        run: |
+          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
+          BUMP_TYPE="${{ github.event.inputs.bump }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          NEW_TAG="$MAJOR.$MINOR.$PATCH"
+          echo "New tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Create chezmoi archive
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          GIT_USER="github-actions[bot]"
+          GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
+
+          ## Remove existing chezmoi config
+          cat <<EOF > .chezmoi.toml
+          [data]
+            name = "${GIT_USER}"
+            email = "${GIT_EMAIL}"
+
+          EOF
+
+          ## Generate install script to add to repo
+          # chezmoi generate install.sh > install.sh
+          # Create a help file
+          # echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
+          # echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
+
+          chezmoi apply
+
+          echo "$(pwd) files:"
+          ls -la .
+
+          echo "$HOME files:"
+          ls -la $HOME
+
+          # mkdir -p release_assets
+
+          # ## Create zip
+          # zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
+          #   ".git/*" \
+          #   "scripts/prune_git_branches.sh"
+
+          # ## Create tar
+          # tar -czvf "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
+          #   --exclude=".git/*" \
+          #   --exclude="scripts/prune_git_branches.sh" \
+          #   .
+
+      # ## Create the tag and push it
+      # - name: Create git tag
+      #   run: |
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
+      #     git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
+      #     git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
+
+      # ## Create the GitHub release with the new tag, auto-generated release notes, and assets
+      # - name: Create GitHub Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+      #     name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+      #     generate_release_notes: true
+      #     token: ${{ secrets.RELEASE_TOKEN }}
+      #     files: |
+      #       release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
+      #       release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
