@@ -64,10 +64,9 @@ jobs:
           DATE=$(date +%Y-%m-%d)
 
           # Create a data file with all required template variables
-          cat <<EOF > $PWD/chezmoi.yaml
+          cat <<EOF > $PWD/.chezmoidata.local.yml
           name: "ci-user"
           email: "ci@example.com"
-          # Add any other required variables here
           EOF
 
           # Create the archives
