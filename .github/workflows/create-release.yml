@@ -63,6 +63,8 @@ jobs:
 
           ## Generate install script to add to repo
           chezmoi install.sh > install.sh
+          # Create a help file
+          echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
 
           mkdir -p release_assets
 
