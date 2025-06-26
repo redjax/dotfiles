@@ -53,9 +53,20 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
+      # - name: Archive dotfiles with date
+      #   run: |
+      #     DATE=$(date +%Y-%m-%d)
+      #     chezmoi archive --format=tar.gz --init --recursive --output=dotfiles-$DATE.tar.gz
+      #     chezmoi archive --format=zip --init --recursive --output=dotfiles-$DATE.zip
+
       - name: Archive dotfiles with date
         run: |
           DATE=$(date +%Y-%m-%d)
+          # Initialize chezmoi source state (creates ~/.local/share/chezmoi)
+          chezmoi init
+          # Apply your dotfiles to generate the source state
+          chezmoi apply --source
+          # Create the archives
           chezmoi archive --format=tar.gz --init --recursive --output=dotfiles-$DATE.tar.gz
           chezmoi archive --format=zip --init --recursive --output=dotfiles-$DATE.zip
 
