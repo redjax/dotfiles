@@ -63,9 +63,12 @@ jobs:
         run: |
           DATE=$(date +%Y-%m-%d)
 
-          # Set default values for template variables
-          export CHEZMOI_DATA_name="Dotfiles User"
-          export CHEZMOI_DATA_email="user@example.com"
+          # Create a data file with all required template variables
+          cat <<EOF > $PWD/chezmoi.yaml
+          name: "ci-user"
+          email: "ci@example.com"
+          # Add any other required variables here
+          EOF
 
           # Create the archives
           chezmoi archive --format=tar.gz --output=dotfiles-$DATE.tar.gz --source=$PWD
