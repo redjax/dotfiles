@@ -74,9 +74,9 @@ jobs:
             "scripts/prune_git_branches.sh"
 
           ## Create tar
-          tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" . -x \
-            ".git/*" \
-            "scripts/prune_git_branches.sh"
+          tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" . \
+            --exclude=".git/*" \
+            --exclude="scripts/prune_git_branches.sh"
 
       ## Create the tag and push it
       - name: Create git tag
