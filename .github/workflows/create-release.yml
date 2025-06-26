@@ -236,5 +236,7 @@ jobs:
           files: |
             release_assets/dotfiles-v${{ needs.setup.outputs.new_tag }}.tar.gz
             release_assets/dotfiles-v${{ needs.setup.outputs.new_tag }}.zip
+            release_assets/chezmoi_dotfiles-v${{ needs.setup.outputs.new_tag }}.tar.gz
+            release_assets/chezmoi_dotfiles-v${{ needs.setup.outputs.new_tag }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
