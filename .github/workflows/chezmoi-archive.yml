@@ -89,10 +89,17 @@ jobs:
           # echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
           # echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
 
+          ## Create chezmoi output directory
+          mkdir -p /release-assets
+
           chezmoi init \
             --source $(pwd) \
             --config .chezmoi.toml \
             --config-format toml \
+            --destination /release-assets \
+            --keep-going \
+            --no-tty \
+            --verbose \
             --force
 
           chezmoi apply
