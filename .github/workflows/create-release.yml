@@ -69,9 +69,10 @@ jobs:
           mkdir -p release_assets
 
           ## Create zip
-          zip -r "release_assets/${ZIP_NAME}" . -x \
+          zip -r "release_assets/${ZIP_NAME}" \
             ".git/*" \
-            "scripts/prune_git_branches.sh"
+            "scripts/prune_git_branches.sh" \
+            .
 
           ## Create tar
           tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" . \
