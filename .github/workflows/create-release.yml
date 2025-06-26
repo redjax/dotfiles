@@ -74,7 +74,7 @@ jobs:
             "scripts/prune_git_branches.sh"
 
           ## Create tar
-          tar -czzf "release_assets/dotfiles-${DATE}.tar.gz" . -x \
+          tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" . -x \
             ".git/*" \
             "scripts/prune_git_branches.sh"
 
