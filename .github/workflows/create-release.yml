@@ -62,6 +62,11 @@ jobs:
       - name: Archive dotfiles with date
         run: |
           DATE=$(date +%Y-%m-%d)
+
+          # Set default values for template variables
+          export CHEZMOI_DATA_NAME="Dotfiles User"
+          export CHEZMOI_DATA_EMAIL="user@example.com"
+
           # Create the archives
           chezmoi archive --format=tar.gz --output=dotfiles-$DATE.tar.gz --source=$PWD
           chezmoi archive --format=zip --output=dotfiles-$DATE.zip --source=$PWD
