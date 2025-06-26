@@ -138,7 +138,7 @@ jobs:
           cd rendered
           zip -r "../release_assets/${ZIP_NAME}" . -x \
             "rendered/" \
-            ".gitconfig"
+            ".gitconfig" \
             "chezmoistate.db" \
 
       - name: Create TAR archive of rendered dotfiles
