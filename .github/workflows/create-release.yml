@@ -19,9 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install chezmoi
+        id: install_chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
         shell: bash
 
@@ -29,7 +31,7 @@ jobs:
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Get current version
-        id: version
+        id: current_version
         run: |
           ## Get the latest git tag, or default to 'v0.0.0'
           CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
@@ -38,7 +40,7 @@ jobs:
       - name: Bump version
         id: bump_version
         run: |
-          CURRENT_VERSION=${{ steps.version.outputs.current_version }}
+          CURRENT_VERSION=${{ steps.current_version.outputs.current_version }}
           BUMP_TYPE=${{ github.event.inputs.bump }}
           # Split version into MAJOR, MINOR, PATCH
           IFS="." read -ra VERSION_ARR <<< "$CURRENT_VERSION"
@@ -53,25 +55,26 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
-      # - name: Archive dotfiles with date
-      #   run: |
-      #     DATE=$(date +%Y-%m-%d)
-      #     chezmoi archive --format=tar.gz --init --recursive --output=dotfiles-$DATE.tar.gz
-      #     chezmoi archive --format=zip --init --recursive --output=dotfiles-$DATE.zip
-
       - name: Archive dotfiles with date
         run: |
           DATE=$(date +%Y-%m-%d)
+          VERSION="${{ steps.bump_version.outputs.new_version }}"
+          ZIP_NAME="dotfiles-${VERSION}.zip"
 
-          # Create a data file with all required template variables
-          cat <<EOF > $PWD/.chezmoidata.local.yml
-          name: "ci-user"
-          email: "ci@example.com"
-          EOF
+          ## Generate install script to add to repo
+          chezmoi install.sh > install.sh
 
-          # Create the archives
-          chezmoi archive --format=tar.gz --output=dotfiles-$DATE.tar.gz --source=$PWD
-          chezmoi archive --format=zip --output=dotfiles-$DATE.zip --source=$PWD
+          mkdir -p release_assets
+
+          ## Create zip
+          zip -r "release_assets/${ZIP_NAME}" . -x \
+            ".git/*" \
+            "scripts/prune_git_branches.sh"
+
+          ## Create tar
+          tar -czzf "release_assets/dotfiles-${DATE}.tar.gz" . -x \
+            ".git/*" \
+            "scripts/prune_git_branches.sh"
 
       ## Create the tag and push it
       - name: Create git tag
@@ -88,6 +91,7 @@ jobs:
           tag_name: "v${{ steps.bump_version.outputs.new_version }}"
           name: "v${{ steps.bump_version.outputs.new_version }}"
           generate_release_notes: true
+          token: ${{ secrets.RELEASE_TOKEN }}
           files: |
             dotfiles-$DATE.tar.gz
             dotfiles-$DATE.zip
