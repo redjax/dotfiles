@@ -194,14 +194,14 @@ jobs:
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="dotfiles-v${VERSION}.zip"
-          cd rendered
+          cd self_contained/
           zip -r "../release_assets/${ZIP_NAME}" . -x ".gitconfig" "chezmoistate.db"
 
       - name: Create TAR archive of rendered dotfiles
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           TAR_NAME="dotfiles-v${VERSION}.tar.gz"
-          cd rendered
+          cd self_contained/
           tar -czf "../release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" .
 
       - name: Upload release assets as artifact (optional)
