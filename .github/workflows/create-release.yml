@@ -62,7 +62,7 @@ jobs:
           ZIP_NAME="dotfiles-${VERSION}.zip"
 
           ## Generate install script to add to repo
-          chezmoi install.sh > install.sh
+          chezmoi generate install.sh > install.sh
           # Create a help file
           echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
 
