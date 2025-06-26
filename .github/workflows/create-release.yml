@@ -69,27 +69,126 @@ jobs:
           echo "New tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Archive dotfiles with date
+      - name: Create chezmoi config for CI
         run: |
           VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          GIT_USER="github-actions[bot]"
+          GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
+
+          cat <<EOF > .chezmoi.toml
+          [data]
+            name = "${GIT_USER}"
+            email = "${GIT_EMAIL}"
+          EOF
+
+      - name: Create output directories
+        run: |
+          mkdir -p rendered/
+          mkdir -p self_contained/
+          mkdir -p release_assets/
+
+      - name: Render dotfiles to output directory
+        run: |
+          chezmoi apply \
+            --source $(pwd) \
+            --config .chezmoi.toml \
+            --config-format toml \
+            --destination rendered/ \
+            --keep-going \
+            --no-tty \
+            --verbose \
+            --force
+
+      - name: Add generated files to rendered/
+        run: |
+          ## Echo release version into file
+          echo "${{ steps.bump_version.outputs.NEW_TAG }}" >> rendered/.version
+
+      - name: Create installable chezmoi + dotfiles artifact
+        run: |
           
           ## Generate install script to add to repo
           chezmoi generate install.sh > install.sh
-          # Create a help file
-          echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
-          echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
 
-          mkdir -p release_assets
+      - name: Add generated files
+        run: |
+          ## Create a help file
+          cat <<EOF > self_contained/README_BEFORE_INSTALL.txt
+          ###########################################################################
+          #                          !! WARNING !!                                  #
+          #                                                                         #
+          # Make a backup of your dots (~/.bashrc, ~/.bash_aliases, ~/.config, etc) #
+          # before running the install.sh script!                                   #
+          ###########################################################################
 
+          Run ./install.sh to install chezmoi & apply the dotfiles.
+          EOF
+
+      - name: Create ZIP archive of self-contained chezmoi dotfiles
+        run: |
           ## Create zip
-          zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
+          zip -r "release_assets/chezmoi_dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
             ".git/*" \
             "scripts/prune_git_branches.sh"
 
+      - name: Create TAR archive of self-contained chezmoi dotfiles
+        run: |
           ## Create tar
-          tar -czvf "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
+          tar -czvf "release_assets/chezmoi_dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
             --exclude=".git/*" \
             --exclude="scripts/prune_git_branches.sh" \
+            .
+
+      - name: Add help text
+        run: |
+          cat <<EOF > rendered/README.txt
+          Github: https://github.com/redjax/dotfiles.git
+
+          ################
+          # Instructions #
+          ################
+
+          MAKE A BACKUP! The steps below will overwrite your dotfiles with mine.
+
+          Copy & paste the files in this directory to your \$HOME directory, opting to replace/overwrite existing files.
+          Close & re-open your terminal (or log out and back in), or run exec $SHELL to load the dotfiles.
+          EOF
+
+      - name: List files for debugging
+        run: |
+          echo "$(pwd) files:"
+          ls -la .
+          echo ""
+
+          echo "Rendered files:"
+          ls -la rendered/
+          echo ""
+
+          echo "Self-contained Chezmoi files:"
+          ls -la self_contained/
+          echo ""
+
+      - name: Create ZIP archive of rendered dotfiles
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          ZIP_NAME="dotfiles-v${VERSION}.zip"
+
+          cd rendered
+          zip -r "../release_assets/${ZIP_NAME}" . -x \
+            "rendered/" \
+            ".gitconfig" \
+            "chezmoistate.db" \
+
+      - name: Create TAR archive of rendered dotfiles
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          TAR_NAME="dotfiles-v${VERSION}.tar.gz"
+
+          cd rendered
+          tar -czf "../release_assets/${TAR_NAME}" \
+            --exclude="rendered/" \
+            --exclude=".gitconfig" \
+            --exclude="chezmoistate.boltdb" \
             .
 
       ## Create the tag and push it
