@@ -90,13 +90,13 @@ jobs:
           # echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
 
           ## Create chezmoi output directory
-          mkdir -p /temp/release-assets
+          mkdir -p rendered/
 
           chezmoi init \
             --source $(pwd) \
             --config .chezmoi.toml \
             --config-format toml \
-            --destination /temp/release-assets \
+            --destination rendered/ \
             --keep-going \
             --no-tty \
             --verbose \
@@ -110,7 +110,8 @@ jobs:
           echo "$HOME files:"
           ls -la $HOME
 
-          # mkdir -p release_assets
+          echo "Rendered files:"
+          ls -la rendered/
 
           # ## Create zip
           # zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
