@@ -103,10 +103,6 @@ jobs:
           ls -la .
           echo ""
 
-          echo "$HOME files:"
-          ls -la $HOME
-          echo ""
-
           echo "Rendered files:"
           ls -la rendered/
 
@@ -119,14 +115,21 @@ jobs:
           VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
           ZIP_NAME="dotfiles-v${VERSION}.zip"
 
-          (cd rendered && zip -r "../release_assets/${ZIP_NAME}" .)
+          cd rendered
+          zip -r "../release_assets/${ZIP_NAME}" . -x \
+            "rendered/"
+            ".gitconfig"
 
       - name: Create TAR archive of rendered dotfiles
         run: |
           VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
           TAR_NAME="dotfiles-v${VERSION}.tar.gz"
 
-          (cd rendered && tar -czf "../release_assets/${TAR_NAME}" .)
+          cd rendered
+          tar -czf "../release_assets/${TAR_NAME}" \
+            --exclude="rendered/" \
+            --exclude=".gitconfig" \
+            .
 
       # ## Create the tag and push it
       # - name: Create git tag
