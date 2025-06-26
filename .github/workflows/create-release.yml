@@ -62,13 +62,9 @@ jobs:
       - name: Archive dotfiles with date
         run: |
           DATE=$(date +%Y-%m-%d)
-          # Initialize chezmoi source state (creates ~/.local/share/chezmoi)
-          chezmoi init
-          # Apply your dotfiles to generate the source state
-          chezmoi apply --source .
           # Create the archives
-          chezmoi archive --format=tar.gz --init --recursive --output=dotfiles-$DATE.tar.gz
-          chezmoi archive --format=zip --init --recursive --output=dotfiles-$DATE.zip
+          chezmoi archive --format=tar.gz --output=dotfiles-$DATE.tar.gz --source=$PWD
+          chezmoi archive --format=zip --output=dotfiles-$DATE.zip --source=$PWD
 
       ## Create the tag and push it
       - name: Create git tag
