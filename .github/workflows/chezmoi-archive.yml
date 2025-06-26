@@ -139,6 +139,7 @@ jobs:
           zip -r "../release_assets/${ZIP_NAME}" . -x \
             "rendered/" \
             ".gitconfig"
+            "chezmoistate.db" \
 
       - name: Create TAR archive of rendered dotfiles
         run: |
@@ -149,6 +150,7 @@ jobs:
           tar -czf "../release_assets/${TAR_NAME}" \
             --exclude="rendered/" \
             --exclude=".gitconfig" \
+            --exclude="chezmoistate.boltdb" \
             .
 
       ## Create the tag and push it
