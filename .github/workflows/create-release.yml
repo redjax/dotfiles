@@ -30,30 +30,51 @@ jobs:
       - name: Add chezmoi to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Get current version
-        id: current_version
-        run: |
-          ## Get the latest git tag, or default to 'v0.0.0'
-          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "current_version=${CURRENT_TAG:1}" >> $GITHUB_OUTPUT
+      # - name: Get current version
+      #   id: current_version
+      #   run: |
+      #     ## Get the latest git tag, or default to 'v0.0.0'
+      #     CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+      #     echo "current_version=${CURRENT_TAG:1}" >> $GITHUB_OUTPUT
 
+      ## Get the latest tag for version bump
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+
+          echo "Latest tag: $LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      ## Bump release version (v0.0.X -> v0.0.X+1)
       - name: Bump version
         id: bump_version
         run: |
-          CURRENT_VERSION=${{ steps.current_version.outputs.current_version }}
-          BUMP_TYPE=${{ github.event.inputs.bump }}
-          # Split version into MAJOR, MINOR, PATCH
-          IFS="." read -ra VERSION_ARR <<< "$CURRENT_VERSION"
-          MAJOR=${VERSION_ARR[0]}
-          MINOR=${VERSION_ARR[1]}
-          PATCH=${VERSION_ARR[2]}
-          case $BUMP_TYPE in
-            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
-            patch) PATCH=$((PATCH+1)) ;;
+          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
+          BUMP_TYPE="${{ github.event.inputs.bump }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
           esac
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          echo "New tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Archive dotfiles with date
         run: |
