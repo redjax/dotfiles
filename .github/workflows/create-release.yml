@@ -86,7 +86,7 @@ jobs:
             "scripts/prune_git_branches.sh"
 
           ## Create tar
-          tar -czvf "release_assets/v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
+          tar -czvf "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
             --exclude=".git/*" \
             --exclude="scripts/prune_git_branches.sh" \
             .
@@ -108,7 +108,7 @@ jobs:
           generate_release_notes: true
           token: ${{ secrets.RELEASE_TOKEN }}
           files: |
-            release_assets/dotfiles-${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
-            release_assets/dotfiles-${{ steps.bump_version.outputs.NEW_TAG }}.zip
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
