@@ -19,63 +19,97 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install chezmoi
+        id: install_chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
         shell: bash
 
       - name: Add chezmoi to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Get current version
-        id: version
+      ## Get the latest tag for version bump
+      - name: Get latest tag
+        id: get_tag
         run: |
-          ## Get the latest git tag, or default to 'v0.0.0'
-          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "current_version=${CURRENT_TAG:1}" >> $GITHUB_OUTPUT
+          git fetch --tags
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
 
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+
+          echo "Latest tag: $LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      ## Bump release version (v0.0.X -> v0.0.X+1)
       - name: Bump version
         id: bump_version
         run: |
-          CURRENT_VERSION=${{ steps.version.outputs.current_version }}
-          BUMP_TYPE=${{ github.event.inputs.bump }}
-          # Split version into MAJOR, MINOR, PATCH
-          IFS="." read -ra VERSION_ARR <<< "$CURRENT_VERSION"
-          MAJOR=${VERSION_ARR[0]}
-          MINOR=${VERSION_ARR[1]}
-          PATCH=${VERSION_ARR[2]}
-          case $BUMP_TYPE in
-            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
-            patch) PATCH=$((PATCH+1)) ;;
+          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
+          BUMP_TYPE="${{ github.event.inputs.bump }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
           esac
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          NEW_TAG="$MAJOR.$MINOR.$PATCH"
+          echo "New tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Archive dotfiles with date
         run: |
-          DATE=$(date +%Y-%m-%d)
-          chezmoi archive --format=tar.gz --init --recursive --output=dotfiles-$DATE.tar.gz
-          chezmoi archive --format=zip --init --recursive --output=dotfiles-$DATE.zip
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          
+          ## Generate install script to add to repo
+          chezmoi generate install.sh > install.sh
+          # Create a help file
+          echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
+          echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
+
+          mkdir -p release_assets
+
+          ## Create zip
+          zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
+            ".git/*" \
+            "scripts/prune_git_branches.sh"
+
+          ## Create tar
+          tar -czvf "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
+            --exclude=".git/*" \
+            --exclude="scripts/prune_git_branches.sh" \
+            .
 
       ## Create the tag and push it
       - name: Create git tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.bump_version.outputs.new_version }}"
-          git push origin "v${{ steps.bump_version.outputs.new_version }}"
+          git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
 
       ## Create the GitHub release with the new tag, auto-generated release notes, and assets
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v${{ steps.bump_version.outputs.new_version }}"
-          name: "v${{ steps.bump_version.outputs.new_version }}"
+          tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
           generate_release_notes: true
+          token: ${{ secrets.RELEASE_TOKEN }}
           files: |
-            dotfiles-$DATE.tar.gz
-            dotfiles-$DATE.zip
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
