@@ -92,7 +92,7 @@ jobs:
           ## Create chezmoi output directory
           mkdir -p rendered/
 
-          chezmoi init \
+          chezmoi apply \
             --source $(pwd) \
             --config .chezmoi.toml \
             --config-format toml \
@@ -101,8 +101,6 @@ jobs:
             --no-tty \
             --verbose \
             --force
-
-          chezmoi apply
 
           echo "$(pwd) files:"
           ls -la .
