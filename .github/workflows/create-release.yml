@@ -18,7 +18,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.bump_version.outputs.new_tag }}
+      new_tag: ${{ steps.bump_version.outputs.NEW_TAG }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -79,9 +79,9 @@ jobs:
 
       - name: Create chezmoi config for CI
         run: |
+          VERSION="${{ needs.setup.outputs.new_tag }}"
           GIT_USER="github-actions[bot]"
           GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
-          
           cat <<EOF > .chezmoi.toml
           [data]
             name = "${GIT_USER}"
@@ -112,7 +112,7 @@ jobs:
 
       - name: Create installable chezmoi + dotfiles artifact
         run: |
-          chezmoi generate install.sh > self_contained/install.sh
+          chezmoi generate install.sh > install.sh
 
       - name: Add generated files
         run: |
@@ -147,17 +147,15 @@ jobs:
           echo "$(pwd) files:"
           ls -la .
           echo ""
-          
           echo "Rendered files:"
           ls -la rendered/
           echo ""
-          
           echo "Self-contained Chezmoi files:"
           ls -la self_contained/
           echo ""
 
       - name: Upload rendered files as artifact (optional)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: rendered-files
           path: rendered/
@@ -170,21 +168,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download rendered files (if using artifacts)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: rendered-files
 
       - name: Create release assets directory
-        run: |
-          mkdir -p release_assets/
-          mkdir -p rendered/
-          mkdir -p self_contained/
+        run: mkdir -p release_assets/
 
       - name: Create ZIP archive of self-contained chezmoi dotfiles
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="chezmoi_dotfiles-v${VERSION}.zip"
-          zip -r "release_assets/${ZIP_NAME}" self_contained -x ".git/*" "scripts/prune_git_branches.sh"
+          zip -r "release_assets/${ZIP_NAME}" . -x ".git/*" "scripts/prune_git_branches.sh"
 
       - name: Create TAR archive of self-contained chezmoi dotfiles
         run: |
@@ -196,16 +191,18 @@ jobs:
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="dotfiles-v${VERSION}.zip"
-          zip -r "release_assets/${ZIP_NAME}" rendered/ -x ".gitconfig" "chezmoistate.db"
+          cd rendered
+          zip -r "../release_assets/${ZIP_NAME}" . -x ".gitconfig" "chezmoistate.db"
 
       - name: Create TAR archive of rendered dotfiles
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           TAR_NAME="dotfiles-v${VERSION}.tar.gz"
-          tar -czf "release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" rendered/
+          cd rendered
+          tar -czf "../release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" .
 
       - name: Upload release assets as artifact (optional)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: release-assets
           path: release_assets/
@@ -214,14 +211,10 @@ jobs:
     needs: archive
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Download release assets (if using artifacts)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: release-assets
-          path: release_assets/
 
       - name: Create git tag
         run: |
@@ -240,7 +233,5 @@ jobs:
           files: |
             release_assets/dotfiles-v${{ needs.setup.outputs.new_tag }}.tar.gz
             release_assets/dotfiles-v${{ needs.setup.outputs.new_tag }}.zip
-            release_assets/chezmoi_dotfiles-v${{ needs.setup.outputs.new_tag }}.tar.gz
-            release_assets/chezmoi_dotfiles-v${{ needs.setup.outputs.new_tag }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
