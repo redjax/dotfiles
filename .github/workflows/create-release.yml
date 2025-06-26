@@ -69,15 +69,15 @@ jobs:
           mkdir -p release_assets
 
           ## Create zip
-          zip -r "release_assets/${ZIP_NAME}" \
+          zip -r "release_assets/${ZIP_NAME}" . -x \
             ".git/*" \
-            "scripts/prune_git_branches.sh" \
-            .
+            "scripts/prune_git_branches.sh"
 
           ## Create tar
-          tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" . \
+          tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" \
             --exclude=".git/*" \
-            --exclude="scripts/prune_git_branches.sh"
+            --exclude="scripts/prune_git_branches.sh" \
+            .
 
       ## Create the tag and push it
       - name: Create git tag
