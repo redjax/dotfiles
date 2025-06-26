@@ -96,7 +96,7 @@ jobs:
           generate_release_notes: true
           token: ${{ secrets.RELEASE_TOKEN }}
           files: |
-            dotfiles-$DATE.tar.gz
-            dotfiles-$DATE.zip
+            *.tar.gz
+            *.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
