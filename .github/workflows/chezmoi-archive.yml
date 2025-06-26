@@ -113,7 +113,7 @@ jobs:
 
           MAKE A BACKUP! The steps below will overwrite your dotfiles with mine.
 
-          Copy & paste the files in this directory to your $HOME directory, opting to replace/overwrite existing files.
+          Copy & paste the files in this directory to your \$HOME directory, opting to replace/overwrite existing files.
           Close & re-open your terminal (or log out and back in), or run exec $SHELL to load the dotfiles.
           EOF
 
