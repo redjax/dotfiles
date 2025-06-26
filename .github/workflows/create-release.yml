@@ -65,7 +65,7 @@ jobs:
               PATCH=$((PATCH + 1))
               ;;
           esac
-          NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          NEW_TAG="$MAJOR.$MINOR.$PATCH"
           echo "New tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
@@ -81,12 +81,12 @@ jobs:
           mkdir -p release_assets
 
           ## Create zip
-          zip -r "release_assets/dotfiles-${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
+          zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
             ".git/*" \
             "scripts/prune_git_branches.sh"
 
           ## Create tar
-          tar -czvf "release_assets/dotfiles-${DATE}.tar.gz" \
+          tar -czvf "release_assets/v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
             --exclude=".git/*" \
             --exclude="scripts/prune_git_branches.sh" \
             .
