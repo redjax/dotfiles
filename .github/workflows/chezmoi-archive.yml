@@ -131,24 +131,24 @@ jobs:
             --exclude=".gitconfig" \
             .
 
-      # ## Create the tag and push it
-      # - name: Create git tag
-      #   run: |
-      #     git config user.name "github-actions[bot]"
-      #     git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
-      #     git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
-      #     git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
+      ## Create the tag and push it
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
 
-      # ## Create the GitHub release with the new tag, auto-generated release notes, and assets
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
-      #     name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
-      #     generate_release_notes: true
-      #     token: ${{ secrets.RELEASE_TOKEN }}
-      #     files: |
-      #       release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
-      #       release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ## Create the GitHub release with the new tag, auto-generated release notes, and assets
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          generate_release_notes: true
+          token: ${{ secrets.RELEASE_TOKEN }}
+          files: |
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
