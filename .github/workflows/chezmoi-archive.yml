@@ -69,65 +69,108 @@ jobs:
           echo "New tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Create chezmoi archive
+      - name: Create chezmoi config for CI
         run: |
           VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
           GIT_USER="github-actions[bot]"
           GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
 
-          ## Remove existing chezmoi config
           cat <<EOF > .chezmoi.toml
           [data]
             name = "${GIT_USER}"
             email = "${GIT_EMAIL}"
-
           EOF
 
-          ## Generate install script to add to repo
-          # chezmoi generate install.sh > install.sh
-          # Create a help file
-          # echo "Run ./install.sh to install chezmoi & initialize dotfiles" > install_help.txt
-          # echo "v${{ steps.bump_version.outputs.NEW_TAG }}" > release_version.txt
+      - name: Create rendered output directory
+        run: |
+          mkdir -p rendered/
 
-          chezmoi apply
+      - name: Render dotfiles to output directory
+        run: |
+          chezmoi apply \
+            --source $(pwd) \
+            --config .chezmoi.toml \
+            --config-format toml \
+            --destination rendered/ \
+            --keep-going \
+            --no-tty \
+            --verbose \
+            --force
 
+      - name: Add generated files to rendered/
+        run: |
+          ## Echo release version into file
+          echo "${{ steps.bump_version.outputs.NEW_TAG }}" >> rendered/.version
+
+      - name: Add help text
+        run: |
+          cat <<EOF > rendered/README.txt
+          Github: https://github.com/redjax/dotfiles.git
+
+          ################
+          # Instructions #
+          ################
+
+          MAKE A BACKUP! The steps below will overwrite your dotfiles with mine.
+
+          Copy & paste the files in this directory to your \$HOME directory, opting to replace/overwrite existing files.
+          Close & re-open your terminal (or log out and back in), or run exec $SHELL to load the dotfiles.
+          EOF
+
+      - name: List files for debugging
+        run: |
           echo "$(pwd) files:"
           ls -la .
+          echo ""
 
-          echo "$HOME files:"
-          ls -la $HOME
+          echo "Rendered files:"
+          ls -la rendered/
 
-          # mkdir -p release_assets
+      - name: Create release assets directory
+        run: |
+          mkdir -p release_assets/
 
-          # ## Create zip
-          # zip -r "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
-          #   ".git/*" \
-          #   "scripts/prune_git_branches.sh"
+      - name: Create ZIP archive of rendered dotfiles
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          ZIP_NAME="dotfiles-v${VERSION}.zip"
 
-          # ## Create tar
-          # tar -czvf "release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
-          #   --exclude=".git/*" \
-          #   --exclude="scripts/prune_git_branches.sh" \
-          #   .
+          cd rendered
+          zip -r "../release_assets/${ZIP_NAME}" . -x \
+            "rendered/" \
+            ".gitconfig" \
+            "chezmoistate.db" \
 
-      # ## Create the tag and push it
-      # - name: Create git tag
-      #   run: |
-      #     git config user.name "github-actions[bot]"
-      #     git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
-      #     git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
-      #     git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
+      - name: Create TAR archive of rendered dotfiles
+        run: |
+          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          TAR_NAME="dotfiles-v${VERSION}.tar.gz"
 
-      # ## Create the GitHub release with the new tag, auto-generated release notes, and assets
-      # - name: Create GitHub Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
-      #     name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
-      #     generate_release_notes: true
-      #     token: ${{ secrets.RELEASE_TOKEN }}
-      #     files: |
-      #       release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
-      #       release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          cd rendered
+          tar -czf "../release_assets/${TAR_NAME}" \
+            --exclude="rendered/" \
+            --exclude=".gitconfig" \
+            --exclude="chezmoistate.boltdb" \
+            .
+
+      ## Create the tag and push it
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
+
+      ## Create the GitHub release with the new tag, auto-generated release notes, and assets
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          generate_release_notes: true
+          token: ${{ secrets.RELEASE_TOKEN }}
+          files: |
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
+            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
