@@ -112,7 +112,7 @@ jobs:
 
       - name: Create installable chezmoi + dotfiles artifact
         run: |
-          chezmoi generate install.sh > self-contained/install.sh
+          chezmoi generate install.sh > self_contained/install.sh
 
       - name: Add generated files
         run: |
@@ -184,7 +184,7 @@ jobs:
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="chezmoi_dotfiles-v${VERSION}.zip"
-          zip -r "release_assets/${ZIP_NAME}" self-contained -x ".git/*" "scripts/prune_git_branches.sh"
+          zip -r "release_assets/${ZIP_NAME}" self_contained -x ".git/*" "scripts/prune_git_branches.sh"
 
       - name: Create TAR archive of self-contained chezmoi dotfiles
         run: |
