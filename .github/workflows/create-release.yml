@@ -79,9 +79,9 @@ jobs:
 
       - name: Create chezmoi config for CI
         run: |
-          VERSION="${{ needs.setup.outputs.new_tag }}"
           GIT_USER="github-actions[bot]"
           GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
+          
           cat <<EOF > .chezmoi.toml
           [data]
             name = "${GIT_USER}"
@@ -112,7 +112,7 @@ jobs:
 
       - name: Create installable chezmoi + dotfiles artifact
         run: |
-          chezmoi generate install.sh > install.sh
+          chezmoi generate install.sh > self-contained/install.sh
 
       - name: Add generated files
         run: |
@@ -147,9 +147,11 @@ jobs:
           echo "$(pwd) files:"
           ls -la .
           echo ""
+          
           echo "Rendered files:"
           ls -la rendered/
           echo ""
+          
           echo "Self-contained Chezmoi files:"
           ls -la self_contained/
           echo ""
@@ -182,7 +184,7 @@ jobs:
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="chezmoi_dotfiles-v${VERSION}.zip"
-          zip -r "release_assets/${ZIP_NAME}" . -x ".git/*" "scripts/prune_git_branches.sh"
+          zip -r "release_assets/${ZIP_NAME}" self-contained -x ".git/*" "scripts/prune_git_branches.sh"
 
       - name: Create TAR archive of self-contained chezmoi dotfiles
         run: |
@@ -194,15 +196,13 @@ jobs:
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="dotfiles-v${VERSION}.zip"
-          cd self_contained/
-          zip -r "../release_assets/${ZIP_NAME}" . -x ".gitconfig" "chezmoistate.db"
+          zip -r "release_assets/${ZIP_NAME}" rendered/ -x ".gitconfig" "chezmoistate.db"
 
       - name: Create TAR archive of rendered dotfiles
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
           TAR_NAME="dotfiles-v${VERSION}.tar.gz"
-          cd self_contained/
-          tar -czf "../release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" .
+          tar -czf "release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" rendered/
 
       - name: Upload release assets as artifact (optional)
         uses: actions/upload-artifact@v4
