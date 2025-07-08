@@ -221,6 +221,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-assets
+          path: release_assets/
 
       - name: Create git tag
         run: |
