@@ -1,3 +1,4 @@
-if command -v lazygit -v 2>&1 /dev/null; then
+## Add Lazygit alias 'lg' if Lazygit is detected
+if command -v lazygit &>/dev/null || [[ -f /usr/local/bin/lazygit ]]; then
   alias lg="lazygit"
 fi
