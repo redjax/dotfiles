@@ -60,3 +60,25 @@ if [[ -f $HOME/bin/chezmoi ]]; then
     export PATH="$PATH:$HOME/bin"
   fi
 fi
+
+if [[ -d "$HOME/.nvm" ]]; then
+  ## Add nvm to shell
+  export NVM_DIR="$HOME/.nvm"
+  ## Load nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  ## This loads nvm bash_completion
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
+fi
+
+## Add Go path to $PATH if Go is installed
+if [[ -f $HOME/.go/bin/go ]]; then
+  export GOROOT=$HOME/.go
+  export GOPATH=$HOME/go
+  export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+  ## Source 'gobins' dir, if it exists.
+  #  I use /opt/gobins to build my Go projects for use in my terminal.
+  if [[ -d /opt/gobins ]]; then
+    export PATH="$PATH:/opt/gobins"
+  fi
+fi
