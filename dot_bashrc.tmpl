@@ -9,16 +9,18 @@ esac
 
 {{ if eq .chezmoi.os "linux" -}}
 ## Append user's bin dir to PATH
-export PATH="$PATH:/usr/local/bin"
+if [[ ":$PATH:" != "*/usr/local/bin" ]]; then
+    export PATH="$PATH:/usr/local/bin"
+fi
 ## Set alias for xdg-open
 alias open="xdg-open"
 {{ else if eq .chezmoi.os "darwin" -}}
 ## Add homebrew bin to path
 if command -v brew -v 2>&1 /dev/null; then
-  export PATH="$PATH:/opt/homebrew/bin"
+  if [[ ":$PATH:" != "*/opt/homebrew/bin" ]]; then
+    export PATH="$PATH:/opt/homebrew/bin"
+  fi
 fi
-## Append user's bin dir to PATH
-export PATH="$PATH:/usr/local/bin"
 {{ end }}
 ## History settings
 # Ignore duplicates and leading spaces
@@ -118,3 +120,26 @@ fi
 
 ## Source ~/.local/bin/env if it exists
 [ ! -f "$HOME/.local/bin/env" ] || . "$HOME/.local/bin/env"
+
+if [[ -d "$HOME/.nvm" ]]; then
+  ## Add nvm to shell
+  export NVM_DIR="$HOME/.nvm"
+  ## Load nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  ## This loads nvm bash_completion
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
+fi
+
+## Add Go path to $PATH if Go is installed
+if [[ -f $HOME/.go/bin/go ]]; then
+  export GOROOT=$HOME/.go
+  export GOPATH=$HOME/go
+  
+  if [[ ":$PATH:" != "*/$GOROOT/bin" ]]; then
+    export PATH=$PATH:$GOROOT/bin
+  fi
+
+  if [[ ":$PATH:" != "*$GOPATH/bin" ]]; then
+    $GOPATH/bin
+  fi
+fi

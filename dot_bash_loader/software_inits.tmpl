@@ -1,6 +1,9 @@
 ## Pyenv
 if command -v pyenv > /dev/null 2>&1; then
-  export PATH="$HOME/.pyenv/bin:$PATH"
+  if [[ ":$PATH:" != "*$HOME/.pyenv/bin" ]]; then
+    export PATH="$HOME/.pyenv/bin:$PATH"
+  fi
+  
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
 fi
@@ -27,16 +30,35 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     # Disable Homebrew analytics
     export HOMEBREW_NO_ANALYTICS=1
 
-    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    if [[ ":$PATH:" != "*/home/linuxbrew/.linuxbrew/bin" ]]; then
+      export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    fi
+fi
+
+## Add Go to PATH
+if [[ -d /usr/local/go ]]; then
+  if [[ ":$PATH:" != "*/usr/local/bin" ]]; then
+    export PATH="$PATH:/usr/local/go/bin"
+  fi
+
+  if [[ -d /opt/gobins ]]; then
+    if [[ ":$PATH:" != "*/opt/gobins" ]]; then
+      export PATH="$PATH:/opt/gobins"
+    fi
+  fi
 fi
 
 ## Add chezmoi to PATH
 if [[ -f $HOME/.local/bin/chezmoi ]]; then
-  export PATH="$PATH:$HOME/.local/bin"
+  if [[ ":$PATH:" != "*$HOME/.local/bin" ]]; then
+    export PATH="$PATH:$HOME/.local/bin"
+  fi
 fi
 # This is chezmoi's default path
 if [[ -f $HOME/bin/chezmoi ]]; then
-  export PATH="$PATH:$HOME/bin"
+  if [[ ":$PATH:" != "*$HOME/bin" ]]; then
+    export PATH="$PATH:$HOME/bin"
+  fi
 fi
 
 if [[ -d "$HOME/.nvm" ]]; then
