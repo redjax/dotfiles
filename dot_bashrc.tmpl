@@ -9,16 +9,18 @@ esac
 
 {{ if eq .chezmoi.os "linux" -}}
 ## Append user's bin dir to PATH
-export PATH="$PATH:/usr/local/bin"
+if [[ ":$PATH:" != "*/usr/local/bin" ]]; then
+    export PATH="$PATH:/usr/local/bin"
+fi
 ## Set alias for xdg-open
 alias open="xdg-open"
 {{ else if eq .chezmoi.os "darwin" -}}
 ## Add homebrew bin to path
 if command -v brew -v 2>&1 /dev/null; then
-  export PATH="$PATH:/opt/homebrew/bin"
+  if [[ ":$PATH:" != "*/opt/homebrew/bin" ]]; then
+    export PATH="$PATH:/opt/homebrew/bin"
+  fi
 fi
-## Append user's bin dir to PATH
-export PATH="$PATH:/usr/local/bin"
 {{ end }}
 ## History settings
 # Ignore duplicates and leading spaces
@@ -132,6 +134,13 @@ fi
 if [[ -f $HOME/.go/bin/go ]]; then
   export GOROOT=$HOME/.go
   export GOPATH=$HOME/go
-  export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+  
+  if [[ ":$PATH:" != "*/$GOROOT/bin" ]]; then
+    export PATH=$PATH:$GOROOT/bin
+  fi
+
+  if [[ ":$PATH:" != "*$GOPATH/bin" ]]; then
+    $GOPATH/bin
+  fi
 fi
 
