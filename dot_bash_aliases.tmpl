@@ -40,7 +40,6 @@ alias tmuxls='tmux ls'
 alias tmuxa='tmux a -t $1'
 
 ## Neovim/nvim
-alias nvimi="nvim --headless '+Lazy sync +qa'"
-alias nvimu="nvim --headless '+Lazy update +qa'"
+alias nvimi="nvim --headless +PlugInstall +qa"
+alias nvimu="nvim --headless +PlugUpdate +qa"
 alias snvim="sudo -E nvim"
-
