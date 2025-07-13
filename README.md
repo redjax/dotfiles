@@ -12,7 +12,7 @@
 
 <!-- Git badges -->
 <p align="center">
-  <a href="https://github.com/redjax/dotfiles">
+  <a href="https://github.com/redjax/dotfiles/tree/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb">
     <img alt="Created At" src="https://img.shields.io/github/created-at/redjax/dotfiles">
   </a>
   <a href="https://github.com/redjax/dotfiles/commit">
