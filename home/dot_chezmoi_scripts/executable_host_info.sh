@@ -47,6 +47,8 @@ OS=$(get_os)
 ARCH=$(get_cpu_arch)
 ## Get distro
 DISTRO=$(detect_distro)
+## Package manager based on distro
+PKG_MANAGER=$(detect_pkg_manager)
 
 Debug "
 
@@ -55,4 +57,5 @@ Hostname: $HOSTNAME
 OS: $OS
 Arch: $ARCH
 Distro: $DISTRO
+Package Manager: $PKG_MANAGER
 "
