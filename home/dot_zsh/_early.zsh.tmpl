@@ -1,0 +1,22 @@
+## Functions/vars in this file will be loaded very early in the .zshrc
+
+dedup_path() {
+  local -a new_path
+  local dir
+  local -A seen
+
+  for dir in ${(s/:/)PATH}; do
+    [[ -z "$dir" || -n "${seen[$dir]}" ]] && continue
+    seen[$dir]=1
+    new_path+="$dir"
+  done
+
+  export PATH="${(j/:/)new_path}"
+}
+
+add_to_path() {
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) export PATH="$PATH:$1" ;;
+  esac
+}
