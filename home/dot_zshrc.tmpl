@@ -1,4 +1,7 @@
 ## Source config modules from ~/.zsh
+
+## Load 'early' code to make functions & vars available to config modules
+[ -f ~/.zsh/_early.zsh ]    && source ~/.zsh/_early.zsh
 [ -f ~/.zsh/env.zsh ]       && source ~/.zsh/env.zsh
 [ -f ~/.zsh/profile.zsh ]   && source ~/.zsh/profile.zsh
 [ -f ~/.zsh/history.zsh ]   && source ~/.zsh/history.zsh
@@ -10,3 +13,6 @@
 
 ## Source oh-my-zsh
 [ -f ~/.zsh/oh-my-zsh.zsh ] && [ -f ~/.oh-my-zsh/oh-my-zsh.sh ] && source ~/.zsh/oh-my-zsh.zsh
+
+## LEAVE THIS AT THE BOTTOM OF THE SCRIPT!
+dedup_path
