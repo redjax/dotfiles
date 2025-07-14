@@ -50,3 +50,10 @@ fi
 if [[ -f $HOME/bin/chezmoi ]]; then
   export PATH="$PATH:$HOME/bin"
 fi
+
+## Dotnet
+if [[ -d "$HOME/.dotnet" ]]; then
+  export DOTNET_TOOLS="$HOME/.dotnet/tools"
+  export PATH="$PATH:$DOTNET_TOOLS"
+fi
+
