@@ -7,6 +7,8 @@ My `zsh` configs.
 - [Usage](#usage)
 - [The Configurations](#the-configurations)
 - [Oh-My-ZSH](#oh-my-zsh)
+- [Notes](#notes)
+- [Links](#links)
 
 ## Usage
 
@@ -43,3 +45,17 @@ The following files are composed by `~/.zshrc` to define the shell's functionali
 The configuration should work fine without adding [oh-my-zsh](https://ohmyz.sh), but if you [install it](https://github.com/ohmyzsh/ohmyzsh#basic-installation), the [`.zshrc`](../dot_zshrc.tmpl) will source it.
 
 For more information on setting up & using oh-my-zsh, [browse their wiki](https://github.com/ohmyzsh/ohmyzsh/wiki).
+
+## Notes
+
+...
+
+## Links
+
+- [oh-my-zsh home](https://ohmyz.sh)
+- [oh-my-zsh Github](https://github.com/ohmyzsh/ohmyzsh)
+  - [oh-my-zsh install instructions](https://github.com/ohmyzsh/ohmyzsh#basic-installation)
+  - [oh-my-zsh cheatsheet](https://github.com/ohmyzsh/ohmyzsh/wiki/Cheatsheet)
+  - [oh-my-zsh wiki](https://github.com/ohmyzsh/ohmyzsh/wiki)
+  - [oh-my-zsh themes](https://github.com/ohmyzsh/ohmyzsh/wiki/Themes)
+  - [oh-my-zsh plugins](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)
