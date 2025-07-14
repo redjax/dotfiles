@@ -131,7 +131,7 @@ if [[ -d "$HOME/.nvm" ]]; then
 fi
 
 ## Add Go path to $PATH if Go is installed
-if [[ -f $HOME/.go/bin/go ]]; then
+if [[ -d $HOME/.go/bin/go ]]; then
   export GOROOT=$HOME/.go
   export GOPATH=$HOME/go
   
@@ -143,3 +143,4 @@ if [[ -f $HOME/.go/bin/go ]]; then
     $GOPATH/bin
   fi
 fi
+
