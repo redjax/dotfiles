@@ -1,0 +1,19 @@
+## Choose which shell profile to render
+{{ if or
+    (not (findExecutable "zsh" (list "bin" ".local/bin" "/usr/bin" "/usr/local/bin" "/bin" "/sbin")))
+    (not (eq (base .user.shell) "zsh"))
+}} # zsh not installed, or zsh is not the default shell
+dot_zshrc
+dot_zsh
+{{ end }}
+
+## Ignore tmux configs if tmux is not installed
+{{ if not (findExecutable "tmux" (list "bin" ".local/bin" "/usr/bin" "/usr/local/bin" "/bin" "/sbin")) }}
+dot_config/tmux
+dot_config/tmux-powerline
+{{ end }}
+
+## Ignore termscp configs if termscp is not installed
+{{ if not (findExecutable "termscp" (list "bin" ".local/bin" "/usr/bin" "/usr/local/bin" "/bin" "/sbin")) }}
+dot_config/termscp
+{{ end }}
