@@ -1,22 +1,5 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
-## Set editor dynamically
-if command -v nvim > /dev/null 2>&1; then
-  export VISUAL="nvim"
-elif command -v vim > /dev/null 2>&1; then
-  export VISUAL="vim"
-elif command -v nano > /dev/null 2>&1; then
-  export VISUAL="nano"
-elif command -v vi > /dev/null 2>&1; then
-  export VISUAL="vi"
-fi
-## Set the $EDITOR value
-export EDITOR="$VISUAL"
-
-export LC_ALL="en_US.UTF-8"
-## Append -R to less commands
-export LESS="-R"
-
 ## Make user default owner of files created as that user
 umask 022
 
@@ -24,3 +7,33 @@ umask 022
 if [[ -z "$TERM" || "$TERM" == "dumb" ]]; then
   export TERM="xterm-256color"
 fi
+
+## Set to "true" if pasting URLs and other text is messed up
+DISABLE_MAGIC_FUNCTIONS="false"
+
+## Disable color in 'ls' commands
+DISABLE_LS_COLORS="false"
+
+## Disable auto-setting terminal title
+DISABLE_AUTO_TITLE="false"
+
+## Enable command auto-correction.
+ENABLE_CORRECTION="false"
+
+## Display red dots whilst waiting for completion.
+#  You can also set it to another string to have that shown instead of the default red dots.
+#  e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+#  Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+COMPLETION_WAITING_DOTS="true"
+
+## Disable marking untracked files
+#  under VCS as dirty. This makes repository status check for large repositories
+#  much, much faster.
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+## Change the command execution timestamp shown in the history command output.
+#  You can set one of the optional three formats:
+#  "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+#  or set a custom format using the strftime function format specifications,
+#  see 'man strftime' for details.
+HIST_STAMPS="yyyy-mm-dd"
