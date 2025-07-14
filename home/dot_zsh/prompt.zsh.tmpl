@@ -1,10 +1,6 @@
-## Only set the prompt if it hasn't been set already
-if [[ -z "$BASE_PROMPT_SET" ]]; then
-  export PS1="%n@%m:%~ %# "
-  export BASE_PROMPT_SET=1
-fi
+setopt PROMPT_SUBST
 
-## Load powerlevel10k if available
-if [[ -f ~/.p10k.zsh ]]; then
-  source ~/.p10k.zsh
-fi
+PROMPT='%F{green}%n@%m%f:%F{blue}%1~%f %F{red}${vcs_info_msg_0_}%f$ '
+
+## Add time to right side of command line
+# RPROMPT="%t"
