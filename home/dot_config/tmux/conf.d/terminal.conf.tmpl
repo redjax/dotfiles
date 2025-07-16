@@ -7,12 +7,10 @@ set -ga terminal-overrides ",xterm-256color*:Tc,screen-256color*:Tc,tmux-256colo
 set -g xterm-keys on
 
 ## Default shell for tmux sessions
-# set -g default-shell /bin/bash
-{{ $zshPath := (trim (output "which" "zsh")) -}}
-{{- $userVar := (env "USER") -}}
+{{ $userVar := (env "USER") -}}
 {{- $userShell := (index (splitList ":" (output "getent" "passwd" $userVar)) 6 | trim) -}}
-{{- if and (ne $zshPath "") (eq $userShell $zshPath) -}}
-set -g default-shell {{ $zshPath }}
+{{- if eq $userShell "/usr/bin/zsh" -}}
+set -g default-shell /usr/bin/zsh
 {{- else -}}
 set -g default-shell /bin/bash
 {{- end }}
