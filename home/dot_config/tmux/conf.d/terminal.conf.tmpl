@@ -7,7 +7,13 @@ set -ga terminal-overrides ",xterm-256color*:Tc,screen-256color*:Tc,tmux-256colo
 set -g xterm-keys on
 
 ## Default shell for tmux sessions
+{{ $userVar := (env "USER") -}}
+{{- $userShell := (index (splitList ":" (output "getent" "passwd" $userVar)) 6 | trim) -}}
+{{- if eq $userShell "/usr/bin/zsh" -}}
+set -g default-shell /usr/bin/zsh
+{{- else -}}
 set -g default-shell /bin/bash
+{{- end }}
 
 ## Fix arrow keys not working in PuTTY
 set -g terminal-overrides "xterm*:kLFT5=\eOD:kRIT5=\eOC:kUP5=\eOA:kDN5=\eOB:smkx@:rmkx@"
