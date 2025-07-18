@@ -63,6 +63,7 @@ theme = "Argonaut"
 #
 # Example:
 # working-dir = "/Users/raphael/Documents/"
+working-dir = "{{ .chezmoi.homeDir }}"
 
 # Environment variables
 #
@@ -77,11 +78,15 @@ theme = "Argonaut"
 #
 # Example:
 # use-fork = false
+{{ if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
+use-fork = true
+{{ end }}
 
 # Confirm before exiting Rio
 # Default is `true`
 #
 # confirm-before-quit = false
+confirm-before-quit = false
 
 # Cursor
 #
@@ -92,10 +97,10 @@ theme = "Argonaut"
 #
 # blinking-interval - Cursor update on milliseconds interval
 #
-# [cursor]
-# shape = 'block'
-# blinking = false
-# blinking-interval = 800
+[cursor]
+shape = 'block'
+blinking = true
+blinking-interval = 800
 
 # Editor
 #
@@ -133,14 +138,14 @@ theme = "Argonaut"
 #     - "rec2020"
 #
 # Example:
-# [window]
-# width = 600
-# height = 400
-# mode = "windowed"
-# opacity = 1.0
-# blur = false
-# decorations = "enabled"
-# colorspace = "display-p3"
+[window]
+width = 1200
+height = 525
+mode = "windowed"
+opacity = 1.0
+blur = false
+decorations = "enabled"
+colorspace = "display-p3"
 
 # Renderer
 #
