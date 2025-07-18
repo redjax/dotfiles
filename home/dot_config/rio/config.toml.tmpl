@@ -1,4 +1,3 @@
-
 # Hide the cursor while typing
 #
 # Default is `false`
@@ -85,7 +84,6 @@ use-fork = true
 # Confirm before exiting Rio
 # Default is `true`
 #
-# confirm-before-quit = false
 confirm-before-quit = false
 
 # Cursor
@@ -250,6 +248,39 @@ ime-cursor-positioning = true
 # family = "cascadiamono"
 # style = "Italic"
 # weight = 800
+[fonts]
+size = 12
+hinting = true
+## Disable warnings on missing fonts
+disable-warnings-not-found = true
+
+{{ if eq .chezmoi.os "windows" }}
+family = "Hack Nerd Font Mono"
+extras = [
+  # { family = "JetBrains Mono" },
+  { family = "FiraCode Nerd Font Mono" },
+  { family = "Consolas" },
+  { family = "Courier New" }
+]
+{{- else if eq .chezmoi.os "darwin" }}
+family = "Hack Nerd Font Mono"
+extras = [
+  # { family = "JetBrains Mono" },
+  { family = "FiraCode Nerd Font Mono" },
+  { family = "SF Mono" },
+  { family = "Menlo" },
+  { family = "Monaco" }
+]
+{{- else }}
+# Assume Linux/BSD
+family = "Hack Nerd Font Mono"
+extras = [
+  # { family = "JetBrains Mono" },
+  { family = "FiraCode Nerd Font Mono" },
+  { family = "DejaVu Sans Mono" },
+  { family = "Liberation Mono" }
+]
+{{- end }}
 
 # Scroll
 #
