@@ -12,6 +12,11 @@ if command -v flatpak &>/dev/null; then
 
     if [ -d "$SRC" ]; then
       mkdir -p "$DEST"
+
+      if [[ -d "$DEST/" ]]; then
+        rm -r "$DEST/"
+      fi
+
       cp -a "$SRC/." "$DEST/"
       echo "Copied Rio config from '$SRC' to '$DEST'"
     else
