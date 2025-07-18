@@ -227,7 +227,7 @@ ime-cursor-positioning = true
 #
 # Simple example:
 # [fonts]
-# size = 18
+# size = 12
 #
 # [fonts.regular]
 # family = "cascadiamono"
@@ -249,7 +249,7 @@ ime-cursor-positioning = true
 # style = "Italic"
 # weight = 800
 [fonts]
-size = 12
+size = 18
 hinting = true
 ## Disable warnings on missing fonts
 disable-warnings-not-found = true
@@ -319,6 +319,14 @@ extras = [
 # hide-if-single = true
 # use-current-path = false
 # color-automation = []
+[navigation]
+{{- if eq .chezmoi.os "darwin" }}
+mode = "NativeTab"
+{{- else }}
+mode = "TopTab"
+{{- end }}
+hide-if-single = true
+clickable = true
 
 # Shell
 #
@@ -353,6 +361,18 @@ extras = [
 # [shell]
 # program = "/opt/homebrew/bin/tmux"
 # args = ["new-session", "-c", "/var/www"]
+[shell]
+{{ if eq .chezmoi.os "windows" -}}
+  {{- if gt (len (output "where" "pwsh")) 0 -}}
+program = "pwsh"
+  {{- else -}}
+program = "powershell"
+  {{- end -}}
+{{- else if eq .chezmoi.os "darwin" -}}
+program = "/bin/zsh"
+{{- else -}}
+program = "/bin/zsh"
+{{- end }}
 
 # Colors
 #
@@ -404,6 +424,15 @@ extras = [
 # # Linux overwrite
 # linux.shell.program = "tmux"
 # linux.shell.args = ["new-session", "-c", "/var/www"]
+{{- if eq .chezmoi.os "windows" -}}
+[platform]
+## Windows overrides
+  {{- if gt (len (output "where" "pwsh")) 0 -}}
+program = "pwsh"
+  {{- else -}}
+program = "powershell"
+  {{- end -}}
+{{- end -}}
 
 # Log level
 #
