@@ -15,9 +15,13 @@ if [[ -f ~/.zsh/oh-my-zsh.zsh && -f ~/.oh-my-zsh/oh-my-zsh.sh ]]; then
   source ~/.zsh/oh-my-zsh.zsh
   source $ZSH/oh-my-zsh.sh
 else
-  [ -f ~/.zsh/prompt.zsh ]    && source ~/.zsh/prompt.zsh
+  [ -f ~/.zsh/prompt.zsh ] && source ~/.zsh/prompt.zsh
 fi
 
+## Source ~/.zshrc.local if it exists
+if [[ -f $HOME/.zshrc.local ]]; then
+  source $HOME/.zshrc.local
+fi
 
 ## LEAVE THIS AT THE BOTTOM OF THE SCRIPT!
 dedup_path
