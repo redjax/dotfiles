@@ -44,3 +44,9 @@ fi
 if [[ -f "$HOME/.bash_loader/functions" ]]; then
   . "$HOME/.bash_loader/functions"
 fi
+
+## Source ~/.bashrc.local if it exists
+if [[ -f $HOME/.bashrc.local ]]; then
+  . "$HOME/.bashrc.local"
+fi
+
