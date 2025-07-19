@@ -12,17 +12,22 @@ if command -v flatpak &>/dev/null; then
 
     if [ -d "$SRC" ]; then
       mkdir -p "$DEST"
+
+      if [[ -d "$DEST/" ]]; then
+        rm -r "$DEST/"
+      fi
+
       cp -a "$SRC/." "$DEST/"
       echo "Copied Rio config from '$SRC' to '$DEST'"
     else
-      echo "No config found at '$SRC'."
+      echo "[WARNING] No Rio config found at '$SRC'."
     fi
 
-  else
-    echo "Rio Flatpak is not installed."
+  # else
+  #   echo "Rio Flatpak is not installed."
   fi
 
-else
-  echo "Flatpak is not installed."
+# else
+#   echo "Flatpak is not installed."
 fi
 
