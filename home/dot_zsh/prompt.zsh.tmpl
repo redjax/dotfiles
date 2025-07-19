@@ -1,0 +1,6 @@
+setopt PROMPT_SUBST
+
+PROMPT='%F{red}%(?..✗ )%f%F{green}%n@%m%f:%F{blue}%/%f %F{red}${vcs_info_msg_0_}%f$( [[ $EUID == 0 ]] && echo "#" || echo "$" ) '
+
+## Add time to right side of command line
+# RPROMPT="%t"

@@ -1,0 +1,13 @@
+## Enable vcs_info
+autoload -Uz vcs_info
+
+## Enable git backend for vcs_info
+zstyle ':vcs_info:*' enable git
+## Set branch details format for git
+zstyle ':vcs_info:git:*' formats '%b '
+
+vcs_precmd() { vcs_info }
+
+## Add vcs_info to precmd()
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd vcs_precmd
