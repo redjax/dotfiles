@@ -130,17 +130,10 @@ if [[ -d "$HOME/.nvm" ]]; then
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
 fi
 
-## Add Go path to $PATH if Go is installed
-if [[ -d $HOME/.go/bin/go ]]; then
-  export GOROOT=$HOME/.go
-  export GOPATH=$HOME/go
-  
-  if [[ ":$PATH:" != "*/$GOROOT/bin" ]]; then
-    export PATH=$PATH:$GOROOT/bin
-  fi
-
-  if [[ ":$PATH:" != "*$GOPATH/bin" ]]; then
-    $GOPATH/bin
-  fi
+## Source ~/.bashrc.local if it exists
+echo ".bashrc.local exists: $([ -f $HOME/.bashrc.local ])"
+if [[ -f "${HOME}/.bashrc.local" ]]; then
+    echo "Sourcing ~/.bashrc.local"
+  . "${HOME}/.bashrc.local"
 fi
 
