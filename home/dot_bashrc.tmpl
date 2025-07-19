@@ -131,9 +131,9 @@ if [[ -d "$HOME/.nvm" ]]; then
 fi
 
 ## Source ~/.bashrc.local if it exists
-echo ".bashrc.local exists: $([ -f $HOME/.bashrc.local ])"
+# echo ".bashrc.local exists: $([ -f $HOME/.bashrc.local ])"
 if [[ -f "${HOME}/.bashrc.local" ]]; then
-    echo "Sourcing ~/.bashrc.local"
+    # echo "Sourcing ~/.bashrc.local"
   . "${HOME}/.bashrc.local"
 fi
 
