@@ -33,10 +33,12 @@ fi
 ## Add Go to PATH
 if [[ -d /usr/local/go ]]; then
   export PATH="$PATH:/usr/local/go/bin"
-
-  if [[ -d /opt/gobins ]]; then
-    export PATH="$PATH:/opt/gobins"
-  fi
+fi
+if [[ -d ~/.go ]]; then
+  export PATH="$PATH:~/.go/bin"
+fi
+if [[ -d /opt/gobins ]]; then
+  export PATH="$PATH:/opt/gobins"
 fi
 
 ## Add chezmoi to PATH
