@@ -33,9 +33,14 @@ fi
 ## Add Go to PATH
 if [[ -d /usr/local/go ]]; then
   export PATH="$PATH:/usr/local/go/bin"
+
+  export GOPATH=$HOME/go
+  export PATH=$PATH:$GOPATH/bin  # For binaries installed via `go install` or `go get`
 fi
 if [[ -d ~/.go ]]; then
-  export PATH="$PATH:~/.go/bin"
+  export GOROOT=$HOME/.go
+  export GOPATH=$HOME/go
+  export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 fi
 if [[ -d /opt/gobins ]]; then
   export PATH="$PATH:/opt/gobins"
