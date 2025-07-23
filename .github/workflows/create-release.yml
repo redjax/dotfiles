@@ -15,43 +15,42 @@ on:
           - major
 
 jobs:
-  release:
+  setup:
     runs-on: ubuntu-latest
-
+    outputs:
+      new_tag: ${{ steps.bump_version.outputs.new_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install chezmoi
-        id: install_chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
-        shell: bash
 
       - name: Add chezmoi to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      ## Get the latest tag for version bump
       - name: Get latest tag
         id: get_tag
         run: |
           git fetch --tags
           LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-
           if [ -z "$LATEST_TAG" ]; then
             LATEST_TAG="v0.0.0"
           fi
-
           echo "Latest tag: $LATEST_TAG"
           echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 
-      ## Bump release version (v0.0.X -> v0.0.X+1)
       - name: Bump version
         id: bump_version
         run: |
+          echo "Bump type: ${{ github.event.inputs.bump }}"
+          echo "Latest tag from get_tag: ${{ steps.get_tag.outputs.latest_tag }}"
+          
           LATEST="${{ steps.get_tag.outputs.latest_tag }}"
-          BUMP_TYPE="${{ github.event.inputs.bump }}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
-          case "$BUMP_TYPE" in
+
+          BUMP="${{ github.event.inputs.bump }}"
+          case "$BUMP" in
             major)
               MAJOR=$((MAJOR + 1))
               MINOR=0
@@ -65,16 +64,33 @@ jobs:
               PATCH=$((PATCH + 1))
               ;;
           esac
+
           NEW_TAG="$MAJOR.$MINOR.$PATCH"
-          echo "New tag: $NEW_TAG"
+          echo "Calculated new tag: $NEW_TAG"
+
           echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Show output tag
+        run: echo "New tag is ${{ steps.bump_version.outputs.new_tag }}"
+    
+  render:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
+
+      - name: Add chezmoi to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Create chezmoi config for CI
         run: |
-          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
           GIT_USER="github-actions[bot]"
           GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
-
+          
           cat <<EOF > .chezmoi.toml
           [data]
             name = "${GIT_USER}"
@@ -101,18 +117,14 @@ jobs:
 
       - name: Add generated files to rendered/
         run: |
-          ## Echo release version into file
-          echo "${{ steps.bump_version.outputs.NEW_TAG }}" >> rendered/.version
+          echo "${{ needs.setup.outputs.new_tag }}" >> rendered/.version
 
       - name: Create installable chezmoi + dotfiles artifact
         run: |
-          
-          ## Generate install script to add to repo
-          chezmoi generate install.sh > install.sh
+          chezmoi generate install.sh > self_contained/install.sh
 
       - name: Add generated files
         run: |
-          ## Create a help file
           cat <<EOF > self_contained/README_BEFORE_INSTALL.txt
           ###########################################################################
           #                          !! WARNING !!                                  #
@@ -123,21 +135,6 @@ jobs:
 
           Run ./install.sh to install chezmoi & apply the dotfiles.
           EOF
-
-      - name: Create ZIP archive of self-contained chezmoi dotfiles
-        run: |
-          ## Create zip
-          zip -r "release_assets/chezmoi_dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip" . -x \
-            ".git/*" \
-            "scripts/prune_git_branches.sh"
-
-      - name: Create TAR archive of self-contained chezmoi dotfiles
-        run: |
-          ## Create tar
-          tar -czvf "release_assets/chezmoi_dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz" \
-            --exclude=".git/*" \
-            --exclude="scripts/prune_git_branches.sh" \
-            .
 
       - name: Add help text
         run: |
@@ -151,7 +148,7 @@ jobs:
           MAKE A BACKUP! The steps below will overwrite your dotfiles with mine.
 
           Copy & paste the files in this directory to your \$HOME directory, opting to replace/overwrite existing files.
-          Close & re-open your terminal (or log out and back in), or run exec $SHELL to load the dotfiles.
+          Close & re-open your terminal (or log out and back in), or run exec \$SHELL to load the dotfiles.
           EOF
 
       - name: List files for debugging
@@ -159,56 +156,112 @@ jobs:
           echo "$(pwd) files:"
           ls -la .
           echo ""
-
+          
           echo "Rendered files:"
           ls -la rendered/
           echo ""
-
+          
           echo "Self-contained Chezmoi files:"
           ls -la self_contained/
           echo ""
 
+      - name: Upload rendered files as artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-files
+          path: rendered/
+
+  archive:
+    needs:
+      - render
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download rendered files (if using artifacts)
+        uses: actions/download-artifact@v4
+        with:
+          name: rendered-files
+
+      - name: Create release assets directory
+        run: |
+          mkdir -p release_assets/
+          mkdir -p rendered/
+          mkdir -p self_contained/
+
+      - name: Create ZIP archive of self-contained chezmoi dotfiles
+        run: |
+          VERSION="${{ needs.setup.outputs.new_tag }}"
+          ZIP_NAME="chezmoi_dotfiles-v${VERSION}.zip"
+          zip -r "release_assets/${ZIP_NAME}" self_contained -x ".git/*" "scripts/prune_git_branches.sh"
+
+      - name: Create TAR archive of self-contained chezmoi dotfiles
+        run: |
+          VERSION="${{ needs.setup.outputs.new_tag }}"
+          TAR_NAME="chezmoi_dotfiles-v${VERSION}.tar.gz"
+          tar -czvf "release_assets/${TAR_NAME}" --exclude=".git/*" --exclude="scripts/prune_git_branches.sh" .
+
       - name: Create ZIP archive of rendered dotfiles
         run: |
-          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          VERSION="${{ needs.setup.outputs.new_tag }}"
           ZIP_NAME="dotfiles-v${VERSION}.zip"
-
-          cd rendered
-          zip -r "../release_assets/${ZIP_NAME}" . -x \
-            "rendered/" \
-            ".gitconfig" \
-            "chezmoistate.db" \
+          zip -r "release_assets/${ZIP_NAME}" rendered/ -x ".gitconfig" "chezmoistate.db"
 
       - name: Create TAR archive of rendered dotfiles
         run: |
-          VERSION="${{ steps.bump_version.outputs.NEW_TAG }}"
+          VERSION="${{ needs.setup.outputs.new_tag }}"
           TAR_NAME="dotfiles-v${VERSION}.tar.gz"
+          tar -czf "release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" rendered/
 
-          cd rendered
-          tar -czf "../release_assets/${TAR_NAME}" \
-            --exclude="rendered/" \
-            --exclude=".gitconfig" \
-            --exclude="chezmoistate.boltdb" \
-            .
+      - run: ls -lh release_assets/
 
-      ## Create the tag and push it
+      - name: Upload release assets as artifact (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: release_assets/
+
+  release:
+    needs: 
+      - archive
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download release assets (if using artifacts)
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: release_assets/
+          ## Fix accidental nesting, i.e. release-assets/release_assets
+          merge-multiple: true
+
+      - name: Debug setup output in release
+        run: |
+          echo "Release tag from setup output: v${{ needs.setup.outputs.new_tag }}"
+
       - name: Create git tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+52949282+github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.bump_version.outputs.NEW_TAG }}"
-          git push origin "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          git tag "v${{ needs.setup.outputs.new_tag }}"
+          git push origin "v${{ needs.setup.outputs.new_tag }}"
 
-      ## Create the GitHub release with the new tag, auto-generated release notes, and assets
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
-          name: "v${{ steps.bump_version.outputs.NEW_TAG }}"
+          tag_name: "v${{ needs.setup.outputs.new_tag }}"
+          name: "v${{ needs.setup.outputs.new_tag }}"
           generate_release_notes: true
           token: ${{ secrets.RELEASE_TOKEN }}
           files: |
-            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.tar.gz
-            release_assets/dotfiles-v${{ steps.bump_version.outputs.NEW_TAG }}.zip
+            release_assets/dotfiles-v${{ needs.setup.outputs.new_tag }}.tar.gz
+            release_assets/dotfiles-v${{ needs.setup.outputs.new_tag }}.zip
+            release_assets/chezmoi_dotfiles-v${{ needs.setup.outputs.new_tag }}.tar.gz
+            release_assets/chezmoi_dotfiles-v${{ needs.setup.outputs.new_tag }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
