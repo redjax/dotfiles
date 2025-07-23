@@ -42,12 +42,15 @@ jobs:
 
       - name: Bump version
         id: bump_version
-        env:
-          LATEST_TAG: ${{ steps.get_tag.outputs.latest_tag }}
-          BUMP_TYPE: ${{ github.event.inputs.bump }}
         run: |
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST_TAG#v}"
-          case "$BUMP_TYPE" in
+          echo "Bump type: ${{ github.event.inputs.bump }}"
+          echo "Latest tag from get_tag: ${{ steps.get_tag.outputs.latest_tag }}"
+          
+          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+
+          BUMP="${{ github.event.inputs.bump }}"
+          case "$BUMP" in
             major)
               MAJOR=$((MAJOR + 1))
               MINOR=0
@@ -61,9 +64,14 @@ jobs:
               PATCH=$((PATCH + 1))
               ;;
           esac
+
           NEW_TAG="$MAJOR.$MINOR.$PATCH"
-          echo "New tag: $NEW_TAG"
+          echo "Calculated new tag: $NEW_TAG"
+
           echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Show output tag
+        run: echo "New tag is ${{ steps.bump_version.outputs.new_tag }}"
     
   render:
     needs: setup
