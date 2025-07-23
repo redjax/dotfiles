@@ -172,7 +172,9 @@ jobs:
           path: rendered/
 
   archive:
-    needs: render
+    needs:
+      - render
+      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
