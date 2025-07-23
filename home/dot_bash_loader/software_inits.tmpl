@@ -6,10 +6,18 @@ if command -v pyenv > /dev/null 2>&1; then
 fi
 
 ## NVM
-if command -v nvm > /dev/null 2>&1; then
+# if command -v nvm > /dev/null 2>&1; then
+#   export NVM_DIR="$HOME/.nvm"
+#   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# fi
+if [[ -d "$HOME/.nvm" ]]; then
+  ## Add nvm to shell
   export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+  ## Load nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  ## This loads nvm bash_completion
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
 fi
 
 ## Astral uv
@@ -31,16 +39,14 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
 fi
 
 ## Add Go to PATH
-if [[ -d /usr/local/go ]]; then
-  export PATH="$PATH:/usr/local/go/bin"
-
-  export GOPATH=$HOME/go
-  export PATH=$PATH:$GOPATH/bin  # For binaries installed via `go install` or `go get`
-fi
-if [[ -d ~/.go ]]; then
-  export GOROOT=$HOME/.go
-  export GOPATH=$HOME/go
-  export PATH=$PATH:$GOROOT/bin:$GOPATH/bin:$HOME/.go
+if [[ -d "$HOME/.go" ]]; then
+  export GOROOT="$HOME/.go"
+  export GOPATH="$HOME/go"
+  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
+elif [[ -d /usr/local/go ]]; then
+  export GOROOT="/usr/local/go"
+  export GOPATH="$HOME/go"
+  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
 fi
 if [[ -d /opt/gobins ]]; then
   export PATH="$PATH:/opt/gobins"
@@ -49,9 +55,8 @@ fi
 ## Add chezmoi to PATH
 if [[ -f $HOME/.local/bin/chezmoi ]]; then
   export PATH="$PATH:$HOME/.local/bin"
-fi
+elif [[ -f $HOME/bin/chezmoi ]]; then
 # This is chezmoi's default path
-if [[ -f $HOME/bin/chezmoi ]]; then
   export PATH="$PATH:$HOME/bin"
 fi
 
