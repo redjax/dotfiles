@@ -42,10 +42,11 @@ jobs:
 
       - name: Bump version
         id: bump_version
+        env:
+          LATEST_TAG: ${{ steps.get_tag.outputs.latest_tag }}
+          BUMP_TYPE: ${{ github.event.inputs.bump }}
         run: |
-          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
-          BUMP_TYPE="${{ github.event.inputs.bump }}"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST_TAG#v}"
           case "$BUMP_TYPE" in
             major)
               MAJOR=$((MAJOR + 1))
