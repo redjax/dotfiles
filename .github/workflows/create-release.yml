@@ -215,6 +215,8 @@ jobs:
           TAR_NAME="dotfiles-v${VERSION}.tar.gz"
           tar -czf "release_assets/${TAR_NAME}" --exclude=".gitconfig" --exclude="chezmoistate.boltdb" rendered/
 
+      - run: ls -lh release_assets/
+
       - name: Upload release assets as artifact (optional)
         uses: actions/upload-artifact@v4
         with:
@@ -235,6 +237,8 @@ jobs:
         with:
           name: release-assets
           path: release_assets/
+          ## Fix accidental nesting, i.e. release-assets/release_assets
+          merge-multiple: true
 
       - name: Debug setup output in release
         run: |
