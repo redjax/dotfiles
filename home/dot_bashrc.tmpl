@@ -121,13 +121,9 @@ fi
 ## Source ~/.local/bin/env if it exists
 [ ! -f "$HOME/.local/bin/env" ] || . "$HOME/.local/bin/env"
 
-if [[ -d "$HOME/.nvm" ]]; then
-  ## Add nvm to shell
-  export NVM_DIR="$HOME/.nvm"
-  ## Load nvm
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  ## This loads nvm bash_completion
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
+## Source .bash_dots_loader file
+if [[ -f "$HOME/.bash_loader/main" ]]; then
+  . "$HOME/.bash_loader/main"
 fi
 
 ## Source ~/.bashrc.local if it exists
