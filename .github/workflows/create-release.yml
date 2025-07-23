@@ -76,19 +76,6 @@ jobs:
 
       - name: Add chezmoi to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-    
-  render:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install chezmoi
-        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
-
-      - name: Add chezmoi to PATH
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Create chezmoi config for CI
         run: |
