@@ -20,33 +20,26 @@
 declare -a HOST_OS=( "ubuntu" "debian" "fedora" )
 for OS in "${HOST_OS[@]}"
 do
-  if [[ -f ~/.bash_aliases_$OS_override ]]; then
-    . ~/.bash_aliases_$OS_override
-  fi
+  [ -f ~/.bash_aliases_$OS_override ] && . ~/.bash_aliases_$OS_override
 done
 
 ## Source bash_loader aliases
-if [[ -f "$HOME/.bash_loader/aliases" ]]; then
-  . "$HOME/.bash_loader/aliases"
-fi
+[ -f "$HOME/.bash_loader/aliases" ] && . "$HOME/.bash_loader/aliases"
 
 ## Source bash_loader env
-if [[ -f "$HOME/.bash_loader/env" ]]; then
-  . "$HOME/.bash_loader/env"
-fi
+[ -f "$HOME/.bash_loader/env" ] && . "$HOME/.bash_loader/env"
 
 ## Source bash_loader software inits
-if [[ -f "$HOME/.bash_loader/software_inits" ]]; then
-  . "$HOME/.bash_loader/software_inits"
-fi
+[ -f "$HOME/.bash_loader/software_inits" ] && . "$HOME/.bash_loader/software_inits"
 
 ## Source bash_loader functions
-if [[ -f "$HOME/.bash_loader/functions" ]]; then
-  . "$HOME/.bash_loader/functions"
-fi
+[ -f "$HOME/.bash_loader/functions" ] && . "$HOME/.bash_loader/functions"
 
 ## Source ~/.bashrc.local if it exists
-if [[ -f $HOME/.bashrc.local ]]; then
-  . "$HOME/.bashrc.local"
-fi
+[ -f $HOME/.bashrc.local ] && . "$HOME/.bashrc.local"
 
+
+
+## KEEP THIS AT THE BOTTOM!
+#  Remove duplicate entries in $PATH, preserving order
+export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | paste -sd:)
