@@ -28,7 +28,7 @@ layout {
         }
 
         pane {
-            name "bottom-left"
+            name "top-right"
             command "ping"
             args "www.google.com"
             // Start the pane suspended, prompting user to start the command
@@ -39,7 +39,7 @@ layout {
     // v-split2
     pane split_direction="vertical" {
         pane {
-            name "top-right"
+            name "bottom-left"
         }
 
         pane {
