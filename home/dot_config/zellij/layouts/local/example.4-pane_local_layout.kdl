@@ -1,0 +1,56 @@
+//
+// This is an example of a local Zellij layout.
+//
+// Local layouts are not synchronized with the git repository, so they can be specific to the local machine.
+// For example, if you frequently open a set of panes for development in a specific directory, make it a layout!
+
+layout {
+    // The top bar with session name
+    pane size=1 borderless=true {
+        plugin location="tab-bar"
+    }
+
+    // The content panes.
+    // This example shows a 4-pane split, with 2 horizontal & 2 vertical
+
+    // v-split 1
+    pane split_direction="vertical" {
+        pane {
+            name "top-left"
+            // Cursor will start in this pane
+            focus true
+            // Run 'ls' when this layout is loaded
+            command "ls"
+            // Pass args to the command
+            args "-l" "-a"
+            // Set the working directory for this pane
+            cwd "~/.config/zellij"
+        }
+
+        pane {
+            name "bottom-left"
+            command "ping"
+            args "www.google.com"
+            // Start the pane suspended, prompting user to start the command
+            start_suspended true
+        }
+    }
+
+    // v-split2
+    pane split_direction="vertical" {
+        pane {
+            name "top-right"
+        }
+
+        pane {
+            name "bottom-right"
+            // Open a file in the default editor
+            edit "~/.config/zellij/config.kdl"
+        }
+    }
+
+    // The bottom bar with commands
+    pane size=1 borderless=true {
+        plugin location="status-bar"
+    }
+}
