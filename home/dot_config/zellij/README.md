@@ -53,6 +53,7 @@ Zellij also has the following themes included by default:
 ## Links
 
 - [Zellij home](https://zellij.dev)
+- [Zellij Github](https://github.com/zellij-org/zellij)
 - [Zellij docs](https://zellij.dev/documentation)
   - [Zellij install docs](https://zellij.dev/documentation/installation.html)
   - [Zellij config docs](https://zellij.dev/documentation/configuration.html)
