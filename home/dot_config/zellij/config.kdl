@@ -257,7 +257,7 @@ load_plugins {
 //    - true
 //    - false (Default)
 //
-// simplified_ui true
+simplified_ui false
 
 // Choose the path to the default shell that zellij will use for opening new panes
 // Default: $SHELL
@@ -273,7 +273,7 @@ load_plugins {
 //   - true (default)
 //   - false
 //
-// pane_frames true
+pane_frames true
 
 // Toggle between having Zellij lay out panes according to a predefined set of layouts whenever possible
 // Options:
@@ -288,7 +288,9 @@ load_plugins {
 //   - true (default)
 //   - false
 //
-// session_serialization false
+session_serialization true
+// Interval in seconds
+serialization_interval 60 
 
 // Whether pane viewports are serialized along with the session, default is false
 // (Requires restart)
@@ -442,7 +444,7 @@ theme "ayu_dark"
 // - false
 // Default: false
 //
-// web_server true
+web_server false
 
 // Whether to allow sessions started in the terminal to be shared through a local web server, assuming one is
 // running (see the `web_server` option for more details).
@@ -457,7 +459,7 @@ theme "ayu_dark"
 // - "disabled" (do not allow web sharing and do not permit sessions started in the terminal to opt-in to it)
 // Default: "off"
 // 
-// web_sharing "on"
+web_sharing "off"
 
 // The ip address the web server should listen on when it starts
 // Default: "127.0.0.1"
@@ -499,12 +501,12 @@ theme "ayu_dark"
 // Whether to show release notes on first version run
 // Default: true
 //
-// show_release_notes false
+show_release_notes true
 
 // Whether to enable mouse hover effects and pane grouping functionality
 // Default: true
 //
-// advanced_mouse_actions false
+advanced_mouse_actions true
 
 // A command to run (will be wrapped with sh -c and provided the RESURRECT_COMMAND env variable)
 // after Zellij attempts to discover a command inside a pane when resurrecting sessions, the STDOUT
@@ -518,3 +520,17 @@ theme "ayu_dark"
 web_client {
     font "monospace"
 }
+
+// UI options
+
+ui {
+    pane_frames {
+        // If true, and if panes are shown, make them rounded
+        rounded_corners true
+        // If true, hide session name from panes
+        hide_session_name false
+    }
+}
+
+// If true, startup tips are shown
+show_startup_tips true
