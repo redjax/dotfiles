@@ -13,9 +13,30 @@ function install_zellij_linux() {
     LINUX_DISTRO="$(get_distro_id)"
     echo "[INFO] Detected Linux distro: $LINUX_DISTRO"
 
-    ## Use static binary for simplicity
-    echo "[INFO] Downloading Zellij static binary"
-    curl -L https://github.com/zellij-org/zellij/releases/latest/download/zellij-x86_64-unknown-linux-musl.tar.gz -o /tmp/zellij.tar.gz
+    # Detect architecture
+    ARCH="$(uname -m)"
+    echo "[INFO] Detected CPU architecture: $ARCH"
+
+    case "$ARCH" in
+        x86_64)
+            ZELLIJ_ARCH="x86_64-unknown-linux-musl"
+            ;;
+        aarch64|arm64)
+            ZELLIJ_ARCH="aarch64-unknown-linux-musl"
+            ;;
+        armv7l)
+            ZELLIJ_ARCH="armv7-unknown-linux-gnueabihf"
+            ;;
+        *)
+            echo "[ERROR] Unsupported architecture: $ARCH"
+            return 1
+            ;;
+    esac
+
+    URL="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${ZELLIJ_ARCH}.tar.gz"
+    echo "[INFO] Downloading Zellij binary for $ARCH from $URL"
+    
+    curl -L "$URL" -o /tmp/zellij.tar.gz
     if [[ $? -ne 0 ]]; then
         echo "[ERROR] Failed to download Zellij static binary"
         return 1
@@ -27,10 +48,10 @@ function install_zellij_linux() {
         echo "[ERROR] Failed to extract Zellij static binary"
         return 1
     fi
-    
+
     sudo mv /tmp/zellij /usr/local/bin/
     sudo chmod +x /usr/local/bin/zellij
-    
+
     echo "[OK] Zellij installed to /usr/local/bin/zellij"
 }
 
