@@ -268,13 +268,6 @@ simplified_ui false
 //
 // default_cwd ""
 
-// Toggle between having pane frames around the panes
-// Options:
-//   - true (default)
-//   - false
-//
-pane_frames true
-
 // Toggle between having Zellij lay out panes according to a predefined set of layouts whenever possible
 // Options:
 //   - true (default)
@@ -524,13 +517,21 @@ web_client {
 // UI options
 
 ui {
+    // Show pane frames
     pane_frames {
         // If true, and if panes are shown, make them rounded
         rounded_corners true
         // If true, hide session name from panes
-        hide_session_name false
+        hide_session_name true
     }
 }
 
+// Toggle between having pane frames around the panes
+// Options:
+//   - true (default)
+//   - false
+//
+pane_frames false
+
 // If true, startup tips are shown
-show_startup_tips true
+show_startup_tips false
