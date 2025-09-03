@@ -5,6 +5,14 @@
 export RESTIC_REPOSITORY_FILE="/home/{{ env "USER" }}/.restic/repo_path"
 
 ## Check for .resticrc.local
-[[ -f "~/.resticrc" ]] && . "~/.resticrc"
-[[ -f "~/.resticrc.local" ]] && . "~/.resticrc.local"
-[[ -f "~/.restic/.resticrc.local" ]] && . "~/.restic/.resticrc.local"
+if [[ -f ~/.resticrc ]]; then
+     . ~/.resticrc
+fi
+
+if [[ -f ~/.resticrc.local ]]; then
+     . ~/.resticrc.local
+fi
+
+if [[ -f ~/.restic/.resticrc.local ]]; then
+     . ~/.restic/.resticrc.local
+fi
