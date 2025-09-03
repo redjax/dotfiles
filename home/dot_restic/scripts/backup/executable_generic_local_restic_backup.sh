@@ -141,10 +141,10 @@ done
 
 ## Print or run command
 if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
-  echo "Running restic cleanup command: $cmd"
+  echo "Running restic cleanup command: ${cmd[@]}"
 
   ## Run the command
-  "$cmd[@]"
+  "${cmd[@]}"
 
   if [[ $? -ne 0 ]]; then
     echo "[ERROR] Failed to run restic cleanup command."
@@ -154,6 +154,6 @@ if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
     exit 0
   fi
 else
-  echo "[DRY RUN] Would run restic cleanup command: $cmd[@]"
+  echo "[DRY RUN] Would run restic cleanup command: ${cmd[@]}"
   exit 0
 fi
