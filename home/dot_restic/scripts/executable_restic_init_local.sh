@@ -6,22 +6,23 @@
 
 set -euo pipefail
 
-## Path to this script's parent dir
+## Paths
 THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-## Path to ~/.restic dir
 DOT_RESTIC_DIR="$HOME/.restic"
 RESTIC_PASSWORDS_DIR="$DOT_RESTIC_DIR/passwords"
-RESTIC_PASSWORD_FILE="$RESTIC_PASSWORDS_DIR/main"
-RESTIC_PASSWORD=""
 
-## Default values
+## Defaults
 RESTIC_REPO_DIR=""
+RESTIC_PASSWORD=""
+RESTIC_MASTER_PW_FILE=""   # will be set to a mktemp path
 DRY_RUN=""
 
-## Functions
+## Clean environment for restic
+unset RESTIC_REPOSITORY_FILE
+unset RESTIC_REPOSITORY
+unset RESTIC_PASSWORD_FILE
 
-function print_help() {
+print_help() {
     cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
@@ -29,30 +30,27 @@ Initialize a Restic repository on the local machine.
 
 OPTIONS:
   -r, --repo, --repository PATH            Path to restic repository directory (required)
-  -p, --password           STRING          Password for restic repository
-  -P, --password-file      PATH            Path to restic password file
-  --dry-run                                Print the restic command that would be run, but do not execute
+  -p, --password           STRING          Master password for the restic repository
+  -P, --password-file      PATH            Path to file containing the master password
+  --dry-run                                Show what would happen without executing
   -h, --help                               Display this help and exit
 
 EXAMPLES:
   $(basename "$0") -r /etc/restic/repo
 
 NOTES:
-  - Restic is required. See [https://restic.readthedocs.io/en/latest/020_installation.html](https://restic.readthedocs.io/en/latest/020_installation.html)
-  - Run with --dry-run to see command without running it.
+  - Restic is required: https://restic.readthedocs.io/en/latest/020_installation.html
 EOF
 }
 
 read_password() {
     while true; do
-        # Prompt for password silently
-        read -rsp "Enter restic repository password: " pass1
+        read -rsp "Enter restic repository master password: " pass1
         echo
         read -rsp "Confirm password: " pass2
         echo
-
         if [[ "$pass1" == "$pass2" ]]; then
-            echo "$pass1"
+            printf '%s' "$pass1"
             break
         else
             echo "Passwords do not match. Please try again."
@@ -60,146 +58,154 @@ read_password() {
     done
 }
 
-if [[ ! $(command -v restic) ]]; then
+cleanup() {
+    # Securely delete temp master password file if it exists
+    if [[ -n "${RESTIC_MASTER_PW_FILE:-}" && -f "$RESTIC_MASTER_PW_FILE" ]]; then
+        if command -v shred &>/dev/null; then
+            shred -u "$RESTIC_MASTER_PW_FILE" || true
+        else
+            rm -f "$RESTIC_MASTER_PW_FILE" || true
+        fi
+    fi
+}
+trap cleanup EXIT
+
+## Require restic
+if ! command -v restic &>/dev/null; then
     echo "[ERROR] Restic is not installed. Please install Restic and retry."
     exit 1
 fi
 
-## Parse CLI args
+## Parse args
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -r|--repo|--repository)
-            if [[ -z $2 ]]; then
-                echo "[ERROR] --repo-dir provided but no path given."
-
-                print_help
-                exit 1
+            if [[ -z ${2:-} ]]; then
+                echo "[ERROR] --repository provided but no path given."
+                print_help; exit 1
             fi
-
-            RESTIC_REPO_DIR="$2"
-            shift 2
+            RESTIC_REPO_DIR="$2"; shift 2
             ;;
         -p|--password)
-            if [[ -z $2 ]]; then
+            if [[ -z ${2:-} ]]; then
                 echo "[ERROR] --password provided but no password given."
-
-                print_help
-                exit 1
+                print_help; exit 1
             fi
-
-            RESTIC_PASSWORD="$2"
-            shift 2
+            RESTIC_PASSWORD="$2"; shift 2
             ;;
         -P|--password-file)
-            if [[ -z $2 ]]; then
+            if [[ -z ${2:-} ]]; then
                 echo "[ERROR] --password-file provided but no path given."
-
-                print_help
-                exit 1
+                print_help; exit 1
             fi
-
-            RESTIC_PASSWORD_FILE="$2"
-            shift 2
+            # Read master password from file
+            RESTIC_PASSWORD="$(<"$2")"; shift 2
             ;;
         --dry-run)
-            DRY_RUN="true"
-            shift
+            DRY_RUN="true"; shift
             ;;
         -h|--help)
-            print_help
-            exit 0
+            print_help; exit 0
             ;;
         *)
             echo "[ERROR] Unknown argument: $1"
-            print_help
-            exit 1
+            print_help; exit 1
             ;;
     esac
 done
 
 if [[ -z "$RESTIC_REPO_DIR" ]]; then
-    echo "[ERROR] --repo-dir is required."
-    echo ""
-
+    echo "[ERROR] --repository is required."
+    echo
     print_help
     exit 1
 fi
 
-
-## Ensure the password directory exists
+## Ensure dirs exist
 mkdir -p "$RESTIC_PASSWORDS_DIR"
 
-
 if [[ -z "$DRY_RUN" ]]; then
-
-
-    ## If password not provided, prompt the user for it and confirm
+    ## Master password: prompt if not provided
     if [[ -z "$RESTIC_PASSWORD" ]]; then
         RESTIC_PASSWORD=$(read_password)
     fi
 
-    ## Temporarily save password to file with safe permissions
-    echo "$RESTIC_PASSWORD" > "$RESTIC_PASSWORD_FILE"
-    chmod 600 "$RESTIC_PASSWORD_FILE"
+    ## Create a temp file for the master password (shredded at the end)
+    RESTIC_MASTER_PW_FILE="$(mktemp "$RESTIC_PASSWORDS_DIR/master_XXXXXX")"
+    # Write without trailing newline
+    printf '%s' "$RESTIC_PASSWORD" > "$RESTIC_MASTER_PW_FILE"
+    chmod 600 "$RESTIC_MASTER_PW_FILE"
 
+    ## Initialize repository
+    echo "Running: restic init --repo \"$RESTIC_REPO_DIR\" --password-file <temp>"
+    restic init --repo "$RESTIC_REPO_DIR" --password-file "$RESTIC_MASTER_PW_FILE"
 
-    ## Build Restic init command with password-file
-    cmd=(restic init --repo "$RESTIC_REPO_DIR" --password-file "$RESTIC_PASSWORD_FILE")
-    
-    echo "Running restic init command: ${cmd[@]}"
-
-
-    ## Run the restic init command
-    "${cmd[@]}"
-
-    ## Show the password once to the user with warning
     echo
-    echo "IMPORTANT: This is the last time you will see your Restic master password."
-    echo "Please save it somewhere secure."
-    echo "Restic repository password: $RESTIC_PASSWORD"
+    echo "IMPORTANT: This is the last time you will see your Restic MASTER password here."
+    echo "Save it securely (password managers, secure notes, etc.)."
+    echo "Master password: $RESTIC_PASSWORD"
     echo
 
-    ## Securely delete the password file
-    if command -v shred &>/dev/null; then
-        shred -u "$RESTIC_PASSWORD_FILE"
-    else
-        rm -f "$RESTIC_PASSWORD_FILE"
-    fi
+    ## Store repo path for convenience
+    printf '%s\n' "$RESTIC_REPO_DIR" > "$DOT_RESTIC_DIR/repo_path"
 
-    ## Save the repository path into ~/.restic/repo_path
-    mkdir -p "$DOT_RESTIC_DIR"
-    echo "$RESTIC_REPO_DIR" > "$DOT_RESTIC_DIR/repo_path"
-
-    ## Offer to add a user access key
-    read -rp "Would you like to add a user access key? (y/N): " add_key
+    ## Offer to add a user access key (separate password, stored in ~/.restic/passwords/main)
+    read -rp "Would you like to create a USER KEY and save its password to ~/.restic/passwords/main? (y/N): " add_key
     if [[ "$add_key" =~ ^[Yy]$ ]]; then
-        ## Determine the path to save the user access key
-        if [[ -z "${RESTIC_PASSWORD_FILE:-}" ]]; then
-            read -rp "Enter path to save the user access key: " user_key_path
+        user_key_pw_file="$RESTIC_PASSWORDS_DIR/main"
+
+        # If main exists, confirm overwrite
+        if [[ -f "$user_key_pw_file" ]]; then
+            read -rp "$user_key_pw_file already exists. Overwrite? (y/N): " overwrite
+            if [[ ! "$overwrite" =~ ^[Yy]$ ]]; then
+                echo "Keeping existing $user_key_pw_file; skipping user key creation."
+            else
+                do_userkey="yes"
+            fi
         else
-            user_key_path="$RESTIC_PASSWORD_FILE"
+            do_userkey="yes"
         fi
 
-        echo "Adding user access key and saving to $user_key_path ..."
+        if [[ "${do_userkey:-}" == "yes" ]]; then
+            # Prompt for user key password (this is the one saved to 'main')
+            while true; do
+                read -rsp "Enter USER KEY password (will be saved to ~/.restic/passwords/main): " userkey_pass1
+                echo
+                read -rsp "Confirm USER KEY password: " userkey_pass2
+                echo
+                if [[ "$userkey_pass1" == "$userkey_pass2" ]]; then
+                    break
+                else
+                    echo "Passwords do not match, please try again."
+                fi
+            done
 
-        ## Use restic key add with --password-command to pass the master password
-        restic -r "$RESTIC_REPO_DIR" --password-command "echo $RESTIC_PASSWORD" key add > "$user_key_path"
+            # Save USER KEY password permanently to ~/.restic/passwords/main
+            printf '%s' "$userkey_pass1" > "$user_key_pw_file"
+            chmod 600 "$user_key_pw_file"
 
-        chmod 600 "$user_key_path"
-        echo "User access key saved to $user_key_path"
-    else
-        echo "User access key was not added."
+            # Add the user key using:
+            #   --password-file <temp master file>
+            #   --new-password-file ~/.restic/passwords/main
+            echo "Running: restic -r \"$RESTIC_REPO_DIR\" key add --password-file <temp> --new-password-file \"$user_key_pw_file\""
+            restic -r "$RESTIC_REPO_DIR" \
+                --password-file "$RESTIC_MASTER_PW_FILE" \
+                key add \
+                --new-password-file "$user_key_pw_file"
+
+            echo "User key created. USER KEY password saved at: $user_key_pw_file"
+            echo "To use this key later, you’ll supply --password-file \"$user_key_pw_file\"."
+        fi
     fi
 
+    ## Master password temp file is removed at script end by trap
 else
-    if [[ -z "$RESTIC_PASSWORD" && -z "$RESTIC_PASSWORD_FILE" ]]; then
-        echo "  Would prompt for a password (none was given)"
-    else
-        if [[ -n "$RESTIC_PASSWORD_FILE" ]]; then
-            cmd+=(--password-file "$RESTIC_PASSWORD_FILE")
-        fi
-    fi
-
-    echo "Would run restic init command: ${cmd[@]}"
-    exit 0
+    echo "[DRY RUN]"
+    echo "Would prompt for (or use provided) MASTER password."
+    echo "Would create temp master password file in: $RESTIC_PASSWORDS_DIR (mktemp)"
+    echo "Would run: restic init --repo \"$RESTIC_REPO_DIR\" --password-file <temp>"
+    echo "Would ask to create a USER KEY:"
+    echo "  - If yes: save USER KEY password to ~/.restic/passwords/main"
+    echo "  - Then run: restic -r \"$RESTIC_REPO_DIR\" key add --password-file <temp> --new-password-file ~/.restic/passwords/main"
+    echo "Would securely delete the temp master password file at the end."
 fi
