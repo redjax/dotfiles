@@ -8,10 +8,12 @@ Restic is [scriptable](https://restic.readthedocs.io/en/latest/075_scripting.htm
 
 - [Setup](#setup)
 - [Managing encryptiong keys](#managing-encryptiong-keys)
-  - [Restic key command cheat sheet](#restic-key-command-cheat-sheet)
+- [Restic key command cheat sheet](#restic-key-command-cheat-sheet)
 - [Links](#links)
 
 ## Setup
+
+First, install Restic, either using the [official install docs](https://restic.readthedocs.io/en/latest/020_installation.html), or the included [`install_restic.sh` script](./scripts/executable_install_restic.sh).
 
 To use this directory on a new machine, you have to do a bit of setup. There is an [init script](./scripts/executable_restic_init_local.sh) to guide you through initializing a local Restic repository, which accepts CLI args (run it with `-h/--help` to see usage) or prompts the user for missing inputs like a password.
 
@@ -21,7 +23,17 @@ To use this directory on a new machine, you have to do a bit of setup. There is 
 >
 > One better method is to use [encryption keys](#managing-encryptiong-keys)
 
-## Managing encryptiong keys
+## Creating backups
+
+*[Restic backup docs](https://restic.readthedocs.io/en/stable/040_backup.html)*
+
+After [setting up your Restic repository](#setup), you can create backups by running the `restic -r /repo/path backup [/path/to/backup]`. If you set a `RESTIC_REPOSITORY_FILE` or `RESTIC_REPOSITORY` environment variable, you do not need to pass the repository with `-r`, and if you set a `RESTIC_PASSWORD_FILE` or `RESTIC_PASSWORD_COMMAND`, you will not need to input your password.
+
+You can add the `--verbose` flag to see more info.
+
+You can add the `--skip-if-unchanged` flag to skip snapshotting if nothing in the source path has changed.
+
+## Managing encryption keys
 
 Restic uses [key-based encryption](https://restic.readthedocs.io/en/latest/070_encryption.html#manage-repository-keys), deriving new keys from the repository's master password with the `restic -r /repo/path key add` command.
 
@@ -29,7 +41,7 @@ It is good practice to keep your initial/"master" password backed up somewhere s
 
 If you ever need to revoke a specific key/password, you can do so with `restic -r /repo/path key remove <keyID>`, where `<keyId>` is the shorthash/ID of one of the keys you see when you run `restic -r /repo/path key list`.
 
-### Restic key command cheat sheet
+## Restic key command cheat sheet
 
 > [!NOTE]
 > All `restic key` commands require your master passsword. They do not make use of the `RESTIC_PASSWORD_FILE` env var.
