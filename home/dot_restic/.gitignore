@@ -1,0 +1,6 @@
+passwords/*
+
+!passwords/
+
+!*example*.*
+!*.*example*

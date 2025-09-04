@@ -1,0 +1,18 @@
+## This file looks for a .resticr.local in this path.
+#  If that file exists, it sources values from it. You
+#  can use the .local version to store sensitie or machine-specific values.
+
+export RESTIC_REPOSITORY_FILE="{{ .chezmoi.homeDir }}/.restic/repo_path"
+
+## Check for .resticrc.local
+if [[ -f ~/.resticrc ]]; then
+     . ~/.resticrc
+fi
+
+if [[ -f ~/.resticrc.local ]]; then
+     . ~/.resticrc.local
+fi
+
+if [[ -f ~/.restic/.resticrc.local ]]; then
+     . ~/.restic/.resticrc.local
+fi
