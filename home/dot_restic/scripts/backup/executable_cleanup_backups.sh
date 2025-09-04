@@ -1,5 +1,17 @@
 #!/bin/bash
 
+##
+# Run a cleanup/purge of Restic snapshots,
+# with configurable retention
+#
+# This script can be scheduled as a cron job,
+# i.e. once a week on Sunday at 4:30am:
+#   30 04 * * 0 /path/to/cleanup_backups.sh -r /etc/restic/repo -p /etc/restic/pw > /var/log/restic/cleanup/weekly_cleanup.log 2>&1
+#
+# If you output to a log with > /path/to/cleanup.log 2>&1,
+# the '/path/to' path must exist. Create with sudo mkdir -p /path/to (or wherever you output the log).
+##
+
 set -euo pipefail
 
 ## Paths
