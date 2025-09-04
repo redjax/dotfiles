@@ -2,7 +2,7 @@
 #  If that file exists, it sources values from it. You
 #  can use the .local version to store sensitie or machine-specific values.
 
-export RESTIC_REPOSITORY_FILE="/home/{{ env "USER" }}/.restic/repo_path"
+export RESTIC_REPOSITORY_FILE="{{ .chezmoi.homeDir }}/.restic/repo_path"
 
 ## Check for .resticrc.local
 if [[ -f ~/.resticrc ]]; then
