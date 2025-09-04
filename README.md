@@ -29,9 +29,10 @@
   <!-- ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redjax/dotfiles/tests.yml) -->
 </p>
 
-My dotfiles, managed by [chezmoi](https://www.chezmoi.io). While I am not a fan of its name, this tool simplifies managing Linux/Mac dotfiles across multiple machines much easier.
+My dotfiles, currently managed by [chezmoi](https://www.chezmoi.io), which simplifies managing Linux/Mac dotfiles across multiple machines.
 
-This is a continuation of a dotfiles repository I originally hosted on Gitlab, [starting in 2016](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb). The original code is retained in [an archive branch](https://github.com/redjax/dotfiles/tree/archive/2025-06-24).
+> [!TIP]
+> This is a continuation of a dotfiles repository I originally hosted on Gitlab, [starting in 2016](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb). The original code is retained in [an archive branch](https://github.com/redjax/dotfiles/tree/archive/2025-06-24).
 
 Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`. Chezmoi uses conventions like `dot_config`, which becomes `.config/`, and `executable_some-script-name.sh` to create a script named `some-script-name.sh` with `chmod +x` permissions.
 
