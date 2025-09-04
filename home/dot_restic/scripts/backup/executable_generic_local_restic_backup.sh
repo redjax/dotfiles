@@ -15,7 +15,6 @@ SRC_DIR=""
 RESTIC_REPO_FILE=""
 RESTIC_PW_FILE=""
 DRY_RUN=""
-SKIP_UNCHANGED=""
 RESTIC_FORCE=""
 
 ## Create array of exclude files to pass to restic
@@ -46,7 +45,6 @@ OPTIONS:
   --keep-weekly N                Retain last N weekly snapshots when running with --cleanup (default: $KEEP_WEEKLY)
   --keep-monthly N               Retain last N monthly snapshots when running with --cleanup (default: $KEEP_MONTHLY)
   -c, --cleanup                  Run restic cleanup after backup (default: false)
-  -S, --skip-if-unchanged        Skip backup if there are no changes (default: false).
   --force                        Add the --force flag to Restic commands.
   --dry-run                      Print the restic command that would be run, but do not execute
   -h, --help                     Display this help and exit
@@ -156,10 +154,6 @@ while [[ $# -gt 0 ]]; do
       DO_CLEANUP="true"
       shift
       ;;
-    -S|--skip-if-unchanged)
-      SKIP_UNCHANGED="true"
-      shift
-      ;;
     -F|--force)
       RESTIC_FORCE="true"
       shift
@@ -202,11 +196,6 @@ done
 for excl_pattern in "${EXCLUDE_PATTERNS[@]}"; do
   cmd+=(--exclude "$excl_pattern")
 done
-
-## Append --skip-if-unchanged if SKIP_UNCHANGED is true
-if [[ "$SKIP_UNCHANGED" == "true" ]]; then
-  cmd+=(--skip-if-unchanged)
-fi
 
 ## Append --force if RESTIC_FORCE is true
 if [[ "$RESTIC_FORCE" != "" ]]; then
