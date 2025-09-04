@@ -6,8 +6,12 @@
 # customized backup scripts, or just use this to
 # run/schedule backups.
 #
-# This script assumes you're storing your password
+# Assumes you're storing your password
 # locally in a file, and using a local repository.
+#
+# You can schedule this script as a cron job, i.e.
+# backup your home directory every 12 hours:
+#   0 */12 * * * /path/to/generic_local_restic_backup.sh -s /home/$USER > /var/log/restic/backups/homedir_backup.log 2>&1
 ##
 
 ## Set default vars
@@ -73,9 +77,9 @@ while [[ $# -gt 0 ]]; do
       SRC_DIR="$2"
       shift 2
       ;;
-    -r|--repo-file)
+    -r|--repo-file|--repository-file)
       if [[ -z $2 ]]; then
-        echo "[ERROR] --repo-file provided but no path given."
+        echo "[ERROR] --repository-file provided but no path given."
 
         print_help
         exit 1
