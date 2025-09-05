@@ -7,7 +7,8 @@ Restic is [scriptable](https://restic.readthedocs.io/en/latest/075_scripting.htm
 ## Table of Contents <!-- omit in toc -->
 
 - [Setup](#setup)
-- [Managing encryptiong keys](#managing-encryptiong-keys)
+- [Creating backups](#creating-backups)
+- [Managing encryption keys](#managing-encryption-keys)
 - [Restic key command cheat sheet](#restic-key-command-cheat-sheet)
 - [Links](#links)
 
@@ -21,7 +22,7 @@ To use this directory on a new machine, you have to do a bit of setup. There is 
 >
 > When creating a repository with this script, the password is stored in a file in `~/.restic/passwords/`. This is not very secure, but is simple for local backups If your repository contains sensitive files, or you are running this in a production environment, use a stronger method.
 >
-> One better method is to use [encryption keys](#managing-encryptiong-keys)
+> One better method is to use [encryption keys](#managing-encryption-keys)
 
 ## Creating backups
 
