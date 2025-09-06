@@ -22,7 +22,6 @@
   - If you set a `schedule` in any of your profiles, you can run `resticprofile schedule` to automatically add your `default` profile's schedule to your platform's task scheduler (`cron` on Linux, `Task Scheduler` on Windows, etc)
 - Test your backup configuration by running `resticprofile --dry-run backup`
   - You can test individual backup profiles by passing `--name <profile_name>`
-- https://creativeprojects.github.io/resticprofile/configuration/copy/index.html
 - Optionally, you can add [command completion](https://creativeprojects.github.io/resticprofile/installation/shell/index.html) to your shell
   - On Linux, you can install them permanently with `resticprofile generate --bash-completion > /etc/bash_completion.d/resticprofile && chmod +x /etc/bash_completion.d/resticprofile`
 
