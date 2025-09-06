@@ -27,10 +27,8 @@ default:
   password-file: "/path/to/restic_pw"
 
   ## Define backup retention policy
-  #  https://creativeprojects.github.io/resticprofile/reference/profile/retention/index.html
-  retention:
-    ## Run cleanup after backups
-    after-backup: true
+  #  https://creativeprojects.github.io/resticprofile/schedules/index.html
+  forget:
     ## Keep n most recent backups
     keep-last: 2
     ## Keep n most reecent hourly backups
