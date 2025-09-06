@@ -10,9 +10,12 @@ thinclient_drives/
 .Xauthority
 .Xclients
 .xsession-errors
+pCloudDrive
 
 ## Ignore symlinks
 ansible_homelab/
 backup/
 git/
 
+## Don't ignore resticprofile profiles.yaml
+!profiles.yaml

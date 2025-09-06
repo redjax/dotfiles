@@ -1,0 +1,79 @@
+#!/bin/bash
+
+PROFILE_PATH="{{ .chezmoi.homeDir}}/profiles.yaml"
+AS_ROOT=""
+DRY_RUN=""
+
+if ! command -v resticprofile &>/dev/null; then
+  echo "[ERROR] resticprofile is not installed."
+  exit 1
+fi
+
+function print_help() {
+  echo "Usage: resticprofile-prune [-p|--profile <path>] [-s|--sudo|--root] [--dry-run]"
+  echo ""
+  echo "Run with -h/--help to print usage menu."
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -p|--profile)
+      if [[ -z "$2" ]]; then
+        echo "[ERROR] --profile provided, but no profile path string given."
+
+        print_help
+        exit 1
+      fi
+
+      PROFILE_PATH="$2"
+      shift 2
+      ;;
+    -s|--sudo|--root)
+      AS_ROOT="true"
+      shift
+      ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift
+      ;;
+    -h|--help)
+      print_help
+      exit 0
+      ;;
+    *)
+      echo "[ERROR] Invalid arg: $1"
+
+      print_help
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$PROFILE_PATH" ]] || [[ "${PROFILE_PATH}" == "" ]]; then
+  echo "[ERROR] --profile provided, but no profile path string given."
+  exit 1
+elif [[ ! -f "$PROFILE_PATH" ]]; then
+  echo "[ERROR] Profile file does not exist: $PROFILE_PATH"
+  exit 1
+fi
+
+cmd=(resticprofile -c ~/profiles.yaml prune --all)
+
+if [[ -n "$DRY_RUN" ]]; then
+  cmd+=(--dry-run)
+fi
+
+if [[ -n "$AS_ROOT" ]]; then
+  cmd=(sudo "${cmd[@]}")
+fi
+
+echo "Running resticprofile prune command: ${cmd[@]} --dry-run"
+"${cmd[@]}"
+
+if [[ $? -ne 0 ]]; then
+  echo "[ERROR] Failed pruning resticprofile backups."
+  exit $?
+else
+  echo "Backups pruned."
+  exit 0
+fi
