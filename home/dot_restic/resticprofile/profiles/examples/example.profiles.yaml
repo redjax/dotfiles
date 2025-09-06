@@ -74,7 +74,7 @@ default:
     exclude-cloud-files: false
     ## Set size limit on individual files in the backup repository.
     #  i.e. 50K, 500M, 10G, 1T
-    exclude-if-larger-than: ""
+    # exclude-if-larger-than: ""
     ## Comma-separated list of options for grouping snapshots.
     #  options are 'host', 'paths', 'tags', and can be combined with a comma,
     #  like: 'host,paths'
