@@ -31,9 +31,8 @@ default:
   min-memory: 100
 
   ## Define backup retention policy
-  #  https://creativeprojects.github.io/resticprofile/reference/profile/retention/index.html
-  retention:
-    after-backup: true
+  #  https://creativeprojects.github.io/resticprofile/schedules/index.html
+  forget:
     keep-last: 2
     keep-hourly: 24
     keep-daily: 7
@@ -77,3 +76,27 @@ default:
     no-size: false
 
   no-error-on-warning: true
+
+## Backup home dir
+home:
+  inherit: default
+  default-command: backup
+
+  backup:
+    verbose: true
+    source: "/home/{{ .Env.USER }}"
+    read-concurrency: 4
+    skip-if-unchanged: true
+    exclude:
+      - ".tmp/"
+      - ".cache/"
+    exclude-file:
+      - "~/.restic/ignores/default"
+      - "~/.restic/ignores/home"
+    exclude-cloud-files: true
+    group-by: "tags,host,paths"
+    schedule: "*/12:*"
+    schedule-permission: "user"
+    schedule-priority: "standard"
+    schedule-lock-mode: default
+    schedule-lock-wait: 15m30s
