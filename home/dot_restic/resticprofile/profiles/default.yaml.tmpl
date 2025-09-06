@@ -84,7 +84,7 @@ home:
 
   backup:
     verbose: true
-    source: "/home/{{ .Env.USER }}"
+    source: "/home/{{ .chezmoi.homeDir }}"
     read-concurrency: 4
     skip-if-unchanged: true
     exclude:
