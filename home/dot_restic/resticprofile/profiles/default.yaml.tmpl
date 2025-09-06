@@ -40,8 +40,12 @@ default:
     keep-tag:
       - forever
     prune: true
-    tag:
-      - resticprofile
+
+  ## Define pruning policy
+  #  https://creativeprojects.github.io/resticprofile/reference/profile/prune/index.html
+  prune:
+    schedule: "weekly"
+    schedule-permission: "auto"
 
   ## Backup operation defaults
   #  https://creativeprojects.github.io/resticprofile/reference/profile/backup/index.html
@@ -76,6 +80,10 @@ default:
     no-size: false
 
   no-error-on-warning: true
+
+groups:
+  full-backup:
+    - home
 
 ## Backup home dir
 home:
