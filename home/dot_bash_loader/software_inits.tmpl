@@ -72,7 +72,11 @@ if command -v direnv &>/dev/null; then
 fi
 
 ## Restic
-if [[ -f "$HOME/.restic/.resticrc" ]]; then
-  . "$HOME/.restic/.resticrc"
-fi
+# if [[ -f "$HOME/.restic/.resticrc" ]]; then
+#   . "$HOME/.restic/.resticrc"
+# fi
 
+## Resticprofile
+if command -v resticprofile &>/dev/null; then
+  eval "$(resticprofile generate --bash-completion)"
+fi
