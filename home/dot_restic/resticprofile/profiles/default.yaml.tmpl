@@ -7,7 +7,7 @@ version: "1"
 # bare-minimum for all of my machines, and the starting point for
 # other profiles.
 #
-# To use this profile as-is, copy it to ~/profiles.yaml,
+# To use this profile as-is, copy it to {{ .chezmoi.homeDir }}/profiles.yaml,
 # or pass it with `resticprofile -c /path/to/default.yaml`
 ###
 
@@ -16,6 +16,13 @@ global:
   initialize: true
   priority: low
   min-memory: 100
+
+groups:
+  full-backup:
+    - home
+  
+  userland:
+    - home
 
 default:
   ## Path must exist. If you don't want to run resticprofile as root,
@@ -58,7 +65,7 @@ default:
       - ".tmp/"
       - ".cache/"
     exclude-file:
-      - "~/.restic/ignores/default"
+      - "{{ .chezmoi.homeDir }}/.restic/ignores/default"
     exclude-cloud-files: true
     group-by: "tags,host,paths"
 
@@ -81,10 +88,6 @@ default:
 
   no-error-on-warning: true
 
-groups:
-  full-backup:
-    - home
-
 ## Backup home dir
 home:
   inherit: default
@@ -92,15 +95,15 @@ home:
 
   backup:
     verbose: true
-    source: "/home/{{ .chezmoi.homeDir }}"
+    source: "{{ .chezmoi.homeDir }}"
     read-concurrency: 4
     skip-if-unchanged: true
     exclude:
       - ".tmp/"
       - ".cache/"
     exclude-file:
-      - "~/.restic/ignores/default"
-      - "~/.restic/ignores/home"
+      - "{{ .chezmoi.homeDir }}/.restic/ignores/default"
+      - "{{ .chezmoi.homeDir }}/.restic/ignores/home"
     exclude-cloud-files: true
     group-by: "tags,host,paths"
     schedule: "*/12:*"
@@ -108,3 +111,8 @@ home:
     schedule-priority: "standard"
     schedule-lock-mode: default
     schedule-lock-wait: 15m30s
+
+  tags:
+    - home
+    - userland
+
