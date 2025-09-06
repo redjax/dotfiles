@@ -7,7 +7,7 @@ version: "1"
 # bare-minimum for all of my machines, and the starting point for
 # other profiles.
 #
-# To use this profile as-is, copy it to ~/profiles.yaml,
+# To use this profile as-is, copy it to {{ .chezmoi.homeDir }}/profiles.yaml,
 # or pass it with `resticprofile -c /path/to/default.yaml`
 ###
 
@@ -65,7 +65,7 @@ default:
       - ".tmp/"
       - ".cache/"
     exclude-file:
-      - "~/.restic/ignores/default"
+      - "{{ .chezmoi.homeDir }}/.restic/ignores/default"
     exclude-cloud-files: true
     group-by: "tags,host,paths"
 
@@ -102,8 +102,8 @@ home:
       - ".tmp/"
       - ".cache/"
     exclude-file:
-      - "~/.restic/ignores/default"
-      - "~/.restic/ignores/home"
+      - "{{ .chezmoi.homeDir }}/.restic/ignores/default"
+      - "{{ .chezmoi.homeDir }}/.restic/ignores/home"
     exclude-cloud-files: true
     group-by: "tags,host,paths"
     schedule: "*/12:*"
