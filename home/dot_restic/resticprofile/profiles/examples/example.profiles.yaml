@@ -18,7 +18,7 @@ global:
 ## Defaults that profiles can inherit with 'inherit: default'
 default:
   ## Path to your restic repository
-  repository: "/path/to/restic-repo"
+  repository: "local:/path/to/restic-repo"
   ## Path to a file containing the path to your restic repository
   # repository-file: "/path/to/restic_repo_file"
   ## Command to run to get password (i.e. read from vault)
