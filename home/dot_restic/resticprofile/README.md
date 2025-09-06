@@ -25,6 +25,34 @@
 - Optionally, you can add [command completion](https://creativeprojects.github.io/resticprofile/installation/shell/index.html) to your shell
   - On Linux, you can install them permanently with `resticprofile generate --bash-completion > /etc/bash_completion.d/resticprofile && chmod +x /etc/bash_completion.d/resticprofile`
 
+### Scheduling
+
+In your backups, you can define a [`forget:` section](https://creativeprojects.github.io/resticprofile/schedules/index.html) to schedule cleanups if `prune: true` in the `forget:` section. When the backup runs, it will check the schedule and run cleanup operations if it's time.
+
+You can instal schedules automatically with `resticprofile -c /path/to/profiles.yaml [--name <profile_name>] schedule install`. You can remove scheduled jobs with `resticprofile -c /path/to/profiles.yaml [--name <profile_name>] schedule uninstall`. On Linux, you can add `--start` to start the job(s) after installing.
+
+You can install all schedules with `resticprofile scshedule install --all`.
+
+Example job schedule:
+
+```yaml
+...
+some_job:
+  ## Define backup retention policy
+  #  https://creativeprojects.github.io/resticprofile/schedules/index.html
+  forget:
+    keep-last: 2
+    keep-hourly: 24
+    keep-daily: 7
+    keep-weekly: 4
+    keep-tag:
+      - forever
+    prune: true
+    tag:
+      - resticprofile
+
+```
+
 ## Example profiles.yaml
 
 This is the 'bare minimum' required for a `profiles.yaml` file:
