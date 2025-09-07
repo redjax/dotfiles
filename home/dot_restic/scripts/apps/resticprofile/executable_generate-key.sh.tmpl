@@ -12,18 +12,40 @@ if ! command -v resticprofile; then
     exit 1
 fi
 
+function print_help() {
+  echo "Usage: ./generate-key.sh [-k/--key-length <int>] [-o/--output-file <path>]"
+  echo ""
+  echo "Print help menu by running ./generate-key.sh -h/--help"
+}
+
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     -k|--key-length)
+      if [[ -z $2 ]]; then
+        echo "[ERROR] --key-length provided but no integer value given."
+
+        print_help
+        exit 1
+      fi
+
       KEY_LENGTH="$2"
       shift 2
       ;;
     -o|--output-file)
+      if [[ -z $2 ]]; then
+        echo "[ERROR] --output-file provided but no path given."
+
+        print_help
+        exit 1
+      fi
+
       OUTPUT_FILE="$2"
       shift 2
       ;;
     *)
       echo "Unknown parameter passed: $1"
+
+      print_help
       exit 1
       ;;
   esac
@@ -63,5 +85,16 @@ else
   fi
 
   echo "Key/password generated successfully."
-  exit 0
+
+  if [[ -n "$OUTPUT_FILE" ]]; then
+    echo $key > "${OUTPUT_FILE}"
+
+    echo "Key saved to ${OUTPUT_FILE}"
+    exit 0
+  else
+    echo "  Key: ${key}"
+
+    exit 0
+  fi
 fi
+
