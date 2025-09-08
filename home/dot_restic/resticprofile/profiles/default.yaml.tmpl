@@ -106,7 +106,7 @@ home:
       - "{{ .chezmoi.homeDir }}/.restic/ignores/home"
     exclude-cloud-files: true
     group-by: "tags,host,paths"
-    schedule: "*/12:*"
+    schedule: "0,6,12,18:00"  # every 6 hours
     schedule-permission: "user"
     schedule-priority: "standard"
     schedule-lock-mode: default
