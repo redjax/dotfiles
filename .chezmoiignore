@@ -1,6 +1,8 @@
 ## Ignore patterns for chezmoi.
 #  Chezmoi will not render files/dirs matching these patterns
 README.md
+**/README.md
+
 scripts/*
 .gitignore
 
