@@ -1,0 +1,41 @@
+## Ensure ~/.local/share/bash-completions exists
+if [[ ! -d "$HOME/.local/share/bash-completions" ]]; then
+  mkdir -p "$HOME/.local/share/bash-completions" &>/dev/null
+fi
+
+## -----------------------------------------------------------
+
+## uv
+if command -v uv &>/dev/null; then
+  uv generate-shell-completion bash > "$HOME/.local/share/bash-completions/uv.bash"
+fi
+
+## NVM
+if [[ -d "$HOME/.nvm" ]]; then
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+fi
+
+## Resticprofile
+if command -v resticprofile &>/dev/null; then
+  resticprofile_complete="$HOME/.local/share/bash-completions/resticprofile.bash"
+  if [[ ! -f "$resticprofile_complete" ]]; then
+    resticprofile generate --bash-completion > "$resticprofile_complete"
+  fi
+fi
+
+## Zellij
+if command -v zellij &>/dev/null; then
+  zellij_complete="$HOME/.local/share/bash-completions/zellij.bash"
+  if [[ ! -f "$zellij_complete" ]]; then
+    zellij setup --generate-completion bash > "$zellij_complete"
+  fi
+fi
+
+## -----------------------------------------------------------
+
+## Source completions
+for completion in "$HOME/.local/share/bash-completions/"*.bash; do
+  ## avoid globbing literal if no files (optional, defensive)
+  [[ -f "$completion" ]] && source "$completion"
+done
+
