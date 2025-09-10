@@ -31,6 +31,14 @@ if command -v zellij &>/dev/null; then
   fi
 fi
 
+## Syst
+if command -v syst &>/dev/null; then
+  syst_complete="$HOME/.local/share/bash-completions/syst.bash"
+  if [[ ! -f "$syst_complete" ]]; then
+    syst completion bash > "$syst_complete"
+  fi
+fi
+
 ## -----------------------------------------------------------
 
 ## Source completions
