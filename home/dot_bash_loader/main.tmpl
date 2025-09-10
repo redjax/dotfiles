@@ -38,6 +38,8 @@ done
 ## Source ~/.bashrc.local if it exists
 [ -f $HOME/.bashrc.local ] && . "$HOME/.bashrc.local"
 
+## Source Bash completions
+[ -f $HOME/.bash_loader/shell_completions ] && . "$HOME/.bash_loader/shell_completions"
 
 
 ## KEEP THIS AT THE BOTTOM!
