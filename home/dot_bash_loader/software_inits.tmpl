@@ -17,13 +17,7 @@ if [[ -d "$HOME/.nvm" ]]; then
   ## Load nvm
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   ## This loads nvm bash_completion
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
-fi
-
-## Astral uv
-if command -v uv > /dev/null 2>&1; then
-    eval "$(uv generate-shell-completion bash)"
-    eval "$(uvx --generate-shell-completion bash)"
+  # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
 fi
 
 ## Enable x-cmd if it's installed
@@ -48,15 +42,23 @@ elif [[ -d /usr/local/go ]]; then
   export GOPATH="$HOME/go"
   export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
 fi
+
+## Add gobins to path
 if [[ -d /opt/gobins ]]; then
   export PATH="$PATH:/opt/gobins"
+fi
+if [[ -d "$HOME/gobins" ]]; then
+  export PATH="$PATH:$HOME/gobins"
+fi
+if [[ -d "$HOME/.gobins" ]]; then
+  export PATH="$PATH:$HOME/.gobins"
 fi
 
 ## Add chezmoi to PATH
 if [[ -f $HOME/.local/bin/chezmoi ]]; then
   export PATH="$PATH:$HOME/.local/bin"
 elif [[ -f $HOME/bin/chezmoi ]]; then
-# This is chezmoi's default path
+  # This is chezmoi's default path
   export PATH="$PATH:$HOME/bin"
 fi
 
@@ -71,12 +73,3 @@ if command -v direnv &>/dev/null; then
   eval "$(direnv hook bash)"
 fi
 
-## Restic
-# if [[ -f "$HOME/.restic/.resticrc" ]]; then
-#   . "$HOME/.restic/.resticrc"
-# fi
-
-## Resticprofile
-if command -v resticprofile &>/dev/null; then
-  eval "$(resticprofile generate --bash-completion)"
-fi
