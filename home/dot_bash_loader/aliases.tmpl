@@ -2,6 +2,10 @@ if command -v lazygit >/dev/null 2>&1; then
   alias lg="lazygit"
 fi
 
+if command -v lazydocker &>/dev/null; then
+  alias lzd="lazydocker"
+fi
+
 if command -v zellij --help &>/dev/null; then
   alias zj="zellij"
 fi
