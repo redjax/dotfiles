@@ -1,0 +1,255 @@
+---
+name: Create Release with Bundled Chezmoi
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type (patch, minor, major)"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump_version.outputs.new_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "Latest tag: $LATEST_TAG"
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+
+          BUMP="${{ github.event.inputs.bump }}"
+          case "$BUMP" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_TAG="$MAJOR.$MINOR.$PATCH"
+          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+          - os: linux
+            arch: arm64
+          - os: darwin
+            arch: amd64
+          - os: darwin
+            arch: arm64
+          - os: windows
+            arch: amd64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create release directory
+        run: |
+          mkdir -p release/
+          mkdir -p temp_chezmoi/
+
+      - name: Download chezmoi binary
+        run: |
+          CHEZMOI_VERSION=$(curl -s https://api.github.com/repos/twpayne/chezmoi/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+          echo "Latest chezmoi version: $CHEZMOI_VERSION"
+          
+          case "${{ matrix.os }}" in
+            linux)
+              CHEZMOI_OS="linux"
+              ;;
+            darwin)
+              CHEZMOI_OS="darwin"
+              ;;
+            windows)
+              CHEZMOI_OS="windows"
+              ;;
+          esac
+          
+          CHEZMOI_ARCH="${{ matrix.arch }}"
+          CHEZMOI_EXT=""
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            CHEZMOI_EXT=".exe"
+          fi
+          
+          CHEZMOI_URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/chezmoi_${CHEZMOI_VERSION#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
+          
+          echo "Downloading from: $CHEZMOI_URL"
+          curl -L "$CHEZMOI_URL" | tar -xz -C temp_chezmoi/
+          
+          # Move the binary to release directory
+          mv temp_chezmoi/chezmoi${CHEZMOI_EXT} release/
+
+      - name: Copy dotfiles templates
+        run: |
+          # Copy the home directory (contains all templates)
+          cp -r home/ release/dotfiles/
+          
+          # Copy any additional files users might need
+          cp README.md release/ 2>/dev/null || echo "README.md not found, skipping"
+          cp .chezmoidata.yml release/ 2>/dev/null || echo ".chezmoidata.yml not found, skipping"
+
+      - name: Create installation script
+        run: |
+          cat <<'EOF' > release/install.sh
+          #!/bin/bash
+          set -e
+          
+          echo "Installing dotfiles with bundled chezmoi..."
+          echo ""
+          echo "IMPORTANT: This will modify your home directory dotfiles!"
+          echo "Make sure you have backed up any existing dotfiles you want to keep."
+          echo ""
+          read -p "Do you want to continue? (y/N): " -n 1 -r
+          echo
+          if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+              echo "Installation cancelled."
+              exit 1
+          fi
+          
+          # Get the directory where this script is located
+          SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+          CHEZMOI_BIN="$SCRIPT_DIR/chezmoi"
+          DOTFILES_DIR="$SCRIPT_DIR/dotfiles"
+          
+          # Make chezmoi executable
+          chmod +x "$CHEZMOI_BIN"
+          
+          # Check if chezmoi source directory already exists
+          if [ -d "$HOME/.local/share/chezmoi" ]; then
+              echo "Existing chezmoi source found. Backing up to ~/.local/share/chezmoi.backup"
+              mv "$HOME/.local/share/chezmoi" "$HOME/.local/share/chezmoi.backup"
+          fi
+          
+          # Initialize chezmoi with our dotfiles
+          echo "Initializing chezmoi..."
+          "$CHEZMOI_BIN" init --source "$DOTFILES_DIR"
+          
+          # Apply the dotfiles
+          echo "Applying dotfiles..."
+          "$CHEZMOI_BIN" apply --verbose
+          
+          echo ""
+          echo "Installation complete!"
+          echo "You may need to restart your shell or run 'exec \$SHELL' to load the new configuration."
+          EOF
+          
+          chmod +x release/install.sh
+
+      - name: Create README for release
+        run: |
+          cat <<EOF > release/README.txt
+          # Dotfiles with Bundled Chezmoi
+          
+          This archive contains:
+          - chezmoi binary (for ${{ matrix.os }}/${{ matrix.arch }})
+          - dotfiles templates
+          - install.sh script for easy installation
+          
+          ## Installation
+          
+          1. Extract this archive to a temporary directory
+          2. Run: ./install.sh
+          3. Follow the prompts
+          
+          ## Manual Installation
+          
+          If you prefer to install manually:
+          
+          1. Make chezmoi executable: chmod +x chezmoi
+          2. Initialize chezmoi: ./chezmoi init --source dotfiles/
+          3. Review what will be changed: ./chezmoi diff
+          4. Apply the dotfiles: ./chezmoi apply
+          
+          ## Source
+          
+          GitHub: https://github.com/redjax/dotfiles
+          EOF
+
+      - name: Create archives
+        run: |
+          VERSION="${{ needs.setup.outputs.new_tag }}"
+          OS_ARCH="${{ matrix.os }}_${{ matrix.arch }}"
+          
+          # Create ZIP archive
+          cd release/
+          zip -r "../dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.zip" .
+          cd ..
+          
+          # Create TAR.GZ archive
+          tar -czf "dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.tar.gz" -C release/ .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            *.zip
+            *.tar.gz
+
+  release:
+    needs: 
+      - build
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ needs.setup.outputs.new_tag }}"
+          git push origin "v${{ needs.setup.outputs.new_tag }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ needs.setup.outputs.new_tag }}"
+          name: "v${{ needs.setup.outputs.new_tag }}"
+          generate_release_notes: true
+          files: artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
