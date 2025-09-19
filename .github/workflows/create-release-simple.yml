@@ -1,5 +1,5 @@
 ---
-name: Create Release with Bundled Chezmoi
+name: Create Manual Release
 
 on:
   workflow_dispatch:
@@ -186,17 +186,17 @@ jobs:
       - name: Create archives
         run: |
           VERSION="${{ needs.setup.outputs.new_tag }}"
-          OS_ARCH="${{ matrix.os }}_${{ matrix.arch }}"
+          OS_ARCH="${{ matrix.os }}-${{ matrix.arch }}"
           
           # Create deploy directory and move release contents into it
           mkdir -p deploy/
           mv release/* deploy/
           
           # Create ZIP archive
-          zip -r "dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.zip" deploy/
+          zip -r "dotfiles-${OS_ARCH}-v${VERSION}.zip" deploy/
           
           # Create TAR.GZ archive
-          tar -czf "dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.tar.gz" deploy/
+          tar -czf "dotfiles-${OS_ARCH}-v${VERSION}.tar.gz" deploy/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
