@@ -107,8 +107,9 @@ jobs:
             email = "${GIT_EMAIL}"
           EOF
           
-          # Initialize chezmoi with the source directory
-          chezmoi init --source $(pwd)/home
+          # Copy source to chezmoi's expected location
+          mkdir -p ~/.local/share/chezmoi
+          cp -r home/* ~/.local/share/chezmoi/
           
           # Apply to the rendered directory
           chezmoi apply --destination $(pwd)/rendered/ --verbose --force
@@ -229,10 +230,11 @@ jobs:
             email = "${GIT_EMAIL}"
           EOF
           
-          # Initialize chezmoi with source
-          chezmoi init --source $(pwd)/home
+          # Copy source to chezmoi's expected location
+          mkdir -p ~/.local/share/chezmoi
+          cp -r home/* ~/.local/share/chezmoi/
           
-          # Generate install script (this includes the entire repo)
+          # Generate install script
           chezmoi generate install.sh > self_contained/install.sh
           
           # Add README
