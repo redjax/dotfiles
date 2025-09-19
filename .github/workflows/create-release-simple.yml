@@ -73,8 +73,6 @@ jobs:
             arch: amd64
           - os: darwin
             arch: arm64
-          - os: windows
-            arch: amd64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -89,23 +87,8 @@ jobs:
           CHEZMOI_VERSION=$(curl -s https://api.github.com/repos/twpayne/chezmoi/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
           echo "Latest chezmoi version: $CHEZMOI_VERSION"
           
-          case "${{ matrix.os }}" in
-            linux)
-              CHEZMOI_OS="linux"
-              ;;
-            darwin)
-              CHEZMOI_OS="darwin"
-              ;;
-            windows)
-              CHEZMOI_OS="windows"
-              ;;
-          esac
-          
+          CHEZMOI_OS="${{ matrix.os }}"
           CHEZMOI_ARCH="${{ matrix.arch }}"
-          CHEZMOI_EXT=""
-          if [ "${{ matrix.os }}" = "windows" ]; then
-            CHEZMOI_EXT=".exe"
-          fi
           
           CHEZMOI_URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/chezmoi_${CHEZMOI_VERSION#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
           
@@ -113,7 +96,7 @@ jobs:
           curl -L "$CHEZMOI_URL" | tar -xz -C temp_chezmoi/
           
           # Move the binary to release directory
-          mv temp_chezmoi/chezmoi${CHEZMOI_EXT} release/
+          mv temp_chezmoi/chezmoi release/
 
       - name: Copy dotfiles templates
         run: |
