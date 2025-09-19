@@ -103,8 +103,7 @@ jobs:
           # Copy the home directory (contains all templates)
           cp -r home/ release/dotfiles/
           
-          # Copy any additional files users might need
-          cp README.md release/ 2>/dev/null || echo "README.md not found, skipping"
+          # Copy any additional config files users might need
           cp .chezmoidata.yml release/ 2>/dev/null || echo ".chezmoidata.yml not found, skipping"
 
       - name: Create installation script
@@ -189,13 +188,15 @@ jobs:
           VERSION="${{ needs.setup.outputs.new_tag }}"
           OS_ARCH="${{ matrix.os }}_${{ matrix.arch }}"
           
+          # Create deploy directory and move release contents into it
+          mkdir -p deploy/
+          mv release/* deploy/
+          
           # Create ZIP archive
-          cd release/
-          zip -r "../dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.zip" .
-          cd ..
+          zip -r "dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.zip" deploy/
           
           # Create TAR.GZ archive
-          tar -czf "dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.tar.gz" -C release/ .
+          tar -czf "dotfiles_with_chezmoi-v${VERSION}-${OS_ARCH}.tar.gz" deploy/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
