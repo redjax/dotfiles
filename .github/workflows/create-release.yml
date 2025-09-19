@@ -97,18 +97,21 @@ jobs:
           GIT_USER="github-actions[bot]"
           GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
           
-          # Set environment variables for chezmoi data
-          export CHEZMOI_DATA_NAME="${GIT_USER}"
-          export CHEZMOI_DATA_EMAIL="${GIT_EMAIL}"
+          # Create chezmoi config directory
+          mkdir -p ~/.config/chezmoi
           
-          # Apply directly from source to destination with data
-          chezmoi apply \
-            --source $(pwd)/home \
-            --destination $(pwd)/rendered/ \
-            --data name="${GIT_USER}" \
-            --data email="${GIT_EMAIL}" \
-            --verbose \
-            --force
+          # Create chezmoi config file with data
+          cat <<EOF > ~/.config/chezmoi/chezmoi.toml
+          [data]
+            name = "${GIT_USER}"
+            email = "${GIT_EMAIL}"
+          EOF
+          
+          # Initialize chezmoi with the source directory
+          chezmoi init --source $(pwd)/home
+          
+          # Apply to the rendered directory
+          chezmoi apply --destination $(pwd)/rendered/ --verbose --force
           
           # Show what was created
           echo "Files created in rendered/:"
@@ -154,6 +157,12 @@ jobs:
         run: |
           echo "Chezmoi version:"
           chezmoi --version
+          echo ""
+          echo "Chezmoi config:"
+          cat ~/.config/chezmoi/chezmoi.toml
+          echo ""
+          echo "Chezmoi data:"
+          chezmoi data
           echo ""
           echo "Source directory template files:"
           find home/ -name "*.tmpl" | head -10
@@ -209,8 +218,22 @@ jobs:
           sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
+          # Create chezmoi config for installer generation
+          mkdir -p ~/.config/chezmoi
+          GIT_USER="github-actions[bot]"
+          GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
+          
+          cat <<EOF > ~/.config/chezmoi/chezmoi.toml
+          [data]
+            name = "${GIT_USER}"
+            email = "${GIT_EMAIL}"
+          EOF
+          
+          # Initialize chezmoi with source
+          chezmoi init --source $(pwd)/home
+          
           # Generate install script (this includes the entire repo)
-          chezmoi generate install.sh --source $(pwd)/home > self_contained/install.sh
+          chezmoi generate install.sh > self_contained/install.sh
           
           # Add README
           cat <<EOF > self_contained/README_BEFORE_INSTALL.txt
