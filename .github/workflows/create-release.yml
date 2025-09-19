@@ -86,34 +86,33 @@ jobs:
       - name: Add chezmoi to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Create chezmoi config for CI
-        run: |
-          GIT_USER="github-actions[bot]"
-          GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
-          
-          cat <<EOF > .chezmoi.toml
-          [data]
-            name = "${GIT_USER}"
-            email = "${GIT_EMAIL}"
-          EOF
-
       - name: Create output directories
         run: |
           mkdir -p rendered/
           mkdir -p self_contained/
           mkdir -p release_assets/
 
-      - name: Render dotfiles to output directory
+      - name: Setup chezmoi and render dotfiles
         run: |
+          GIT_USER="github-actions[bot]"
+          GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
+          
+          # Set environment variables for chezmoi data
+          export CHEZMOI_DATA_NAME="${GIT_USER}"
+          export CHEZMOI_DATA_EMAIL="${GIT_EMAIL}"
+          
+          # Apply directly from source to destination with data
           chezmoi apply \
             --source $(pwd)/home \
-            --config .chezmoi.toml \
-            --config-format toml \
-            --destination rendered/ \
-            --keep-going \
-            --no-tty \
+            --destination $(pwd)/rendered/ \
+            --data name="${GIT_USER}" \
+            --data email="${GIT_EMAIL}" \
             --verbose \
             --force
+          
+          # Show what was created
+          echo "Files created in rendered/:"
+          find rendered/ -type f | head -20
 
       - name: Add generated files to rendered/
         run: |
@@ -151,16 +150,16 @@ jobs:
           Close & re-open your terminal (or log out and back in), or run exec \$SHELL to load the dotfiles.
           EOF
 
-      - name: Debug - Show chezmoi version and config
+      - name: Debug - Show chezmoi version and results
         run: |
           echo "Chezmoi version:"
           chezmoi --version
           echo ""
-          echo "Chezmoi config:"
-          cat .chezmoi.toml
-          echo ""
-          echo "Source directory contents:"
+          echo "Source directory template files:"
           find home/ -name "*.tmpl" | head -10
+          echo ""
+          echo "Rendered files:"
+          find rendered/ -type f | head -20
           echo ""
 
       - name: List files for debugging
@@ -202,26 +201,16 @@ jobs:
         run: |
           mkdir -p release_assets/
 
-      - name: Recreate self-contained files for archiving
+      - name: Create self-contained chezmoi installer
         run: |
           mkdir -p self_contained/
           
-          # Install chezmoi
+          # Install chezmoi for generating the install script
           sh -c "$(curl -fsLS get.chezmoi.io)" -- -b ~/.local/bin
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           
-          # Create chezmoi config
-          GIT_USER="github-actions[bot]"
-          GIT_EMAIL="41898282+52949282+github-actions[bot]@users.noreply.github.com"
-          
-          cat <<EOF > .chezmoi.toml
-          [data]
-            name = "${GIT_USER}"
-            email = "${GIT_EMAIL}"
-          EOF
-          
-          # Generate install script
-          chezmoi generate install.sh > self_contained/install.sh
+          # Generate install script (this includes the entire repo)
+          chezmoi generate install.sh --source $(pwd)/home > self_contained/install.sh
           
           # Add README
           cat <<EOF > self_contained/README_BEFORE_INSTALL.txt
