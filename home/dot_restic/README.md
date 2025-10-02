@@ -14,6 +14,9 @@ Restic is [scriptable](https://restic.readthedocs.io/en/latest/075_scripting.htm
 
 ## Setup
 
+> [!NOTE]
+> For a step-by-step guide I use on new machines, check the [setup document](./SETUP.md).
+
 First, install Restic, either using the [official install docs](https://restic.readthedocs.io/en/latest/020_installation.html), or the included [`install_restic.sh` script](./scripts/executable_install_restic.sh).
 
 To use this directory on a new machine, you have to do a bit of setup. There is an [init script](./scripts/executable_restic_init_local.sh) to guide you through initializing a local Restic repository, which accepts CLI args (run it with `-h/--help` to see usage) or prompts the user for missing inputs like a password.
