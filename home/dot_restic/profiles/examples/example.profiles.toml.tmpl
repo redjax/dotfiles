@@ -9,6 +9,7 @@ min-memory = 100
 [default]
 repository = "local:/path/to/restic-repo"
 password-file = "/path/to/restic_pw"
+no-error-on-warning = true
 
 [default.forget]
 keep-last = 2
@@ -41,9 +42,6 @@ with-cache = false
 cleanup = false
 max-age = 30
 no-size = false
-
-[default]
-no-error-on-warning = true
 
 [groups]
 basic = ["home"]
@@ -87,14 +85,14 @@ source = ["/home/username"]
 tags = ["rclone", "home", "userland"]
 
 [rclone_backup.env]
-RCLONE_CONFIG = "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.conf\" }}"
+RCLONE_CONFIG = "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
 
 [pcloud-backup]
 inherit = "default"
-repository = "rclone:pcloud:restic-backups"
+repository = "rclone:your-remote:/path/to/restic/repo"
 
 [pcloud-backup.env]
-RCLONE_CONFIG = "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.pcloud.conf\" }}"
+RCLONE_CONFIG = "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
 
 [pcloud-backup.backup]
 source = ["/home/username"]
@@ -113,4 +111,4 @@ source = ["/home/username"]
 tags = ["sftp"]
 
 [sftp-backup.env]
-SSH_AUTH_SOCK = "{{ .Env.SSH_AUTH_SOCK }}"
+SSH_AUTH_SOCK = "{{ default "" (env "SSH_AUTH_SOCK") }}"

@@ -162,13 +162,13 @@ b2_example:
 
     ## To load from the environment, use this template syntax
     #  https://creativeprojects.github.io/resticprofile/configuration/templates/index.html
-    # B2_ACCOUNT_ID: "{{ .Env.MY_CUSTOM_ID }}"
-    # B2_APPLICATION_KEY: "{{ .Env.MY_CUSTOM_KEY }}"
+    # B2_ACCOUNT_ID: "{{ default "" (env "B2_ACCOUNT_ID") }}"
+    # B2_APPLICATION_KEY: "{{ default "" (env "B2_APPLICATION_KEY") }}"
 
 ## Example rclone backup
 rclone_backup:
   inherit: default
-  repository: "rclone:your-remote:restic-backups"
+  repository: rclone:your-remote:/path/to/restic/repo
   backup:
     source:
       - "/home/username"
@@ -178,14 +178,14 @@ rclone_backup:
     - userland
   env:
     ## Set path to rclone.conf file. Looks in ~/.config/rclone/rclone.conf by default
-    RCLONE_CONFIG: "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.conf\" }}"
+    RCLONE_CONFIG: "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
 
 ## Example pcloud backup
 pcloud-backup:
   inherit: default
   repository: "rclone:pcloud:restic-backups"
   env:
-    RCLONE_CONFIG: "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.pcloud.conf\" }}"
+    RCLONE_CONFIG: "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
   backup:
     source:
       - "/home/username"
@@ -199,7 +199,7 @@ pcloud-backup:
 sftp-backup:
   inherit: default
   ## You can parametrize this, i.e.
-  #  repository: "sftp:{{ .Env.SFTP_USER }}@{{ .Env.SFTP_HOST }}:{{ .Env.SFTP_PATH }}"
+  #  repository: "sftp:username@hostname-or-ip:/path/on/remote/host"
   repository: "sftp:user@host:/path/to/restic-repo"
   backup:
     source:
@@ -210,4 +210,4 @@ sftp-backup:
     ## Optional SSH config file path or overrides.
     #  Using key-based auth may fail if this is not set.
     #  Specific to UNIX-like OSes (Linux, macOS).
-    SSH_AUTH_SOCK: "{{ .Env.SSH_AUTH_SOCK }}"
+    SSH_AUTH_SOCK: "{{ default "" (env "SSH_AUTH_SOCK") }}"
