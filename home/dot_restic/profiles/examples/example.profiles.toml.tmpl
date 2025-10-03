@@ -1,0 +1,116 @@
+version = "1"
+
+[global]
+default-command = "backup"
+initialize = false
+priority = "low"
+min-memory = 100
+
+[default]
+repository = "local:/path/to/restic-repo"
+password-file = "/path/to/restic_pw"
+
+[default.forget]
+keep-last = 2
+keep-hourly = 24
+keep-daily = 7
+keep-weekly = 4
+keep-tag = ["forever"]
+prune = true
+tag = ["resticprofile"]
+
+[default.backup]
+verbose = false
+one-file-system = false
+read-concurrency = 2
+skip-if-unchanged = true
+exclude = [".tmp/", ".cache/"]
+exclude-file = ["/path/to/resticignore"]
+exclude-cloud-files = false
+group-by = "host,paths"
+
+[default.check]
+schedule = "weekly"
+schedule-after-network-online = false
+schedule-ignore-on-battery = false
+schedule-ignore-on-battery-less-than = 20
+read-data = true
+with-cache = false
+
+[default.cache]
+cleanup = false
+max-age = 30
+no-size = false
+
+[default]
+no-error-on-warning = true
+
+[groups]
+basic = ["home"]
+full_backup = ["home"]
+
+[home]
+inherit = "default"
+
+[home.backup]
+verbose = true
+source = ["/home/username"]
+exclude-file = ["/path/to/resticignore", "/path/to/restic_home_ignore"]
+
+[home.tags]
+tags = ["home", "userland"]
+
+[home.check]
+schedule = "*-*-01 03:00"
+
+[b2_example]
+inherit = "default"
+repository = "b2:your-bucket:/restic-backups"
+password-file = "/path/to/b2_pw"
+
+[b2_example.backup]
+source = ["/some/path/to/backup"]
+exclude-file = ["/path/to/restic_b2ignore"]
+
+[b2_example.env]
+B2_ACCOUNT_ID = "..."
+B2_APPLICATION_KEY = "..."
+
+[rclone_backup]
+inherit = "default"
+repository = "rclone:your-remote:restic-backups"
+
+[rclone_backup.backup]
+source = ["/home/username"]
+
+[rclone_backup.tags]
+tags = ["rclone", "home", "userland"]
+
+[rclone_backup.env]
+RCLONE_CONFIG = "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.conf\" }}"
+
+[pcloud-backup]
+inherit = "default"
+repository = "rclone:pcloud:restic-backups"
+
+[pcloud-backup.env]
+RCLONE_CONFIG = "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.pcloud.conf\" }}"
+
+[pcloud-backup.backup]
+source = ["/home/username"]
+
+[pcloud-backup.tags]
+tags = ["pcloud", "home", "userland"]
+
+[sftp-backup]
+inherit = "default"
+repository = "sftp:user@host:/path/to/restic-repo"
+
+[sftp-backup.backup]
+source = ["/home/username"]
+
+[sftp-backup.tags]
+tags = ["sftp"]
+
+[sftp-backup.env]
+SSH_AUTH_SOCK = "{{ .Env.SSH_AUTH_SOCK }}"
