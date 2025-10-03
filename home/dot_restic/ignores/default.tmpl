@@ -1,16 +1,18 @@
 ## Ignore caches
 *.cache
 .cache/
+.pytest_cache/
+.nox/
+.ruff_cache/
 
 ## Ignore temporary files
 *.tmp
 *.temp
+tmp/
+temp/
 
 ## Ignore specific user directories
 Downloads/
-
-## Ignore log files
-*.log
 
 ## Ignore MacOS and Linux system files
 .DS_Store
@@ -64,6 +66,7 @@ MANIFEST
 venv/
 env/
 .env/
+.venv/
 
 ## Ignore distribution/build directories
 build/
@@ -75,13 +78,8 @@ dist/
 *.tmp
 *.swp
 
-## Ignore caches
-.cache/
-.pytest_cache/
-
-## Ignore IDE/editor files
-.vscode/
-.idea/
+## Ignore node
+node_modules/
 
 ## -----------------------------------
 
