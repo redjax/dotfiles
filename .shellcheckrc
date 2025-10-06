@@ -1,0 +1,36 @@
+# Shellcheck configuration for chezmoi dotfiles repository
+# See: https://github.com/koalaman/shellcheck/wiki/Directive
+
+# Disable checks for template variables (chezmoi uses {{ .variable }} syntax)
+disable=SC2154  # var is referenced but not assigned (template variables)
+
+# Disable checks that conflict with common template patterns
+disable=SC2086  # Double quote to prevent globbing and word splitting (often needed in templates)
+
+# Disable syntax errors caused by template directives
+disable=SC1054  # You need a space after the '{' (chezmoi template syntax)
+disable=SC1083  # This } is literal (chezmoi template syntax)
+disable=SC1073  # Couldn't parse this brace group (chezmoi template syntax)
+disable=SC1072  # Unexpected keyword/token (chezmoi template syntax)
+
+# Disable checks for zsh-specific syntax (many .zsh.tmpl files use zsh features)
+disable=SC2148  # Tips depend on target shell (many zsh files don't have shebangs)
+disable=SC2296  # Parameter expansions can't start with ( (zsh syntax)
+
+# Disable checks for variables that are used by frameworks like oh-my-zsh
+disable=SC2034  # Variable appears unused (oh-my-zsh, tmux-powerline, etc. use them)
+
+# Disable checks for sourcing non-constant files (common in dotfiles)
+disable=SC1090  # ShellCheck can't follow non-constant source
+
+# Allow some common patterns in shell scripts
+disable=SC2142  # Aliases can't use positional parameters (zsh aliases can)
+disable=SC2139  # This expands when defined, not when used (intentional in many cases)
+
+# Set the default shell to bash for unknown scripts
+# Individual files can override with: # shellcheck shell=bash|sh|zsh
+shell=bash
+
+# Enable optional checks
+# enable=check-extra-masked-returns
+# enable=check-unassigned-uppercase
