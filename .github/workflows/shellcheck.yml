@@ -1,0 +1,184 @@
+name: Shellcheck
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, dev, feat/** ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  shellcheck-source:
+    name: Shellcheck - Source Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run shellcheck on source files
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          severity: warning
+          format: tty
+          additional_files: '*.tmpl'
+        continue-on-error: true
+      
+      - name: Upload shellcheck results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shellcheck-source-results
+          path: |
+            **/shellcheck.log
+            **/shellcheck-*.log
+
+  shellcheck-rendered:
+    name: Shellcheck - Rendered Templates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install chezmoi
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+          chezmoi --version
+      
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck --version
+      
+      - name: Render chezmoi templates
+        run: |
+          mkdir -p /tmp/chezmoi-rendered
+          export CHEZMOI_DATA_custom_hostname="github-actions"
+          chezmoi archive --output=/tmp/chezmoi-rendered.tar --source="${GITHUB_WORKSPACE}" 2>/dev/null || true
+          tar -xf /tmp/chezmoi-rendered.tar -C /tmp/chezmoi-rendered 2>/dev/null || true
+          echo "Rendered files:"
+          find /tmp/chezmoi-rendered -type f | wc -l
+      
+      - name: Find shell scripts in rendered output
+        id: find-scripts
+        run: |
+          cd /tmp/chezmoi-rendered
+          
+          # Find all shell scripts
+          {
+            find . -type f \( \
+              -name "*.sh" -o \
+              -name "*.bash" -o \
+              -name "*.zsh" -o \
+              -name "*.ksh" \
+            \)
+            
+            find . -type f -executable -exec sh -c '
+              for file; do
+                if head -n1 "$file" 2>/dev/null | grep -q "^#!.*sh"; then
+                  echo "$file"
+                fi
+              done
+            ' sh {} +
+          } | sort -u > /tmp/shell-scripts.txt
+          
+          SCRIPT_COUNT=$(wc -l < /tmp/shell-scripts.txt)
+          echo "Found ${SCRIPT_COUNT} shell scripts"
+          echo "script_count=${SCRIPT_COUNT}" >> $GITHUB_OUTPUT
+      
+      - name: Run shellcheck on rendered files
+        if: steps.find-scripts.outputs.script_count > 0
+        run: |
+          cd /tmp/chezmoi-rendered
+          
+          # Copy .shellcheckrc if it exists
+          if [ -f "${GITHUB_WORKSPACE}/.shellcheckrc" ]; then
+            echo "Using .shellcheckrc configuration"
+            cp "${GITHUB_WORKSPACE}/.shellcheckrc" ./.shellcheckrc
+          fi
+          
+          FAILED=0
+          CHECKED=0
+          
+          while IFS= read -r script; do
+            CHECKED=$((CHECKED + 1))
+            echo "[$CHECKED] Checking: ${script#./}"
+            
+            if shellcheck --severity=warning --color=auto "$script"; then
+              echo "  ✓ OK"
+            else
+              echo "  ✗ FAILED"
+              FAILED=$((FAILED + 1))
+            fi
+            echo ""
+          done < /tmp/shell-scripts.txt
+          
+          echo "================================"
+          echo "Shellcheck Summary (Rendered)"
+          echo "================================"
+          echo "Checked: ${CHECKED} files"
+          echo "Failed:  ${FAILED} files"
+          echo "Passed:  $((CHECKED - FAILED)) files"
+          
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::warning::Shellcheck found issues in ${FAILED} rendered file(s)"
+            exit 1
+          else
+            echo "✓ All rendered scripts passed shellcheck"
+          fi
+        continue-on-error: true
+      
+      - name: Upload rendered files on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chezmoi-rendered-files
+          path: /tmp/chezmoi-rendered/
+          retention-days: 7
+        continue-on-error: true
+
+  shellcheck-summary:
+    name: Shellcheck Summary
+    runs-on: ubuntu-latest
+    needs: [shellcheck-source, shellcheck-rendered]
+    if: always()
+    
+    steps:
+      - name: Check results
+        run: |
+          echo "## Shellcheck Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          SOURCE_RESULT="${{ needs.shellcheck-source.result }}"
+          RENDERED_RESULT="${{ needs.shellcheck-rendered.result }}"
+          
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$SOURCE_RESULT" == "success" ]; then
+            echo "| Source Files | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Source Files | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "$RENDERED_RESULT" == "success" ]; then
+            echo "| Rendered Templates | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Rendered Templates | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$SOURCE_RESULT" == "success" ] && [ "$RENDERED_RESULT" == "success" ]; then
+            echo "✅ **All shellcheck scans passed!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Some shellcheck scans failed. Please review the logs.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "_Note: Shellcheck failures do not block merges._" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Always exit successfully to not block PRs
+          exit 0
