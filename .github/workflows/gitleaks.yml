@@ -89,35 +89,46 @@ jobs:
             echo "================================"
             echo "Scanning rendered chezmoi templates..."
             echo "================================"
+            
+            ## Always generate SARIF report first (with exit-code=0 to not fail)
+            gitleaks detect --source=/tmp/chezmoi-rendered --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --no-git --report-path=gitleaks-rendered-report.sarif --report-format=sarif --exit-code=0 || true
+            
+            ## Also generate JSON report and check for leaks
             if ! gitleaks detect --source=/tmp/chezmoi-rendered --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --verbose --no-git --report-path=gitleaks-rendered-report.json --report-format=json; then
-              echo "⚠️  Secrets found in rendered templates!"
+              echo "Secrets found in rendered templates"
               SCAN_FAILED=1
             else
-              echo "✅ No secrets found in rendered templates"
+              echo "No secrets found in rendered templates"
             fi
-            
-            ## Also generate SARIF report for GitHub Security
-            gitleaks detect --source=/tmp/chezmoi-rendered --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --no-git --report-path=gitleaks-rendered-report.sarif --report-format=sarif --exit-code=0 || true
           else
-            echo "⚠️  No rendered templates found to scan"
+            echo "No rendered templates found to scan"
+            ## Create empty SARIF file
+            echo '{"version":"2.1.0","runs":[]}' > gitleaks-rendered-report.sarif
           fi
           
           ## Exit with error if secrets were found
           if [ $SCAN_FAILED -eq 1 ]; then
             echo "================================"
-            echo "❌ Gitleaks scan failed - secrets detected!"
+            echo "Gitleaks scan failed - secrets detected"
             echo "================================"
             exit 1
           fi
 
-      - name: Upload SARIF to GitHub Security
+      - name: Upload source SARIF to GitHub Security
         if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: |
-            gitleaks-source-report.sarif
-            gitleaks-rendered-report.sarif
-          category: gitleaks
+          sarif_file: gitleaks-source-report.sarif
+          category: gitleaks-source
+
+      - name: Upload rendered SARIF to GitHub Security
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks-rendered-report.sarif
+          category: gitleaks-rendered
 
       - name: Upload Gitleaks report
         if: failure()
