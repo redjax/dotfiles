@@ -59,20 +59,41 @@ jobs:
           fi
 
       - name: Scan source files with Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_CONFIG: .gitleaks.toml
+        id: gitleaks-source
         continue-on-error: true
-        with:
-          config-path: .gitleaks.toml
-          report-format: sarif
-          report-path: gitleaks-source-report.sarif
+        run: |
+          ## Install gitleaks if not present
+          if ! command -v gitleaks &> /dev/null; then
+            echo "Installing gitleaks..."
+            wget -q https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz
+            tar -xzf gitleaks_*.tar.gz
+            chmod +x gitleaks
+            sudo mv gitleaks /usr/local/bin/
+          fi
+          
+          gitleaks version
+          
+          echo "================================"
+          echo "Scanning source files..."
+          echo "================================"
+          
+          ## Scan with git history, generate SARIF report
+          gitleaks detect --source="${GITHUB_WORKSPACE}" --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --report-path=gitleaks-source-report.sarif --report-format=sarif --exit-code=0 || true
+          
+          ## Also run with exit code to check for failures
+          if ! gitleaks detect --source="${GITHUB_WORKSPACE}" --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --verbose; then
+            echo "Secrets found in source files"
+            echo "source_scan_failed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No secrets found in source files"
+            echo "source_scan_failed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Scan rendered templates with Gitleaks
+        id: gitleaks-rendered
         if: always()
         run: |
-          ## Install gitleaks for custom scan
+          ## Install gitleaks if not present
           if ! command -v gitleaks &> /dev/null; then
             echo "Installing gitleaks..."
             wget -q https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz
@@ -102,8 +123,24 @@ jobs:
             fi
           else
             echo "No rendered templates found to scan"
-            ## Create empty SARIF file
-            echo '{"version":"2.1.0","runs":[]}' > gitleaks-rendered-report.sarif
+            ## Create valid empty SARIF file
+            cat > gitleaks-rendered-report.sarif << 'EOF'
+          {
+            "version": "2.1.0",
+            "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+            "runs": [
+              {
+                "tool": {
+                  "driver": {
+                    "name": "Gitleaks",
+                    "informationUri": "https://github.com/gitleaks/gitleaks"
+                  }
+                },
+                "results": []
+              }
+            ]
+          }
+          EOF
           fi
           
           ## Exit with error if secrets were found
@@ -111,11 +148,30 @@ jobs:
             echo "================================"
             echo "Gitleaks scan failed - secrets detected"
             echo "================================"
+            echo "rendered_scan_failed=true" >> $GITHUB_OUTPUT
             exit 1
+          else
+            echo "rendered_scan_failed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify SARIF reports
+        if: always()
+        run: |
+          echo "Checking for SARIF reports..."
+          ls -lah *.sarif 2>/dev/null || echo "No SARIF files found"
+          
+          if [ -f gitleaks-source-report.sarif ]; then
+            echo "Source SARIF exists ($(wc -c < gitleaks-source-report.sarif) bytes)"
+            head -n 5 gitleaks-source-report.sarif
+          fi
+          
+          if [ -f gitleaks-rendered-report.sarif ]; then
+            echo "Rendered SARIF exists ($(wc -c < gitleaks-rendered-report.sarif) bytes)"
+            head -n 5 gitleaks-rendered-report.sarif
           fi
 
       - name: Upload source SARIF to GitHub Security
-        if: always()
+        if: always() && hashFiles('gitleaks-source-report.sarif') != ''
         continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -123,7 +179,7 @@ jobs:
           category: gitleaks-source
 
       - name: Upload rendered SARIF to GitHub Security
-        if: always()
+        if: always() && hashFiles('gitleaks-rendered-report.sarif') != ''
         continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
@@ -141,3 +197,13 @@ jobs:
             gitleaks-rendered-report.sarif
           retention-days: 7
           if-no-files-found: ignore
+
+      - name: Fail if secrets detected
+        if: always()
+        run: |
+          if [ "${{ steps.gitleaks-source.outputs.source_scan_failed }}" == "true" ] || [ "${{ steps.gitleaks-rendered.outputs.rendered_scan_failed }}" == "true" ]; then
+            echo "================================"
+            echo "FAILED: Secrets detected in scans"
+            echo "================================"
+            exit 1
+          fi
