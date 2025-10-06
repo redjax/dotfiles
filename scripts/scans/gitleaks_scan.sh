@@ -171,6 +171,7 @@ install_gitleaks() {
 ## Run gitleaks scan
 run_scan() {
     local config_file="${REPO_ROOT}/.gitleaks.toml"
+    local scan_mode="${1:-current}"
     
     if [ ! -f "$config_file" ]; then
         echo "[ERROR] Gitleaks config not found: $config_file"
@@ -179,36 +180,86 @@ run_scan() {
     
     echo "Repository root: ${REPO_ROOT}"
     echo "Config file: ${config_file}"
-    echo "Running Gitleaks scan..."
     
     echo ""
     echo "================================"
-    echo "Starting Gitleaks Secret Scan"
-    echo "================================"
-    echo ""
     
-    # Run gitleaks detect
-    if gitleaks detect --source="${REPO_ROOT}" --config="${config_file}" --verbose; then
+    # Run gitleaks detect based on scan mode
+    if [ "$scan_mode" = "full" ]; then
+        echo "Starting FULL Gitleaks Secret Scan (all history and branches)"
+        echo "================================"
         echo ""
-        echo "================================"
-        echo "SUCCESS: No secrets detected"
-        echo "================================"
-        return 0
+        
+        # Scan entire git history across all branches
+        if gitleaks detect --source="${REPO_ROOT}" --config="${config_file}" --verbose --log-opts="--all"; then
+            echo ""
+            echo "================================"
+            echo "SUCCESS: No secrets detected in full history"
+            echo "================================"
+            return 0
+        else
+            echo ""
+            echo "================================"
+            echo "[ERROR] Secrets detected in git history"
+            echo "================================"
+            return 1
+        fi
     else
+        echo "Starting Gitleaks Secret Scan (current state)"
+        echo "================================"
         echo ""
-        echo "================================"
-        echo "[ERROR] Secrets detected"
-        echo "================================"
-        return 1
+        
+        # Scan current state only (no git history)
+        if gitleaks detect --source="${REPO_ROOT}" --config="${config_file}" --verbose --no-git; then
+            echo ""
+            echo "================================"
+            echo "SUCCESS: No secrets detected"
+            echo "================================"
+            return 0
+        else
+            echo ""
+            echo "================================"
+            echo "[ERROR] Secrets detected"
+            echo "================================"
+            return 1
+        fi
     fi
 }
 
 ## Main execution
 main() {
+    local scan_mode="current"
+    
+    # Parse command line arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --full|--all|-f)
+                scan_mode="full"
+                shift
+                ;;
+            --help|-h)
+                echo "Usage: $0 [OPTIONS]"
+                echo ""
+                echo "Options:"
+                echo "  --full, --all, -f    Scan entire git history and all branches"
+                echo "  --help, -h           Show this help message"
+                echo ""
+                echo "Default: Scans current state only (no git history)"
+                exit 0
+                ;;
+            *)
+                echo "[ERROR] Unknown option: $1"
+                echo "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+    
     echo "Gitleaks Scan Script"
     echo "Script location: ${THIS_DIR}"
     echo "Repository root: ${REPO_ROOT}"
     echo "OS/Architecture: $(detect_os)"
+    echo "Scan mode: ${scan_mode}"
     
     if [ "$(uname -s)" = "Linux" ]; then
         echo "Linux distribution: $(get_linux_distro)"
@@ -230,8 +281,8 @@ main() {
     
     echo ""
     
-    # Run the scan
-    if run_scan; then
+    # Run the scan with specified mode
+    if run_scan "$scan_mode"; then
         exit 0
     else
         exit 1
