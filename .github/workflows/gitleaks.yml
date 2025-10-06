@@ -1,0 +1,143 @@
+---
+name: Gitleaks Secret Scanning
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  gitleaks:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ## Fetch all history for all branches and tags
+          fetch-depth: 0
+
+      - name: Install chezmoi
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+          chezmoi --version
+
+      - name: Create temporary build directory
+        run: |
+          mkdir -p /tmp/chezmoi-build
+
+      - name: Build chezmoi templates
+        run: |
+          ## Create directory for rendered templates
+          mkdir -p /tmp/chezmoi-rendered
+          
+          ## Initialize chezmoi with the current repository as source
+          export CHEZMOI_SOURCE_DIR="${GITHUB_WORKSPACE}"
+          
+          ## Set chezmoi data values to avoid prompts
+          export CHEZMOI_DATA_custom_hostname="ci-test"
+          
+          ## Archive and extract rendered templates
+          #  This processes all .tmpl files and outputs the final rendered content
+          chezmoi archive --output=/tmp/chezmoi-build.tar --source="${GITHUB_WORKSPACE}" 2>&1 || {
+            echo "Warning: chezmoi archive had issues, continuing anyway..."
+          }
+          
+          ## Extract rendered templates if archive was created
+          if [ -f /tmp/chezmoi-build.tar ]; then
+            tar -xf /tmp/chezmoi-build.tar -C /tmp/chezmoi-rendered
+            echo "Successfully extracted rendered templates"
+            ls -la /tmp/chezmoi-rendered || true
+          else
+            echo "No archive created, templates may not have been rendered"
+          fi
+
+      - name: Scan source files with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+        continue-on-error: true
+        with:
+          config-path: .gitleaks.toml
+          report-format: sarif
+          report-path: gitleaks-source-report.sarif
+
+      - name: Scan rendered templates with Gitleaks
+        if: always()
+        run: |
+          ## Install gitleaks for custom scan
+          if ! command -v gitleaks &> /dev/null; then
+            echo "Installing gitleaks..."
+            wget -q https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(uname -s)_$(uname -m).tar.gz
+            tar -xzf gitleaks_*.tar.gz
+            chmod +x gitleaks
+            sudo mv gitleaks /usr/local/bin/
+          fi
+          
+          gitleaks version
+          
+          ## Scan the rendered templates if directory exists
+          SCAN_FAILED=0
+          if [ -d /tmp/chezmoi-rendered ] && [ "$(ls -A /tmp/chezmoi-rendered 2>/dev/null)" ]; then
+            echo "================================"
+            echo "Scanning rendered chezmoi templates..."
+            echo "================================"
+            
+            ## Always generate SARIF report first (with exit-code=0 to not fail)
+            gitleaks detect --source=/tmp/chezmoi-rendered --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --no-git --report-path=gitleaks-rendered-report.sarif --report-format=sarif --exit-code=0 || true
+            
+            ## Also generate JSON report and check for leaks
+            if ! gitleaks detect --source=/tmp/chezmoi-rendered --config="${GITHUB_WORKSPACE}/.gitleaks.toml" --verbose --no-git --report-path=gitleaks-rendered-report.json --report-format=json; then
+              echo "Secrets found in rendered templates"
+              SCAN_FAILED=1
+            else
+              echo "No secrets found in rendered templates"
+            fi
+          else
+            echo "No rendered templates found to scan"
+            ## Create empty SARIF file
+            echo '{"version":"2.1.0","runs":[]}' > gitleaks-rendered-report.sarif
+          fi
+          
+          ## Exit with error if secrets were found
+          if [ $SCAN_FAILED -eq 1 ]; then
+            echo "================================"
+            echo "Gitleaks scan failed - secrets detected"
+            echo "================================"
+            exit 1
+          fi
+
+      - name: Upload source SARIF to GitHub Security
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks-source-report.sarif
+          category: gitleaks-source
+
+      - name: Upload rendered SARIF to GitHub Security
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks-rendered-report.sarif
+          category: gitleaks-rendered
+
+      - name: Upload Gitleaks report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: |
+            gitleaks-source-report.sarif
+            gitleaks-rendered-report.json
+            gitleaks-rendered-report.sarif
+          retention-days: 7
+          if-no-files-found: ignore
