@@ -1,0 +1,54 @@
+# Trufflehog configuration file
+# See: https://github.com/trufflesecurity/trufflehog
+
+# Only report verified and unknown results by default
+# - verified: Secret confirmed active via API testing
+# - unknown: Verification failed due to network/API error
+# - unverified: Detected but not verified
+only:
+  - verified
+  - unknown
+
+# Exclude specific paths from scanning
+exclude:
+  paths:
+    # Git internals
+    - '\.git/'
+    - '\.github/workflows/.*\.yml'
+    
+    # Temporary and build files
+    - '.*\.tar$'
+    - '.*\.tar\.gz$'
+    - '/tmp/.*'
+    
+    # Documentation and examples that may contain test keys
+    - '.*README\.md$'
+    - '.*/examples/.*'
+    - '.*/docs/.*'
+    
+    # Ignore certain chezmoi template patterns that cause false positives
+    - '.*\.tmpl$'  # Note: This will skip templates; remove if you want to scan them
+
+# Detectors to always exclude (if any)
+# exclude-detectors:
+#   - Generic
+
+# Maximum file size to scan (in bytes)
+# max-file-size: 10485760  # 10MB
+
+# Include specific detectors only (optional)
+# include-detectors:
+#   - AWS
+#   - GitHub
+#   - Slack
+#   - OpenAI
+
+# Verification settings
+# no-verification: false  # Set to true to skip verification
+
+# Concurrency settings
+# concurrency: 20
+
+# Archive scanning settings
+# archive-max-size: 10485760  # 10MB
+# archive-max-depth: 5

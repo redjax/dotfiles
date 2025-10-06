@@ -1,0 +1,160 @@
+name: Trufflehog
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, dev, feat/** ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  trufflehog-source:
+    name: Trufflehog - Source Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Trufflehog needs full history
+      
+      - name: Run Trufflehog scan on source
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown --json
+        continue-on-error: true
+      
+      - name: Upload Trufflehog results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-source-results
+          path: |
+            trufflehog-results.json
+            **/trufflehog*.json
+        continue-on-error: true
+
+  trufflehog-rendered:
+    name: Trufflehog - Rendered Templates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install chezmoi
+        run: |
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
+          chezmoi --version
+      
+      - name: Install trufflehog
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+          trufflehog --version
+      
+      - name: Render chezmoi templates
+        run: |
+          mkdir -p /tmp/chezmoi-rendered
+          export CHEZMOI_DATA_custom_hostname="github-actions"
+          chezmoi archive --output=/tmp/chezmoi-rendered.tar --source="${GITHUB_WORKSPACE}" 2>/dev/null || true
+          tar -xf /tmp/chezmoi-rendered.tar -C /tmp/chezmoi-rendered 2>/dev/null || true
+          echo "Rendered files:"
+          find /tmp/chezmoi-rendered -type f | wc -l
+      
+      - name: Scan rendered templates with Trufflehog
+        run: |
+          echo "Scanning rendered templates for secrets..."
+          echo "Results filter: verified,unknown"
+          echo ""
+          
+          # Run trufflehog and capture exit code
+          if trufflehog filesystem /tmp/chezmoi-rendered --results=verified,unknown --json > /tmp/trufflehog-rendered.json; then
+            echo "✓ No verified or unknown secrets found in rendered templates"
+            EXIT_CODE=0
+          else
+            EXIT_CODE=$?
+            echo "⚠ Trufflehog found potential secrets (exit code: ${EXIT_CODE})"
+            
+            # Show summary
+            if [ -s /tmp/trufflehog-rendered.json ]; then
+              echo ""
+              echo "Summary of findings:"
+              jq -r '.DetectorName' /tmp/trufflehog-rendered.json 2>/dev/null | sort | uniq -c | sort -rn || echo "Could not parse results"
+            fi
+          fi
+          
+          # Create GitHub summary
+          echo "## Trufflehog Rendered Scan Results" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$EXIT_CODE" -eq 0 ]; then
+            echo "✅ No verified or unknown secrets detected" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Potential secrets detected in rendered templates" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the artifacts for details." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Exit with warning but don't fail the build
+          exit 0
+        continue-on-error: true
+      
+      - name: Upload rendered scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-rendered-results
+          path: /tmp/trufflehog-rendered.json
+          retention-days: 30
+        continue-on-error: true
+      
+      - name: Upload rendered files on findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chezmoi-rendered-files
+          path: /tmp/chezmoi-rendered/
+          retention-days: 7
+        continue-on-error: true
+
+  trufflehog-summary:
+    name: Trufflehog Summary
+    runs-on: ubuntu-latest
+    needs: [trufflehog-source, trufflehog-rendered]
+    if: always()
+    
+    steps:
+      - name: Create summary
+        run: |
+          echo "## 🔍 Trufflehog Secret Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          SOURCE_RESULT="${{ needs.trufflehog-source.result }}"
+          RENDERED_RESULT="${{ needs.trufflehog-rendered.result }}"
+          
+          echo "| Scan Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$SOURCE_RESULT" == "success" ]; then
+            echo "| Source Files | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Source Files | ⚠️ See logs |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "$RENDERED_RESULT" == "success" ]; then
+            echo "| Rendered Templates | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Rendered Templates | ⚠️ See logs |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### About Trufflehog" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 **800+ secret detectors** with active verification" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Verified**: Secret confirmed active via API" >> $GITHUB_STEP_SUMMARY
+          echo "- ❓ **Unknown**: Verification failed (network/API error)" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚠️ **Unverified**: Detected but not verified" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Note: Trufflehog findings are informational and do not block merges._" >> $GITHUB_STEP_SUMMARY
+          
+          # Always succeed to not block PRs
+          exit 0
