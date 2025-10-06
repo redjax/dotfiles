@@ -3,7 +3,7 @@ name: Trufflehog
 on:
   workflow_dispatch:
   push:
-    branches: [ main, dev, feat/** ]
+    branches: [ main, dev ]
   pull_request:
     branches: [ main, dev ]
 
