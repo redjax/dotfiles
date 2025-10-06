@@ -168,6 +168,70 @@ install_gitleaks() {
     fi
 }
 
+## Check if chezmoi is installed
+check_chezmoi() {
+    if command -v chezmoi &> /dev/null; then
+        echo "Chezmoi is installed: $(chezmoi --version 2>&1 | head -n1)"
+        return 0
+    else
+        echo "[WARNING] Chezmoi is not installed"
+        return 1
+    fi
+}
+
+## Render chezmoi templates to temporary directory
+render_chezmoi() {
+    local temp_dir="${1:-/tmp/chezmoi-rendered-$$}"
+    
+    if ! command -v chezmoi &> /dev/null; then
+        echo "[ERROR] Chezmoi is not installed. Cannot render templates."
+        return 1
+    fi
+    
+    echo "Creating temporary directory: ${temp_dir}" >&2
+    mkdir -p "$temp_dir"
+    
+    echo "Rendering chezmoi templates..." >&2
+    
+    ## Set chezmoi data values to avoid prompts
+    export CHEZMOI_DATA_custom_hostname="scan-test"
+    
+    ## Archive rendered templates (redirect warnings to /dev/null)
+    chezmoi archive --output="${temp_dir}.tar" --source="${REPO_ROOT}" 2>/dev/null
+    
+    ## Check if archive was created
+    if [ ! -f "${temp_dir}.tar" ]; then
+        echo "[ERROR] Failed to create chezmoi archive" >&2
+        rm -rf "$temp_dir"
+        return 1
+    fi
+    
+    ## Extract rendered templates (suppress tar warnings)
+    tar -xf "${temp_dir}.tar" -C "$temp_dir" 2>/dev/null
+    
+    ## Check if extraction succeeded
+    if [ ! "$(ls -A "$temp_dir" 2>/dev/null)" ]; then
+        echo "[ERROR] Failed to extract chezmoi archive or archive is empty" >&2
+        rm -rf "$temp_dir" "${temp_dir}.tar"
+        return 1
+    fi
+    
+    rm -f "${temp_dir}.tar"
+    echo "Successfully rendered chezmoi templates to: ${temp_dir}" >&2
+    
+    ## Show what was rendered
+    echo "Rendered files:" >&2
+    find "$temp_dir" -type f | head -n 10 >&2
+    local file_count=$(find "$temp_dir" -type f | wc -l)
+    if [ "$file_count" -gt 10 ]; then
+        echo "... and $((file_count - 10)) more files" >&2
+    fi
+    
+    ## Return the path via stdout
+    echo "$temp_dir"
+    return 0
+}
+
 ## Run gitleaks scan
 run_scan() {
     local config_file="${REPO_ROOT}/.gitleaks.toml"
@@ -184,13 +248,13 @@ run_scan() {
     echo ""
     echo "================================"
     
-    # Run gitleaks detect based on scan mode
+    ## Run gitleaks detect based on scan mode
     if [ "$scan_mode" = "full" ]; then
         echo "Starting FULL Gitleaks Secret Scan (all history and branches)"
         echo "================================"
         echo ""
         
-        # Scan entire git history across all branches
+        ## Scan entire git history across all branches
         if gitleaks detect --source="${REPO_ROOT}" --config="${config_file}" --verbose --log-opts="--all"; then
             echo ""
             echo "================================"
@@ -204,12 +268,51 @@ run_scan() {
             echo "================================"
             return 1
         fi
+    elif [ "$scan_mode" = "rendered" ]; then
+        echo "Starting Gitleaks Scan on rendered Chezmoi Templates"
+        echo "================================"
+        echo ""
+        
+        ## Render chezmoi templates
+        local rendered_dir
+        rendered_dir=$(render_chezmoi "/tmp/chezmoi-rendered-$$")
+        
+        if [ -z "$rendered_dir" ] || [ ! -d "$rendered_dir" ]; then
+            echo "[ERROR] Failed to render templates"
+            return 1
+        fi
+        
+        echo ""
+        echo "Scanning rendered templates at: ${rendered_dir}"
+        echo ""
+        
+        ## Scan rendered templates
+        local scan_result=0
+        if gitleaks detect --source="${rendered_dir}" --config="${config_file}" --verbose --no-git; then
+            echo ""
+            echo "================================"
+            echo "SUCCESS: No secrets detected in rendered templates"
+            echo "================================"
+        else
+            echo ""
+            echo "================================"
+            echo "[ERROR] Secrets detected in rendered templates"
+            echo "================================"
+            scan_result=1
+        fi
+        
+        ## Cleanup
+        echo ""
+        echo "Cleaning up temporary directory: ${rendered_dir}"
+        rm -rf "$rendered_dir"
+        
+        return $scan_result
     else
         echo "Starting Gitleaks Secret Scan (current state)"
         echo "================================"
         echo ""
         
-        # Scan current state only (no git history)
+        ## Scan current state only (no git history)
         if gitleaks detect --source="${REPO_ROOT}" --config="${config_file}" --verbose --no-git; then
             echo ""
             echo "================================"
@@ -230,19 +333,24 @@ run_scan() {
 main() {
     local scan_mode="current"
     
-    # Parse command line arguments
+    ## Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
             --full|--all|-f)
                 scan_mode="full"
                 shift
                 ;;
+            --rendered|--chezmoi|-r)
+                scan_mode="rendered"
+                shift
+                ;;
             --help|-h)
                 echo "Usage: $0 [OPTIONS]"
                 echo ""
                 echo "Options:"
-                echo "  --full, --all, -f    Scan entire git history and all branches"
-                echo "  --help, -h           Show this help message"
+                echo "  --full, --all, -f        Scan entire git history and all branches"
+                echo "  --rendered, --chezmoi, -r  Render chezmoi templates and scan the rendered output"
+                echo "  --help, -h               Show this help message"
                 echo ""
                 echo "Default: Scans current state only (no git history)"
                 exit 0
@@ -279,9 +387,18 @@ main() {
         fi
     fi
     
+    ## Check for chezmoi if rendering is requested
+    if [ "$scan_mode" = "rendered" ]; then
+        if ! check_chezmoi; then
+            echo "[ERROR] Chezmoi is required for --rendered mode"
+            echo "Install chezmoi first: https://www.chezmoi.io/install/"
+            exit 1
+        fi
+    fi
+    
     echo ""
     
-    # Run the scan with specified mode
+    ## Run the scan with specified mode
     if run_scan "$scan_mode"; then
         exit 0
     else
