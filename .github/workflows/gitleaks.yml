@@ -11,6 +11,7 @@ on:
     branches:
       - main
       - dev
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   gitleaks:
