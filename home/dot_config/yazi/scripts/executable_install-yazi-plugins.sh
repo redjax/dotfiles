@@ -5,6 +5,8 @@ set -uo pipefail
 declare -a PLUGINS=(
     ## Open files/dirs with Enter
     yazi-rs/plugins:smart-enter
+    ## Paste file into hovered dir
+    yazi-rs/plugins:smart-paste
     ## Mount (mount/eject paths)
     yazi-rs/plugins:mount
     ## VSC files (show git changes)
