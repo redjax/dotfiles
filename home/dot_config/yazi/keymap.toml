@@ -1,5 +1,23 @@
 "$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
 
+# Launch shell keybindings for windows & linux
+[[mgr.prepend_keymap]]
+on = "!"
+for = "unix"
+run = 'shell "$SHELL" --block'
+desc = "Open $SHELL here"
+
+[[mgr.prepend_keymap]]
+on = "!"
+for = "windows"
+run = 'shell "powershell.exe" --block'
+desc = "Open PowerShell here"
+
+## cd back to git root
+[[mgr.prepend_keymap]]
+on = ["g", "r"]
+run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"'
+
 [mgr]
 
 keymap = [
@@ -329,6 +347,12 @@ keymap = [
     { on = "~", run = "help", desc = "Open help" },
     { on = "<F1>", run = "help", desc = "Open help" },
 ]
+
+# Only require 1 ESC to exit input
+[[input.prepend_keymap]]
+on = "<Esc>"
+run = "close"
+desc = "Cancel input"
 
 [input]
 
