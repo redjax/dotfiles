@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -uo pipefail
 
 declare -a THEMES=(
     ## Dark
@@ -9,11 +9,20 @@ declare -a THEMES=(
     yazi-rs/flavors:catppuccin-frappe    # dark = "catppuccin-frappe"
     yazi-rs/flavors:dracula              # dark = "dracula"
     bennyyip/gruvbox-dark                # dark = "gruvbox-dark"
-    kmlupreti/ayu-dark
+    kmlupreti/ayu-dark                   # dark = "ayu-dark"
+    gosxrgxx/flexoki-dark                # dark = "flexoki-dark"
+    956MB/vscode-dark-modern             # dark = "vscode-dark-modern"
+    956MB/vscode-dark-plus               # dark = "vscode-dark-plus"
+    Mintass/rose-pine                    # dark = "rose-pine"
+    Mintass/rose-pine-moon               # dark = "rose-pine-moon"
 
     ## Light
     yazi-rs/flavors:catppuccin-latte # light = "catppuccin-latte"
     muratoffalex/kanagawa-lotus      # light = "kanagawa-lotus"
+    gosxrgxx/flexoki-light           # light = "flexoki-light"
+    956MB/vscode-light-modern        # light = "vscode-light-modern"
+    956MB/vscode-light-plus          # light = "vscode-light-plus"
+    Mintass/rose-pine-dawn           # light = "rose-pine-dawn"
 )
 
 if ! command -v ya; then
@@ -29,13 +38,16 @@ for theme in "${THEMES[@]}"; do
     echo ""
     echo "Installing theme: ${theme}"
 
-    ya pkg add $theme
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to install theme '${theme}'."
-        _errs+=$theme
-        continue
+    if output=$(ya pkg add $theme 2>&1); then
+        echo "Theme '${theme}' installed."
     else
-        echo "Theme '${theme}' installed"
+        if echo "$output" | grep -q "already exists"; then
+            echo "Theme '${theme}' already installed, skipping."
+        else
+            echo "[ERROR] Failed to install theme '${theme}':"
+            echo "$output"
+            _errs+=("$theme")
+        fi
     fi
 done
 
