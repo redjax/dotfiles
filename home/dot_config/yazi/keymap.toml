@@ -534,13 +534,21 @@ keymap = [
     { on = "f", run = "filter", desc = "Filter help items" },
 ]
 
-## Plugins
+###########
+# Plugins #
+###########
 
 ## Smart enter https://github.com/yazi-rs/plugins/tree/main/smart-enter.yazi
 [[mgr.prepend_keymap]]
 on = "l"
 run = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
+
+## Smart paste https://github.com/yazi-rs/plugins/tree/main/smart-paste.yazi
+[[mgr.prepend_keymap]]
+on = "p"
+run = "plugin smart-paste"
+desc = "Paste into the hovered directory or CWD"
 
 ## Mount https://github.com/yazi-rs/plugins/tree/main/mount.yazi
 [[mgr.prepend_keymap]]
