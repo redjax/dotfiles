@@ -3,15 +3,11 @@ name: Gitleaks Secret Scanning
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - dev
   pull_request:
     branches:
       - main
       - dev
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   gitleaks:
@@ -37,19 +33,19 @@ jobs:
         run: |
           ## Create directory for rendered templates
           mkdir -p /tmp/chezmoi-rendered
-          
+
           ## Initialize chezmoi with the current repository as source
           export CHEZMOI_SOURCE_DIR="${GITHUB_WORKSPACE}"
-          
+
           ## Set chezmoi data values to avoid prompts
           export CHEZMOI_DATA_custom_hostname="ci-test"
-          
+
           ## Archive and extract rendered templates
           #  This processes all .tmpl files and outputs the final rendered content
           chezmoi archive --output=/tmp/chezmoi-build.tar --source="${GITHUB_WORKSPACE}" 2>&1 || {
             echo "Warning: chezmoi archive had issues, continuing anyway..."
           }
-          
+
           ## Extract rendered templates if archive was created
           if [ -f /tmp/chezmoi-build.tar ]; then
             tar -xf /tmp/chezmoi-build.tar -C /tmp/chezmoi-rendered
@@ -81,9 +77,9 @@ jobs:
             chmod +x gitleaks
             sudo mv gitleaks /usr/local/bin/
           fi
-          
+
           gitleaks version
-          
+
           ## Scan the rendered templates if directory exists
           SCAN_FAILED=0
           if [ -d /tmp/chezmoi-rendered ] && [ "$(ls -A /tmp/chezmoi-rendered 2>/dev/null)" ]; then
@@ -106,7 +102,7 @@ jobs:
             ## Create empty SARIF file
             echo '{"version":"2.1.0","runs":[]}' > gitleaks-rendered-report.sarif
           fi
-          
+
           ## Exit with error if secrets were found
           if [ $SCAN_FAILED -eq 1 ]; then
             echo "================================"
