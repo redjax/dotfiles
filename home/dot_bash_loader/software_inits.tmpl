@@ -82,3 +82,12 @@ fi
 if command -v yazi &>/dev/null; then
   alias y="yazi "
 fi
+
+## GoEnv
+if [[ -d "{{ .chezmoi.homeDir}}/.goenv" ]]; then
+  export GOENV_ROOT="{{ .chezmoi.homeDir }}/.goenv"
+  export PATH="$GOENV_ROOT/bin:$PATH"
+
+  eval "$(goenv init -)"
+fi
+
