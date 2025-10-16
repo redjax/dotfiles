@@ -40,6 +40,19 @@ if command -v gitid &>/dev/null; then
   [ ! -f "$gitid_complete" ] && complete -C {{ .chezmoi.homeDir }}/.local/bin/gitid gitid > "$gitid_complete"
 fi
 
+## Terraform
+if command -v terraform &>/dev/null; then
+  terraform_completion="{{ .chezmoi.homeDir }}/.local/share/bash-completions/terraform.bash"
+  [ ! -f "$terraform_completion" ] && terraform -install-autocomplete
+fi
+
+## OpenTofu
+if command -v opentofu &>/dev/null; then
+  opentofu_completion="{{ .chezmoi.homeDir }}/.local/share/bash-completions/opentofu.bash"
+  [ ! -f "$opentofu_completion" ] && opentofu completion bash > "$opentofu_completion"
+fi
+
+
 ## -----------------------------------------------------------
 
 ## Source completions
