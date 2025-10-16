@@ -24,22 +24,22 @@ do
 done
 
 ## Source bash_loader aliases
-[ -f "$HOME/.bash_loader/aliases" ] && . "$HOME/.bash_loader/aliases"
+[ -f "{{ .chezmoi.homeDir }}/.bash_loader/aliases" ] && . "{{ .chezmoi.homeDir }}/.bash_loader/aliases"
 
 ## Source bash_loader env
-[ -f "$HOME/.bash_loader/env" ] && . "$HOME/.bash_loader/env"
+[ -f "{{ .chezmoi.homeDir }}/.bash_loader/env" ] && . "{{ .chezmoi.homeDir }}/.bash_loader/env"
 
 ## Source bash_loader software inits
-[ -f "$HOME/.bash_loader/software_inits" ] && . "$HOME/.bash_loader/software_inits"
+[ -f "{{ .chezmoi.homeDir }}/.bash_loader/software_inits" ] && . "{{ .chezmoi.homeDir }}/.bash_loader/software_inits"
 
 ## Source bash_loader functions
-[ -f "$HOME/.bash_loader/functions" ] && . "$HOME/.bash_loader/functions"
+[ -f "{{ .chezmoi.homeDir }}/.bash_loader/functions" ] && . "{{ .chezmoi.homeDir }}/.bash_loader/functions"
 
 ## Source ~/.bashrc.local if it exists
-[ -f $HOME/.bashrc.local ] && . "$HOME/.bashrc.local"
+[ -f {{ .chezmoi.homeDir }}/.bashrc.local ] && . "{{ .chezmoi.homeDir }}/.bashrc.local"
 
 ## Source Bash completions
-[ -f $HOME/.bash_loader/shell_completions ] && . "$HOME/.bash_loader/shell_completions"
+[ -f {{ .chezmoi.homeDir }}/.bash_loader/shell_completions ] && . "{{ .chezmoi.homeDir }}/.bash_loader/shell_completions"
 
 ## -------------------------------------------------------------------------------------
 
