@@ -1,21 +1,21 @@
 ## if running bash
 if [ -n "$BASH_VERSION" ]; then
   # include .bashrc if it exists
-  if [ -f "$HOME/.bashrc" ]; then
-	. "$HOME/.bashrc"
+  if [ -f "{{ .chezmoi.homeDir }}/.bashrc" ]; then
+	. "{{ .chezmoi.homeDir }}/.bashrc"
   fi
 fi
 
 ## set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-  if [[ ":$PATH:" != "*$HOME/bin" ]]; then
-    export PATH="$HOME/bin:$PATH"
+if [ -d "{{ .chezmoi.homeDir }}/bin" ] ; then
+  if [[ ":$PATH:" != "*{{ .chezmoi.homeDir }}/bin" ]]; then
+    export PATH="{{ .chezmoi.homeDir }}/bin:$PATH"
   fi
 fi
 
 ## set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-  if [[ ":$PATH:" != "*$HOME/.local/bin" ]]; then
-    PATH="$HOME/.local/bin:$PATH"
+if [ -d "{{ .chezmoi.homeDir }}/.local/bin" ] ; then
+  if [[ ":$PATH:" != "*{{ .chezmoi.homeDir }}/.local/bin" ]]; then
+    PATH="{{ .chezmoi.homeDir }}/.local/bin:$PATH"
   fi
 fi

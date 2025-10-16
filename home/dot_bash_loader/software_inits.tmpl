@@ -1,19 +1,19 @@
 ## Pyenv
 if command -v pyenv > /dev/null 2>&1; then
-  export PATH="$HOME/.pyenv/bin:$PATH"
+  export PATH="{{ .chezmoi.homeDir }}/.pyenv/bin:$PATH"
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
 fi
 
 ## NVM
 # if command -v nvm > /dev/null 2>&1; then
-#   export NVM_DIR="$HOME/.nvm"
+#   export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
 #   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 #   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 # fi
-if [[ -d "$HOME/.nvm" ]]; then
+if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
   ## Add nvm to shell
-  export NVM_DIR="$HOME/.nvm"
+  export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
   ## Load nvm
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   ## This loads nvm bash_completion
@@ -21,7 +21,7 @@ if [[ -d "$HOME/.nvm" ]]; then
 fi
 
 ## Enable x-cmd if it's installed
-[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X"
+[ ! -f "{{ .chezmoi.homeDir }}/.x-cmd.root/X" ] || . "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
 
 ## Homebrew
 if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
@@ -33,13 +33,13 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
 fi
 
 ## Add Go to PATH
-if [[ -d "$HOME/.go" ]]; then
-  export GOROOT="$HOME/.go"
-  export GOPATH="$HOME/go"
+if [[ -d "{{ .chezmoi.homeDir }}/.go" ]]; then
+  export GOROOT="{{ .chezmoi.homeDir }}/.go"
+  export GOPATH="{{ .chezmoi.homeDir }}/go"
   export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
 elif [[ -d /usr/local/go ]]; then
   export GOROOT="/usr/local/go"
-  export GOPATH="$HOME/go"
+  export GOPATH="{{ .chezmoi.homeDir }}/go"
   export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
 fi
 
@@ -47,24 +47,24 @@ fi
 if [[ -d /opt/gobins ]]; then
   export PATH="$PATH:/opt/gobins"
 fi
-if [[ -d "$HOME/gobins" ]]; then
-  export PATH="$PATH:$HOME/gobins"
+if [[ -d "{{ .chezmoi.homeDir }}/gobins" ]]; then
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
 fi
-if [[ -d "$HOME/.gobins" ]]; then
-  export PATH="$PATH:$HOME/.gobins"
+if [[ -d "{{ .chezmoi.homeDir }}/.gobins" ]]; then
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
 fi
 
 ## Add chezmoi to PATH
-if [[ -f $HOME/.local/bin/chezmoi ]]; then
-  export PATH="$PATH:$HOME/.local/bin"
-elif [[ -f $HOME/bin/chezmoi ]]; then
+if [[ -f {{ .chezmoi.homeDir }}/.local/bin/chezmoi ]]; then
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/.local/bin"
+elif [[ -f {{ .chezmoi.homeDir }}/bin/chezmoi ]]; then
   # This is chezmoi's default path
-  export PATH="$PATH:$HOME/bin"
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/bin"
 fi
 
 ## Dotnet
-if [[ -d "$HOME/.dotnet" ]]; then
-  export DOTNET_TOOLS="$HOME/.dotnet/tools"
+if [[ -d "{{ .chezmoi.homeDir }}/.dotnet" ]]; then
+  export DOTNET_TOOLS="{{ .chezmoi.homeDir }}/.dotnet/tools"
   export PATH="$PATH:$DOTNET_TOOLS"
 fi
 
@@ -74,7 +74,7 @@ if command -v direnv &>/dev/null; then
 fi
 
 ## LM Studio
-if [[ -d "$HOME/.lmstudio" ]]; then
+if [[ -d "{{ .chezmoi.homeDir }}/.lmstudio" ]]; then
   export PATH="$PATH:{{ .chezmoi.homeDir }}/.lmstudio/bin"
 fi
 
@@ -94,10 +94,4 @@ fi
 ## Terraform
 if command -v terraform &>/dev/null; then
   alias tf="terraform "
-fi
-
-## Gitid
-if command -v gitid &>/dev/null; then
-  ## Source completions
-  complete -C {{ .chezmoi.homeDir }}/.local/bin/gitid gitid
 fi

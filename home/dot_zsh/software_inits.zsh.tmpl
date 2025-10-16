@@ -1,6 +1,6 @@
 ## Pyenv
 if command -v pyenv > /dev/null 2>&1; then
-  export PATH="$PATH:$HOME/.pyenv/bin"
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/.pyenv/bin"
   
   eval "$(pyenv init -)"
   eval "$(pyenv virtualenv-init -)"
@@ -8,7 +8,7 @@ fi
 
 ## NVM
 if command -v nvm > /dev/null 2>&1; then
-  export NVM_DIR="$HOME/.nvm"
+  export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
 
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
@@ -21,7 +21,7 @@ if command -v uv > /dev/null 2>&1; then
 fi
 
 ## Enable x-cmd if it's installed
-[ ! -f "$HOME/.x-cmd.root/X" ] || . "$HOME/.x-cmd.root/X"
+[ ! -f "{{ .chezmoi.homeDir }}/.x-cmd.root/X" ] || . "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
 
 ## Homebrew
 if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
@@ -43,17 +43,17 @@ if [[ -d /usr/local/go ]]; then
 fi
 
 ## Add chezmoi to PATH
-if [[ -f $HOME/.local/bin/chezmoi ]]; then
-  export PATH="$PATH:$HOME/.local/bin"
+if [[ -f {{ .chezmoi.homeDir }}/.local/bin/chezmoi ]]; then
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/.local/bin"
 fi
 # This is chezmoi's default path
-if [[ -f $HOME/bin/chezmoi ]]; then
-  export PATH="$PATH:$HOME/bin"
+if [[ -f {{ .chezmoi.homeDir }}/bin/chezmoi ]]; then
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/bin"
 fi
 
 ## Dotnet
-if [[ -d "$HOME/.dotnet" ]]; then
-  export DOTNET_TOOLS="$HOME/.dotnet/tools"
+if [[ -d "{{ .chezmoi.homeDir }}/.dotnet" ]]; then
+  export DOTNET_TOOLS="{{ .chezmoi.homeDir }}/.dotnet/tools"
   export PATH="$PATH:$DOTNET_TOOLS"
 fi
 
