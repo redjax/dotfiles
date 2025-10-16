@@ -19,8 +19,8 @@ else
 fi
 
 ## Source ~/.zshrc.local if it exists
-if [[ -f $HOME/.zshrc.local ]]; then
-  source $HOME/.zshrc.local
+if [[ -f {{ .chezmoi.homeDir }}/.zshrc.local ]]; then
+  source {{ .chezmoi.homeDir }}/.zshrc.local
 fi
 
 ## LEAVE THIS AT THE BOTTOM OF THE SCRIPT!
