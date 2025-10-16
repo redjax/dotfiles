@@ -75,7 +75,7 @@ fi
 
 ## LM Studio
 if [[ -d "$HOME/.lmstudio" ]]; then
-  export PATH="$PATH:/home/jack/.lmstudio/bin"
+  export PATH="$PATH:{{ .chezmoi.homeDir }}/.lmstudio/bin"
 fi
 
 ## Yazi
@@ -91,3 +91,13 @@ if [[ -d "{{ .chezmoi.homeDir}}/.goenv" ]]; then
   eval "$(goenv init -)"
 fi
 
+## Terraform
+if command -v terraform &>/dev/null; then
+  alias tf="terraform "
+fi
+
+## Gitid
+if command -v gitid &>/dev/null; then
+  ## Source completions
+  complete -C {{ .chezmoi.homeDir }}/.local/bin/gitid gitid
+fi
