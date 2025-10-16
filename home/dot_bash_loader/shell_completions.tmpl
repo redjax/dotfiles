@@ -1,43 +1,49 @@
 ## Ensure ~/.local/share/bash-completions exists
-[ ! -d "$HOME/.local/share/bash-completions" ] && mkdir -p "$HOME/.local/share/bash-completions" &>/dev/null
+[ ! -d "{{ .chezmoi.homeDir }}/.local/share/bash-completions" ] && mkdir -p "{{ .chezmoi.homeDir }}/.local/share/bash-completions" &>/dev/null
 
 ## -----------------------------------------------------------
 
 ## uv
 if command -v uv &>/dev/null; then
-  uv generate-shell-completion bash > "$HOME/.local/share/bash-completions/uv.bash"
+  uv generate-shell-completion bash > "{{ .chezmoi.homeDir }}/.local/share/bash-completions/uv.bash"
 fi
 
 ## NVM
-if [[ -d "$HOME/.nvm" ]]; then
+if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
   ## Add nvm to shell
-  export NVM_DIR="$HOME/.nvm"
+  export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
 
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 fi
 
 ## Resticprofile
 if command -v resticprofile &>/dev/null; then
-  resticprofile_complete="$HOME/.local/share/bash-completions/resticprofile.bash"
+  resticprofile_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/resticprofile.bash"
   [ ! -f "$resticprofile_complete" ] && resticprofile generate --bash-completion > "$resticprofile_complete"
 fi
 
 ## Zellij
 if command -v zellij &>/dev/null; then
-  zellij_complete="$HOME/.local/share/bash-completions/zellij.bash"
+  zellij_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/zellij.bash"
   [ ! -f "$zellij_complete" ] && zellij setup --generate-completion bash > "$zellij_complete"
 fi
 
 ## Syst
 if command -v syst &>/dev/null; then
-  syst_complete="$HOME/.local/share/bash-completions/syst.bash"
+  syst_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/syst.bash"
   [ ! -f "$syst_complete" ] && syst completion bash > "$syst_complete"
+fi
+
+## Gitid
+if command -v gitid &>/dev/null; then
+  gitid_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/gitid.bash"
+  [ ! -f "$gitid_complete" ] && complete -C {{ .chezmoi.homeDir }}/.local/bin/gitid gitid > "$gitid_complete"
 fi
 
 ## -----------------------------------------------------------
 
 ## Source completions
-for completion in "$HOME/.local/share/bash-completions/"*.bash; do
+for completion in "{{ .chezmoi.homeDir }}/.local/share/bash-completions/"*.bash; do
   ## avoid globbing literal if no files (optional, defensive)
   [ -f "$completion" ] && source "$completion"
 done

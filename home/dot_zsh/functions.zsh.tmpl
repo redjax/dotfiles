@@ -3,11 +3,11 @@ function clear_zsh_history() {
   read "reply?This will erase all your zsh history. Are you sure? [y/N] "
   
   if [[ "$reply" =~ ^[Yy]$ ]]; then
-    echo "Clearing history file: ${HISTFILE:-$HOME/.zsh_history} ..."
+    echo "Clearing history file: ${HISTFILE:-{{ .chezmoi.homeDir }}/.zsh_history} ..."
     
     ## Clear history file
-    rm "${HISTFILE:-$HOME/.zsh_history}"
-    touch "${HISTFILE:-$HOME/.zsh_history}"
+    rm "${HISTFILE:-{{ .chezmoi.homeDir }}/.zsh_history}"
+    touch "${HISTFILE:-{{ .chezmoi.homeDir }}/.zsh_history}"
     
     ## Clear in-memory history
     fc -p
