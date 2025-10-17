@@ -42,16 +42,13 @@ fi
 
 ## Terraform
 if command -v terraform &>/dev/null; then
-  terraform_completion="{{ .chezmoi.homeDir }}/.local/share/bash-completions/terraform.bash"
-  [ ! -f "$terraform_completion" ] && terraform -install-autocomplete
+  complete -o nospace -C "$(command -v terraform)" terraform
 fi
 
-## OpenTofu
-if command -v opentofu &>/dev/null; then
-  opentofu_completion="{{ .chezmoi.homeDir }}/.local/share/bash-completions/opentofu.bash"
-  [ ! -f "$opentofu_completion" ] && opentofu completion bash > "$opentofu_completion"
+## Terragrunt
+if command -v terragrunt &>/dev/null; then
+  complete -o nospace -C "$(command -v terragrunt)" terragrunt
 fi
-
 
 ## -----------------------------------------------------------
 
