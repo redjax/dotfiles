@@ -57,9 +57,10 @@ echo ""
 echo "Running 'chezmoi apply' would do the following:"
 echo ""
 if [[ "$VERBOSE" == true ]]; then
-  chezmoi apply --dry-run --verbose
+    chezmoi apply --dry-run --verbose
 else
-  chezmoi apply --dry-run
+    chezmoi apply --dry-run
+fi
 
 echo ""
 read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
