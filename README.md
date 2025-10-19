@@ -60,7 +60,7 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
 If you are comfortable cURLing this script and executing it, you can run:
 
 ```shell
-curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/main/scripts/init-dotfiles.sh | bash -s -- --auto
+curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/main/scripts/init-dotfiles.sh | bash
 ```
 
 Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x init-dotfiles.sh && ./init-dotfiles.sh`. 
@@ -124,15 +124,33 @@ echo ""
 
 echo "Running 'chezmoi apply' would do the following:"
 echo ""
-if [[ "$VERBOSE" == true ]]; then
-    chezmoi apply --dry-run --verbose
-else
-    chezmoi apply --dry-run
-fi
+chezmoi apply --dry-run --verbose
 
 echo ""
-echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
-exit 0
+echo "Review the 'dry run' above to make sure you want to apply these changes."
+
+echo ""
+read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
+
+case $yn in
+[Yy])
+    echo "Running chezmoi apply"
+    if [[ "$VERBOSE" == true ]]; then
+        chezmoi apply --verbose
+    else
+        chezmoi apply
+    fi
+
+    if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed to apply dotfiles with chezmoi."
+        exit $?
+    fi
+    ;;
+[Nn])
+    echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
+    exit 0
+    ;;
+esac
 
 ```
 
