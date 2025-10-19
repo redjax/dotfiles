@@ -1,3 +1,8 @@
+## Enable bash compatibility for completion scripts
+autoload -U +X bashcompinit && bashcompinit
+
+# ----------------------------------------------
+
 ## Pyenv
 if command -v pyenv > /dev/null 2>&1; then
   export PATH="$PATH:{{ .chezmoi.homeDir }}/.pyenv/bin"
@@ -57,3 +62,6 @@ if [[ -d "{{ .chezmoi.homeDir }}/.dotnet" ]]; then
   export PATH="$PATH:$DOTNET_TOOLS"
 fi
 
+## Terraform
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C "$(command -v terraform)" terraform

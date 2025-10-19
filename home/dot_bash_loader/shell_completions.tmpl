@@ -40,6 +40,16 @@ if command -v gitid &>/dev/null; then
   [ ! -f "$gitid_complete" ] && complete -C {{ .chezmoi.homeDir }}/.local/bin/gitid gitid > "$gitid_complete"
 fi
 
+## Terraform
+if command -v terraform &>/dev/null; then
+  complete -o nospace -C "$(command -v terraform)" terraform
+fi
+
+## Terragrunt
+if command -v terragrunt &>/dev/null; then
+  complete -o nospace -C "$(command -v terragrunt)" terragrunt
+fi
+
 ## -----------------------------------------------------------
 
 ## Source completions
