@@ -60,7 +60,7 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
 If you are comfortable cURLing this script and executing it, you can run:
 
 ```shell
-curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/main/scripts/init-dotfiles.sh | bash -s -- --auto
+curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/feat/main/scripts/init-dotfiles.sh | bash -s -- --auto
 ```
 
 Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x init-dotfiles.sh && ./init-dotfiles.sh`. 
@@ -71,20 +71,36 @@ Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x 
 set -uo pipefail
 
 USE_HTTP=false
+VERBOSE=false
 
 if ! command -v curl &>/dev/null; then
     echo "[ERROR] curl is not installed"
     exit 1
 fi
 
+## Parse args
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    -v | --verbose)
+        VERBOSE=true
+        shift
+        ;;
+    esac
+done
+
 echo "[ Setup Dotfiles ]"
 echo ""
 
-echo "Installing chezmoi"
-sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
-if [[ $? -ne 0 ]]; then
-    echo "[ERROR] Failed to install chezmoi"
-    exit 1
+if ! command -v chezmoi &>/dev/null; then
+    echo "Installing chezmoi"
+
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+    if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed to install chezmoi"
+        exit 1
+    fi
+
+    export PATH="$PATH:$HOME/.local/bin"
 fi
 
 if [[ "$USE_HTTP" == "true" ]]; then
@@ -96,7 +112,7 @@ fi
 echo "Using dotfiles URL: $dotfiles_url"
 echo ""
 
-$HOME/.local/bin/chezmoi init redjax
+chezmoi init redjax
 if [[ $? -ne 0 ]]; then
     echo "[ERROR] Failed applying chezmoi dotfiles."
     exit 1
@@ -108,25 +124,15 @@ echo ""
 
 echo "Running 'chezmoi apply' would do the following:"
 echo ""
-$HOME/.local/bin/chezmoi apply --dry-run --verbose
+if [[ "$VERBOSE" == true ]]; then
+    chezmoi apply --dry-run --verbose
+else
+    chezmoi apply --dry-run
+fi
 
 echo ""
-read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
-
-case $yn in
-[Yy])
-    echo "Running chezmoi apply"
-    $HOME/.local/bin/chezmoi apply -v
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to apply dotfiles with chezmoi."
-        exit $?
-    fi
-    ;;
-[Nn])
-    echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
-    exit 0
-    ;;
-esac
+echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
+exit 0
 
 ```
 

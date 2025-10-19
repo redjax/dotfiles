@@ -63,24 +63,5 @@ else
 fi
 
 echo ""
-read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
-
-case $yn in
-[Yy])
-    echo "Running chezmoi apply"
-    if [[ "$VERBOSE" == true ]]; then
-        chezmoi apply --verbose
-    else
-        chezmoi apply
-    fi
-
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to apply dotfiles with chezmoi."
-        exit $?
-    fi
-    ;;
-[Nn])
-    echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
-    exit 0
-    ;;
-esac
+echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
+exit 0
