@@ -39,12 +39,98 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
 ## Table of Contents <!-- omit in toc -->
 
 - [Quick Start](#quick-start)
+  - [init-dotfiles.sh Quickstart script](#init-dotfilessh-quickstart-script)
+  - [Quick Start Instructions](#quick-start-instructions)
 - [Usage](#usage)
   - [Synchronizing Changes](#synchronizing-changes)
   - [Cheat-Sheet](#cheat-sheet)
 - [Links](#links)
 
 ## Quick Start
+
+> [!NOTE]
+> Once your dotfiles are managed by `chezmoi`, you do not (read: *should* not) manually edit these files. If you want to make a change, use `chezmoi edit $FILE` if the file is managed by `chezmoi`. For example, to make a change to your `~/.bashrc`, run `chezmoi edit ~/.bashrc`.
+>
+> If you do make manual changes (either out of habit, or installing a program/running an Ansible script that edits a file managed by `chezmoi`), you can run `chezmoi merge $FILE` and manually merge those changes into the `chezmoi` template/file.
+>
+> Any time you make changes to your `chezmoi` repository, you should also [synchronize the changes](#synchronizing-changes).
+
+### init-dotfiles.sh Quickstart script
+
+If you are comfortable cURLing this script and executing it, you can run:
+
+```shell
+curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/main/scripts/init-dotfiles.sh | bash -s -- --auto
+```
+
+Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x init-dotfiles.sh && ./init-dotfiles.sh`. 
+
+```shell
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+USE_HTTP=false
+
+if ! command -v curl &>/dev/null; then
+    echo "[ERROR] curl is not installed"
+    exit 1
+fi
+
+echo "[ Setup Dotfiles ]"
+echo ""
+
+echo "Installing chezmoi"
+sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
+if [[ $? -ne 0 ]]; then
+    echo "[ERROR] Failed to install chezmoi"
+    exit 1
+fi
+
+if [[ "$USE_HTTP" == "true" ]]; then
+    dotfiles_url="https://github.com/redjax/dotfiles.git"
+else
+    dotfiles_url="git@github.com:redjax/dotfiles.git"
+fi
+
+echo "Using dotfiles URL: $dotfiles_url"
+echo ""
+
+$HOME/.local/bin/chezmoi init redjax
+if [[ $? -ne 0 ]]; then
+    echo "[ERROR] Failed applying chezmoi dotfiles."
+    exit 1
+fi
+
+echo ""
+echo "Dotfiles initialized"
+echo ""
+
+echo "Running 'chezmoi apply' would do the following:"
+echo ""
+$HOME/.local/bin/chezmoi apply --dry-run --verbose
+
+echo ""
+read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
+
+case $yn in
+[Yy])
+    echo "Running chezmoi apply"
+    $HOME/.local/bin/chezmoi apply -v
+    if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed to apply dotfiles with chezmoi."
+        exit $?
+    fi
+    ;;
+[Nn])
+    echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
+    exit 0
+    ;;
+esac
+
+```
+
+### Quick Start Instructions
 
 - Install `chezmoi`: `sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin`
   - Run `exec $SHELL` after installing for the first time
@@ -58,12 +144,6 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
 - Do a dry run with: `chezmoi apply --dry-run --verbose`
 - Let `chezmoi` take over by running: `chezmoi apply -v`
 - Run `exec $SHELL` one last time to reload your shell with the current changes
-
-Now that your dotfiles are managed by `chezmoi`, you do not (read: *should* not) manually edit these files. If you want to make a change, use `chezmoi edit $FILE` if the file is managed by `chezmoi`. For example, to make a change to your `~/.bashrc`, run `chezmoi edit ~/.bashrc`.
-
-If you do make manual changes (either out of habit, or installing a program/running an Ansible script that edits a file managed by `chezmoi`), you can run `chezmoi merge $FILE` and manually merge those changes into the `chezmoi` template/file.
-
-Any time you make changes to your `chezmoi` repository, you should also [synchronize the changes](#synchronizing-changes).
 
 ## Usage
 
