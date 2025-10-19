@@ -15,6 +15,7 @@ while [[ $# -gt 0 ]]; do
     case $1 in
     -v | --verbose)
         VERBOSE=true
+        shift
         ;;
     esac
 done
@@ -71,7 +72,7 @@ case $yn in
     else
         chezmoi apply
     fi
-    
+
     if [[ $? -ne 0 ]]; then
         echo "[ERROR] Failed to apply dotfiles with chezmoi."
         exit $?
