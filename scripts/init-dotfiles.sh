@@ -3,11 +3,21 @@
 set -uo pipefail
 
 USE_HTTP=false
+VERBOSE=false
 
 if ! command -v curl &>/dev/null; then
     echo "[ERROR] curl is not installed"
     exit 1
 fi
+
+## Parse args
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    -v | --verbose)
+        VERBOSE=true
+        ;;
+    esac
+done
 
 echo "[ Setup Dotfiles ]"
 echo ""
@@ -45,7 +55,10 @@ echo ""
 
 echo "Running 'chezmoi apply' would do the following:"
 echo ""
-chezmoi apply --dry-run -v
+if [[ "$VERBOSE" == true ]]; then
+  chezmoi apply --dry-run --verbose
+else
+  chezmoi apply --dry-run
 
 echo ""
 read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
@@ -53,7 +66,12 @@ read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
 case $yn in
 [Yy])
     echo "Running chezmoi apply"
-    chezmoi apply -v
+    if [[ "$VERBOSE" == true ]]; then
+        chezmoi apply --verbose
+    else
+        chezmoi apply
+    fi
+    
     if [[ $? -ne 0 ]]; then
         echo "[ERROR] Failed to apply dotfiles with chezmoi."
         exit $?
