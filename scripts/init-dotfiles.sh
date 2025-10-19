@@ -45,7 +45,7 @@ echo ""
 
 echo "Running 'chezmoi apply' would do the following:"
 echo ""
-chezmoi apply --dry-run -v 2>&1 | tee chezmoi_dry_run.log
+chezmoi apply --dry-run -v
 
 echo ""
 read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
@@ -53,7 +53,7 @@ read -n 1 -r -p "Apply dotfiles with chezmoi? (y/n) " yn
 case $yn in
 [Yy])
     echo "Running chezmoi apply"
-    chezmoi apply -v 2>&1 | tee chezmoi_apply.log
+    chezmoi apply -v
     if [[ $? -ne 0 ]]; then
         echo "[ERROR] Failed to apply dotfiles with chezmoi."
         exit $?
