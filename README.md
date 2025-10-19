@@ -60,7 +60,7 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
 If you are comfortable cURLing this script and executing it, you can run:
 
 ```shell
-curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/main/scripts/init-dotfiles.sh | bash -s -- --auto
+curl -LsSf https://raw.githubusercontent.com/redjax/dotfiles/refs/heads/main/scripts/init-dotfiles.sh | bash
 ```
 
 Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x init-dotfiles.sh && ./init-dotfiles.sh`. 
