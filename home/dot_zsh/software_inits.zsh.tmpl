@@ -63,5 +63,14 @@ if [[ -d "{{ .chezmoi.homeDir }}/.dotnet" ]]; then
 fi
 
 ## Terraform
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C "$(command -v terraform)" terraform
+if command -v terraform &>/dev/null; then
+  autoload -U +X bashcompinit && bashcompinit
+  complete -o nospace -C "$(command -v terraform)" terraform
+fi
+
+## Mise
+if command -v mise &>/dev/null; then
+  mkdir -p /usr/local/share/zsh/site-functions &>/dev/null
+  mise completion zsh  > /usr/local/share/zsh/site-functions/_mise
+fi
+

@@ -50,6 +50,11 @@ if command -v terragrunt &>/dev/null; then
   complete -o nospace -C "$(command -v terragrunt)" terragrunt
 fi
 
+## Mise
+if command -v mise &>/dev/null; then
+  mise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
+fi
+
 ## -----------------------------------------------------------
 
 ## Source completions
