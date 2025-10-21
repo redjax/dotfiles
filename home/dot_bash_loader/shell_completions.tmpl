@@ -52,6 +52,10 @@ fi
 
 ## Mise
 if command -v mise &>/dev/null; then
+  if [[ ! -d ~/.local/share/bash-completion/completions ]]; then
+    mkdir -p ~/.local/share/bash-completion/completions &>/dev/null
+  fi
+
   mise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
 fi
 
