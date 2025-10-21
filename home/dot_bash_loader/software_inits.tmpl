@@ -100,3 +100,9 @@ fi
 if command -v terragrunt &>/dev/null; then
   alias tg="terragrunt"
 fi
+
+## Mise
+if command -v mise &>/dev/null; then
+  eval "$(/usr/local/bin/mise activate bash)"
+fi
+
