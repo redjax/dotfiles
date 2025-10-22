@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+#########
+# SETUP #
+#########
+
+ORIGINAL_PATH="$(pwd)"
+THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTRESTIC_ROOT="$(cd "${THIS_DIR}/../" && pwd)"
+
+IGNORES_DIR="${DOTRESTIC_ROOT}/ignores"
+PASSWORDS_DIR="${DOTRESTIC_ROOT}/passwords"
+PROFILES_DIR="${DOTRESTIC_ROOT}/profiles"
+
+## Script option defaults
+DRY_RUN=false
+DEBUG=false
+KEY_NAME="main"
+KEY_OUTPUT_DIR="${PASSWORDS_DIR}"
+
+function check_installed() {
+    local app_cmd
+
+    if [[ -z $1 ]] || [[ "$1" == "" ]]; then
+        echo "[WARNING] You must pass a command to check, example: check_installed restic"
+        return 2
+    fi
+
+    app_cmd=$1
+
+    if ! command -v $app_cmd &>/dev/null; then
+        echo "Command '$app_cmd' is not available"
+        return 1
+    else
+        return 0
+    fi
+
+}
+
+## EXIT trap
+function cleanup() {
+    cd "$ORIGINAL_PATH"
+}
+trap cleanup EXIT
+
+## Ensure dependencies installed
+for depend in restic resticprofile; do
+    check_installed $depend
+done
+
+function debug() {
+    local _debug
+
+    _debug=$DEBUG
+
+    if [[ $DEBUG == true ]]; then
+        echo "[DEBUG] ${@}"
+    fi
+}
+
+function greeting() {
+    local dry_run_enabled
+
+    dry_run_enabled=$DRY_RUN
+
+    echo ""
+    echo "[ resticprofile setup ]"
+    echo ""
+    if [[ "$dry_run_enabled" == true ]]; then
+        echo "+ Dry run enabled. No real actions will be taken."
+        echo "  Instead, the action will be described and passed."
+        echo ""
+    fi
+    echo "This script walks through my standard setup steps for resticprofile."
+    echo "You will need to finish the setup at the end, this just puts files in"
+    echo "place and generates passwords."
+    echo ""
+    echo "----------------------------------------------------------------------"
+    echo ""
+}
+
+function print_help() {
+    echo ""
+    echo "Usage: ${0} [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --dry-run  Enable DRY_RUN mode. Skip all actions and describe instead."
+    echo "  --debug    Enable DEBUG logging."
+    echo "  -k|--init-key       "
+    echo "  -o|--key-output-dir "
+    echo "  -h|--help  Print help menu and exit."
+    echo ""
+}
+
+## Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        --debug)
+            DEBUG=true
+
+            echo "DEBUG logging enabled"
+            shift
+            ;;
+        -k|--init-key)
+            if [[ -z $2 ]]; then
+                echo "[ERROR] --init-key provided, but no key name given"
+
+                print_help
+                exit 1
+            fi
+
+            KEY_NAME="$2"
+            shift 2
+            ;;
+        -o|--key-output-dir)
+            if [[ -z $2 ]]; then
+                echo "[ERROR] --key-output-dir provided, but no directory path given"
+                
+                print_help
+                exit 1
+            fi
+
+            KEY_OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        -h|--help)
+            print_help
+            exit 0
+            ;;
+        *)
+            echo "[ERROR] Invalid option: $1"
+            print_help
+            exit 1
+            ;;
+    esac
+done
+
+debug "Original path: $ORIGINAL_PATH"
+debug "Script path: $THIS_DIR"
+debug ".restic root path: $DOTRESTIC_ROOT"
+
+## Print script greeting
+greeting
+
+## -----------------------------------------------------------------------------------------
+
+function gen_profile_key() {
+    local key_name
+    local output_dir
+    local script_path
+
+    script_path="${DOTRESTIC_ROOT}/scripts/apps/resticprofile/generate-key.sh"
+    key_name=$KEY_NAME
+    output_dir=$KEY_OUTPUT_DIR
+
+    output_path="${output_dir}/${key_name}"
+
+    ## Parse inputs
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -k|--key-name)
+                if [[ -z $2 ]]; then
+                    echo "[ERROR] --key-name provided, but no key name string given."
+                    return 1
+                fi
+
+                key_name="$2"
+                shift 2
+                ;;
+            -o|--output-dir)
+                if [[ -z $2 ]]; then
+                    echo "[ERROR] --output-dir provided, but no directory path given."
+                    return 1
+                fi
+
+                output_dir="$2"
+                shift 2
+                ;;
+            *)
+                echo "[ERROR] Invalid argument for gen_profile_key(): $1"
+                return 2
+                ;;
+        esac
+    done
+
+    debug "(gen_profile_key) script_path: $script_path"
+    debug "(gen_profile_key) key_name: $key_name"
+    debug "(gen_profile_key) ouput_dir: $output_dir"
+    debug "(gen_profile_key) output_path: ${output_path}"
+
+    if [[ ! -f $script_path ]]; then
+        echo "[ERROR] Could not find resticprofile key generation script at path: $script_path"
+        return 1
+    fi
+
+    echo "Generating resticprofile vault key '${key_name}' at path: ${output_path}"
+    echo ""
+
+    if [[ ! -d "$output_dir" ]]; then
+        echo "[WARNING] resticprofile key output directory does not exist"
+        
+        if [[ $DRY_RUN == true ]]; then
+            echo "[DRY RUN] Would create directory: $output_dir"
+        else
+            echo "Creating path: $output_dir"
+
+            mkdir -p "${output_dir}"
+            if [[ $? -ne 0 ]]; then
+                echo "[ERROR] Failed to create resticprofile key output directory."
+                return $?
+            fi
+        fi
+    fi
+
+    cmd=(. $script_path -o "$output_path")
+
+    if [[ $DRY_RUN == true ]]; then
+        echo "[DRY RUN] Would call resticprofile key generate script with command:"
+        echo "            ${cmd[*]}"
+    else
+        echo "Generating resticprofile key"
+        echo "  Command: ${cmd[*]}"
+
+        "${cmd[@]}"
+    fi
+}
+
+function main() {
+    echo "--[ Generate keys"
+    echo ""
+
+    gen_profile_key --key-name "$KEY_NAME" --output-dir "$KEY_OUTPUT_DIR"
+    if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed to generate resticprofile key. Error code: $?"
+        return $?
+    fi
+}
+
+main "${@}"
