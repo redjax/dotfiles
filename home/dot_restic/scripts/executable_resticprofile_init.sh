@@ -269,11 +269,20 @@ function main() {
     local do_edit
     do_edit=false
 
+    local run_init
+    run_init=false
+
+    local install_schedules
+    install_schedules=false
+
     ## Prompt user to determine which parts of script to run
     function get_run_config() {
         echo "Choose which parts of the script to run."
         echo "If you answer 'y' to the 'run all' prompt, the following will occur:"
         echo "  - Encryption keys 'main' and 'user' created for initializing & accessing the repository."
+        echo "  - The script will open ~/profiles.yaml for editing in $EDITOR"
+        echo "  - After editing the file, the repository will be initialized."
+        echo "  - resticprofile schedules will be installed."
         echo ""
 
         ## Ask 'run all' first
