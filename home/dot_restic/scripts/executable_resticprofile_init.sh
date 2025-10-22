@@ -17,7 +17,6 @@ PROFILES_DIR="${DOTRESTIC_ROOT}/profiles"
 ## Script option defaults
 DRY_RUN=false
 DEBUG=false
-KEY_NAME="main"
 KEY_OUTPUT_DIR="${PASSWORDS_DIR}"
 
 function check_installed() {
@@ -86,11 +85,10 @@ function print_help() {
     echo "Usage: ${0} [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --dry-run  Enable DRY_RUN mode. Skip all actions and describe instead."
-    echo "  --debug    Enable DEBUG logging."
-    echo "  -k|--init-key       "
-    echo "  -o|--key-output-dir "
-    echo "  -h|--help  Print help menu and exit."
+    echo "  --dry-run            Enable DRY_RUN mode. Skip all actions and describe instead."
+    echo "  --debug              Enable DEBUG logging."
+    echo "  -o|--key-output-dir  Directory to export generatedd resticprofile keys to."
+    echo "  -h|--help            Print help menu and exit."
     echo ""
 }
 
@@ -106,17 +104,6 @@ while [[ $# -gt 0 ]]; do
 
             echo "DEBUG logging enabled"
             shift
-            ;;
-        -k|--init-key)
-            if [[ -z $2 ]]; then
-                echo "[ERROR] --init-key provided, but no key name given"
-
-                print_help
-                exit 1
-            fi
-
-            KEY_NAME="$2"
-            shift 2
             ;;
         -o|--key-output-dir)
             if [[ -z $2 ]]; then
@@ -156,7 +143,7 @@ function gen_profile_key() {
     local script_path
 
     script_path="${DOTRESTIC_ROOT}/scripts/apps/resticprofile/generate-key.sh"
-    key_name=$KEY_NAME
+    key_name="main"
     output_dir=$KEY_OUTPUT_DIR
 
     output_path="${output_dir}/${key_name}"
@@ -222,7 +209,7 @@ function gen_profile_key() {
 
     if [[ $DRY_RUN == true ]]; then
         echo "[DRY RUN] Would call resticprofile key generate script with command:"
-        echo "            ${cmd[*]}"
+        echo "  ${cmd[*]}"
     else
         echo "Generating resticprofile key"
         echo "  Command: ${cmd[*]}"
@@ -232,13 +219,88 @@ function gen_profile_key() {
 }
 
 function main() {
-    echo "--[ Generate keys"
-    echo ""
+    local run_all
+    run_all=false
 
-    gen_profile_key --key-name "$KEY_NAME" --output-dir "$KEY_OUTPUT_DIR"
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to generate resticprofile key. Error code: $?"
-        return $?
+    local do_key_gen
+    do_key_gen=false
+
+    ## Prompt user to determine which parts of script to run
+    function get_run_config() {
+        echo "Choose which parts of the script to run."
+        echo "If you answer 'y' to the 'run all' prompt, the following will occur:"
+        echo "  - Encryption keys 'main' and 'user' created for initializing & accessing the repository."
+        echo ""
+        
+        ## Ask 'run all' first
+        while true; do
+            read -n 1 -r -p "Run all setup operations? (y/n): " _run_all_choice
+            echo ""
+
+            case $_run_all_choice in
+                [Yy])
+                    run_all=true
+                    break
+                    ;;
+                [Nn])
+                    break
+                    ;;
+                *)
+                    echo "Invalid choice: $1. Please answer 'y' or 'n'"
+                    ;;
+            esac
+        done
+
+        ## Set all to true if run_all=true
+        if [[ $run_all == true ]]; then
+            echo ""
+            echo "! Running all script operations"
+            echo ""
+
+            do_key_gen=true
+
+            ## Skip the rest of the parsing
+            return
+        fi
+
+        ## Prompt for generating resticprofile keys
+        while true; do
+            read -n 1 -r -p "Do you want this script to generate a 'main' and 'user' key for the restic repository? (y/n): " _key_gen_choice
+            echo ""
+
+            case $_key_gen_choice in
+                [Yy])
+                    do_key_gen=true
+                    break
+                    ;;
+                [Nn])
+                    break
+                    ;;
+            esac
+        done
+        echo ""
+
+    }
+
+    ## Parse uses's choices
+    get_run_config
+
+    if [[ $do_key_gen == true ]]; then
+        echo "--[ Generate keys"
+        echo ""
+
+        echo "+ Generating 'main' key"
+        gen_profile_key --key-name "main" --output-dir "$KEY_OUTPUT_DIR"
+
+        echo ""
+        echo "+ Generating 'user' key"
+        gen_profile_key --key-name "user" --output-dir "$KEY_OUTPUT_DIR"
+
+        echo ""
+        if [[ $? -ne 0 ]]; then
+            echo "[ERROR] Failed to generate resticprofile key. Error code: $?"
+            return $?
+        fi
     fi
 }
 
