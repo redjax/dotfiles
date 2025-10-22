@@ -114,44 +114,55 @@ function print_next_steps() {
     echo ""
 
     echo "This script does *not* fully automate the resticprofile setup process."
+    echo ""
     echo "You will need to do the following to finish the setup process:"
 
+    echo ""
+    echo "- Make a backup of your ${KEY_OUTPUT_DIR}/main and ${KEY_OUTPUT_DIR}/user keys"
+    echo "- Edit the ~/profiles.yaml to your liking"
+    echo "  - In the 'default:' section, set 'password-file=\"${KEY_OUTPUT_DIR}/main\""
+    echo "  - Add any extra exclude/ignore pattern files you want to use in a job"
+    echo "  - (Optional) Configure more backup jobs"
+    echo "- Initialize your repository with 'resticprofile init'"
+    echo "  - After initializing the backup repository, replace 'password-file: /path/to/main' with '/path/to/user'"
+    echo "    - (Make sure you have a backup) Remove ${KEY_OUTPUT_DIR}/main"
+    echo "- Install scheduled jobs with 'resticprofile -c ~/profiles.yaml schedule install --all' (you may have to run this with sudo)"
     echo ""
 }
 
 ## Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --dry-run)
-            DRY_RUN=true
-            shift
-            ;;
-        --debug)
-            DEBUG=true
+    --dry-run)
+        DRY_RUN=true
+        shift
+        ;;
+    --debug)
+        DEBUG=true
 
-            echo "DEBUG logging enabled"
-            shift
-            ;;
-        -o|--key-output-dir)
-            if [[ -z $2 ]]; then
-                echo "[ERROR] --key-output-dir provided, but no directory path given"
-                
-                print_help
-                exit 1
-            fi
+        echo "DEBUG logging enabled"
+        shift
+        ;;
+    -o | --key-output-dir)
+        if [[ -z $2 ]]; then
+            echo "[ERROR] --key-output-dir provided, but no directory path given"
 
-            KEY_OUTPUT_DIR="$2"
-            shift 2
-            ;;
-        -h|--help)
-            print_help
-            exit 0
-            ;;
-        *)
-            echo "[ERROR] Invalid option: $1"
             print_help
             exit 1
-            ;;
+        fi
+
+        KEY_OUTPUT_DIR="$2"
+        shift 2
+        ;;
+    -h | --help)
+        print_help
+        exit 0
+        ;;
+    *)
+        echo "[ERROR] Invalid option: $1"
+        print_help
+        exit 1
+        ;;
     esac
 done
 
@@ -178,28 +189,28 @@ function gen_profile_key() {
     ## Parse inputs
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -k|--key-name)
-                if [[ -z $2 ]]; then
-                    echo "[ERROR] --key-name provided, but no key name string given."
-                    return 1
-                fi
+        -k | --key-name)
+            if [[ -z $2 ]]; then
+                echo "[ERROR] --key-name provided, but no key name string given."
+                return 1
+            fi
 
-                key_name="$2"
-                shift 2
-                ;;
-            -o|--output-dir)
-                if [[ -z $2 ]]; then
-                    echo "[ERROR] --output-dir provided, but no directory path given."
-                    return 1
-                fi
+            key_name="$2"
+            shift 2
+            ;;
+        -o | --output-dir)
+            if [[ -z $2 ]]; then
+                echo "[ERROR] --output-dir provided, but no directory path given."
+                return 1
+            fi
 
-                output_dir="$2"
-                shift 2
-                ;;
-            *)
-                echo "[ERROR] Invalid argument for gen_profile_key(): $1"
-                return 2
-                ;;
+            output_dir="$2"
+            shift 2
+            ;;
+        *)
+            echo "[ERROR] Invalid argument for gen_profile_key(): $1"
+            return 2
+            ;;
         esac
     done
 
@@ -218,7 +229,7 @@ function gen_profile_key() {
 
     if [[ ! -d "$output_dir" ]]; then
         echo "[WARNING] resticprofile key output directory does not exist"
-        
+
         if [[ $DRY_RUN == true ]]; then
             echo "[DRY RUN] Would create directory: $output_dir"
         else
@@ -264,23 +275,23 @@ function main() {
         echo "If you answer 'y' to the 'run all' prompt, the following will occur:"
         echo "  - Encryption keys 'main' and 'user' created for initializing & accessing the repository."
         echo ""
-        
+
         ## Ask 'run all' first
         while true; do
             read -n 1 -r -p "Run all setup operations? (y/n): " _run_all_choice
             echo ""
 
             case $_run_all_choice in
-                [Yy])
-                    run_all=true
-                    break
-                    ;;
-                [Nn])
-                    break
-                    ;;
-                *)
-                    echo "Invalid choice: $1. Please answer 'y' or 'n'"
-                    ;;
+            [Yy])
+                run_all=true
+                break
+                ;;
+            [Nn])
+                break
+                ;;
+            *)
+                echo "Invalid choice: $1. Please answer 'y' or 'n'"
+                ;;
             esac
         done
 
@@ -304,33 +315,33 @@ function main() {
             echo ""
 
             case $_key_gen_choice in
-                [Yy])
-                    do_key_gen=true
-                    break
-                    ;;
-                [Nn])
-                    break
-                    ;;
+            [Yy])
+                do_key_gen=true
+                break
+                ;;
+            [Nn])
+                break
+                ;;
             esac
         done
-        
+
         ## Prompt for copying default ~/profiles.yaml
         while true; do
             read -n 1 -r -p "Do you want this script to copy the default profiles.yaml file to ~/profiles.yaml? (y/n): " _copy_configs_choice
             echo ""
-            
+
             case $_copy_configs_choice in
-                [Yy])
-                    copy_configs=true
-                    break
-                    ;;
-                [Nn])
-                    break
-                    ;;
-                *)
-                    echo "Invalid choice: $1. Please use 'y' or 'n'."
-                    echo ""
-                    ;;
+            [Yy])
+                copy_configs=true
+                break
+                ;;
+            [Nn])
+                break
+                ;;
+            *)
+                echo "Invalid choice: $1. Please use 'y' or 'n'."
+                echo ""
+                ;;
             esac
         done
 
@@ -340,16 +351,16 @@ function main() {
             echo ""
 
             case $_do_edit_choice in
-                [Yy])
-                    do_edit=true
-                    break
-                    ;;
-                [Nn])
-                    break
-                    ;;
-                *)
-                    echo "[ERROR] Invalid choice: $_do_edit_choice. Please use 'y' or 'n'"
-                    ;;
+            [Yy])
+                do_edit=true
+                break
+                ;;
+            [Nn])
+                break
+                ;;
+            *)
+                echo "[ERROR] Invalid choice: $_do_edit_choice. Please use 'y' or 'n'"
+                ;;
             esac
         done
 
