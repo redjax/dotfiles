@@ -14,6 +14,8 @@ IGNORES_DIR="${DOTRESTIC_ROOT}/ignores"
 PASSWORDS_DIR="${DOTRESTIC_ROOT}/passwords"
 PROFILES_DIR="${DOTRESTIC_ROOT}/profiles"
 
+DEFAULT_PROFILE_YML="${PROFILES_DIR}/default.yaml"
+
 ## Script option defaults
 DRY_RUN=false
 DEBUG=false
@@ -89,6 +91,18 @@ function print_help() {
     echo "  --debug              Enable DEBUG logging."
     echo "  -o|--key-output-dir  Directory to export generatedd resticprofile keys to."
     echo "  -h|--help            Print help menu and exit."
+    echo ""
+}
+
+## Function to print manual steps required after this script
+function print_next_steps() {
+    echo ""
+    echo "[ Next Steps ]"
+    echo ""
+
+    echo "This script does *not* fully automate the resticprofile setup process."
+    echo "You will need to do the following to finish the setup process:"
+
     echo ""
 }
 
@@ -225,6 +239,9 @@ function main() {
     local do_key_gen
     do_key_gen=false
 
+    local copy_configs
+    copy_configs=false
+
     ## Prompt user to determine which parts of script to run
     function get_run_config() {
         echo "Choose which parts of the script to run."
@@ -258,6 +275,7 @@ function main() {
             echo ""
 
             do_key_gen=true
+            copy_configs=true
 
             ## Skip the rest of the parsing
             return
@@ -278,7 +296,25 @@ function main() {
                     ;;
             esac
         done
-        echo ""
+        
+        while true; do
+            read -n 1 -r -p "Do you want this script to copy the default profiles.yaml file to ~/profiles.yaml? (y/n): " _copy_configs_choice
+            echo ""
+            
+            case $_copy_configs_choice in
+                [Yy])
+                    copy_configs=true
+                    break
+                    ;;
+                [Nn])
+                    break
+                    ;;
+                *)
+                    echo "Invalid choice: $1. Please use 'y' or 'n'."
+                    echo ""
+                    ;;
+            esac
+        done
 
     }
 
@@ -302,6 +338,46 @@ function main() {
             return $?
         fi
     fi
+
+    if [[ $copy_configs == true ]]; then
+        echo ""
+        echo "--[ Copy configuration files"
+        echo ""
+
+        echo "+ Copying default profile to ~/.profiles.yaml"
+        if [[ $DRY_RUN == true ]]; then
+            echo "[DRY RUN] Would copy resticprofile '$DEFAULT_PROFILE_YML' to path '$HOME/profiles.yaml'"
+        else
+            /usr/bin/cp "$DEFAULT_PROFILE_YML" "$HOME/profiles.yaml"
+            if [[ $? -ne 0 ]]; then
+                echo "[ERROR] Failed to copy default profiles.yaml file to '$HOME/profiles.yaml'."
+                return $?
+            fi
+        fi
+    fi
+
+    return $?
 }
 
-main "${@}"
+echo "----------------------------------------------------------------------"
+
+## If script is called directly, execute
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "${@}"
+
+    if [[ $? -ne 0 ]]; then
+        echo ""
+        echo "[ERROR] Failed doing resticprofile initial setup."
+        echo ""
+
+        exit $?
+    else
+        echo ""
+        echo "Finished resticprofile initialization."
+        echo ""
+
+        print_next_steps
+
+        exit 0
+    fi
+fi
