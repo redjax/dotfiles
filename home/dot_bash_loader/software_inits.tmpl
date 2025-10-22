@@ -84,7 +84,7 @@ if command -v yazi &>/dev/null; then
 fi
 
 ## GoEnv
-if [[ -d "{{ .chezmoi.homeDir}}/.goenv" ]]; then
+if [[ -d "{{ .chezmoi.homeDir }}/.goenv" ]]; then
   export GOENV_ROOT="{{ .chezmoi.homeDir }}/.goenv"
   export PATH="$GOENV_ROOT/bin:$PATH"
 
@@ -104,5 +104,21 @@ fi
 ## Mise
 if command -v mise &>/dev/null; then
   eval "$(/usr/local/bin/mise activate bash)"
+fi
+
+## IntelliShell
+if [[ -d "{{ .chezmoi.homeDir }}/.local/share/intelli-shell" ]]; then
+  export INTELLI_HOME="{{ .chezmoi.homeDir }}/.local/share/intelli-shell"
+  # export INTELLI_SEARCH_HOTKEY=\\C-@
+  # export INTELLI_VARIABLE_HOTKEY=\\C-l
+  # export INTELLI_BOOKMARK_HOTKEY=\\C-b
+  # export INTELLI_FIX_HOTKEY=\\C-x
+  # export INTELLI_SKIP_ESC_BIND=0
+  
+  # alias is="intelli-shell"
+  
+  export PATH="$INTELLI_HOME/bin:$PATH"
+  
+  eval "$(intelli-shell init bash)"
 fi
 
