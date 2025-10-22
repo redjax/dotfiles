@@ -21,6 +21,19 @@ DRY_RUN=false
 DEBUG=false
 KEY_OUTPUT_DIR="${PASSWORDS_DIR}"
 
+if [[ -z $EDITOR ]] || [[ "$EDITOR" == "" ]]; then
+    if command -v code --version &>/dev/null; then
+        export EDITOR=$(which code)
+    elif command -v nvim --version &>/dev/null; then
+        export EDITOR=$(which nvim)
+    elif command -v nano --version &>/dev/null; then
+        export EDITOR=$(which nano)
+    else
+        echo "[ERROR] No suitable text editor found for editing the ~/profiles.yaml file."
+        exit 1
+    fi
+fi
+
 function check_installed() {
     local app_cmd
 
@@ -242,6 +255,9 @@ function main() {
     local copy_configs
     copy_configs=false
 
+    local do_edit
+    do_edit=false
+
     ## Prompt user to determine which parts of script to run
     function get_run_config() {
         echo "Choose which parts of the script to run."
@@ -276,6 +292,7 @@ function main() {
 
             do_key_gen=true
             copy_configs=true
+            do_edit=true
 
             ## Skip the rest of the parsing
             return
@@ -297,6 +314,7 @@ function main() {
             esac
         done
         
+        ## Prompt for copying default ~/profiles.yaml
         while true; do
             read -n 1 -r -p "Do you want this script to copy the default profiles.yaml file to ~/profiles.yaml? (y/n): " _copy_configs_choice
             echo ""
@@ -312,6 +330,25 @@ function main() {
                 *)
                     echo "Invalid choice: $1. Please use 'y' or 'n'."
                     echo ""
+                    ;;
+            esac
+        done
+
+        ## Prompt for editing default ~/profiles.yaml
+        while true; do
+            read -n 1 -r -p "If a file requires editing, do you want this script to open your default \$EDITOR ($EDITOR)? (y/n): " _do_edit_choice
+            echo ""
+
+            case $_do_edit_choice in
+                [Yy])
+                    do_edit=true
+                    break
+                    ;;
+                [Nn])
+                    break
+                    ;;
+                *)
+                    echo "[ERROR] Invalid choice: $_do_edit_choice. Please use 'y' or 'n'"
                     ;;
             esac
         done
@@ -354,12 +391,21 @@ function main() {
                 return $?
             fi
         fi
+
+        echo "The ~/profiles.yaml file requires editing before using resticprofile"
+        if [[ $do_edit ]]; then
+            if [[ $DRY_RUN == true ]]; then
+                echo "[DRY RUN] Would edit $HOME/profiles.yaml in editor: $EDITOR"
+            else
+                echo "Launching $EDITOR $HOME/profiles.yaml"
+
+                $EDITOR "$HOME/profiles.yaml"
+            fi
+        fi
     fi
 
     return $?
 }
-
-echo "----------------------------------------------------------------------"
 
 ## If script is called directly, execute
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
