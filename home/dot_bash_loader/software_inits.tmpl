@@ -132,3 +132,9 @@ if [[ -d "{{ .chezmoi.homeDir }}/.atuin" ]]; then
   eval "$(atuin init bash)"
 fi
 
+## k0s
+if command -v k0s &>/dev/null; then
+  alias k="sudo k0s"
+  alias kc="sudo k0s kubectl"
+fi
+
