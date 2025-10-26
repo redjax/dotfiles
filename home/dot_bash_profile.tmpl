@@ -1,6 +1,6 @@
 if [[ -f "{{ .chezmoi.homeDir }}/.profile" ]]; then
   . "{{ .chezmoi.homeDir }}/.profile"
-elif [[ -f "{{ .chezmoi.homeDir }}/.bashrc"]; then
+elif [[ -f "{{ .chezmoi.homeDir }}/.bashrc" ]]; then
   . "{{ .chezmoi.homeDir }}/.bashrc"
 fi
 
