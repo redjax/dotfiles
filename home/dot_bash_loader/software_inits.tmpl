@@ -124,14 +124,14 @@ fi
 
 ## Atuin
 if [[ -d "{{ .chezmoi.homeDir }}/.atuin" ]]; then
-  if command -v atuin &>/dev/null; then
+  if ! command -v atuin &>/dev/null; then
     export PATH="{{ .chezmoi.homeDir }}/.atuin}}:$PATH"
 
     . "$HOME/.atuin/bin/env"
-
-    [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-    eval "$(atuin init bash)"
   fi
+
+  [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+  eval "$(atuin init bash)"
 fi
 
 ## k0s
