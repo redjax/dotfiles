@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/espanso/espanso/dev/schemas/match.schema.json
+
+matches:
+
+  - trigger: ":utcdate"
+    replace: "{{utcDate}}"
+    vars:
+      - name: utcDate
+        type: date
+        params:
+          format: "%Y-%m-%dT%H:%M:%SZ"
