@@ -1,7 +1,44 @@
 ## Ensure ~/.local/share/bash-completions exists
 [ ! -d "{{ .chezmoi.homeDir }}/.local/share/bash-completions" ] && mkdir -p "{{ .chezmoi.homeDir }}/.local/share/bash-completions" &>/dev/null
 
+## Source default completions
+
+## Source /usr/share/bash-completion/
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+fi
+
+## Source /etc/bash_completion/
+if [ -f /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
+
+## Source /etc/bash_completion.d/
+if [ -d /etc/bash_completion.d ]; then
+  for bc_script in /etc/bash_completion.d/*; do
+    [ -f "$bc_script" ] && . "$bc_script"
+  done
+fi
+
 ## -----------------------------------------------------------
+
+## Git
+## Source /usr/share/bash-completion/
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+fi
+
+## Source /etc/bash_completion/
+if [ -f /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
+
+## Source /etc/bash_completion.d/
+if [ -d /etc/bash_completion.d ]; then
+  for bc_script in /etc/bash_completion.d/*; do
+    [ -f "$bc_script" ] && . "$bc_script"
+  done
+fi
 
 ## uv
 if command -v uv &>/dev/null; then
@@ -60,16 +97,6 @@ if command -v mise &>/dev/null; then
 fi
 
 ## -----------------------------------------------------------
-
-## Source /usr/share/bash-completion/
-if [ -f /usr/share/bash-completion/bash_completion ]; then
-  . /usr/share/bash-completion/bash_completion
-fi
-
-## Source /etc/bash_completion/
-if [ -f /etc/bash_completion ]; then
-  . /etc/bash_completion
-fi
 
 ## Source custom completions
 for completion in "{{ .chezmoi.homeDir }}/.local/share/bash-completions/"*.bash; do
