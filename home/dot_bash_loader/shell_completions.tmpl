@@ -23,21 +23,14 @@ fi
 ## -----------------------------------------------------------
 
 ## Git
-## Source /usr/share/bash-completion/
-if [ -f /usr/share/bash-completion/bash_completion ]; then
-  . /usr/share/bash-completion/bash_completion
-fi
-
-## Source /etc/bash_completion/
-if [ -f /etc/bash_completion ]; then
-  . /etc/bash_completion
-fi
-
-## Source /etc/bash_completion.d/
-if [ -d /etc/bash_completion.d ]; then
-  for bc_script in /etc/bash_completion.d/*; do
-    [ -f "$bc_script" ] && . "$bc_script"
-  done
+if ! declare -F __git_complete >/dev/null; then
+    if [ -f /usr/share/bash-completion/completions/git ]; then
+        . /usr/share/bash-completion/completions/git
+    elif [ -f /usr/local/share/bash-completion/completions/git ]; then
+        . /usr/local/share/bash-completion/completions/git
+    elif [ -f /etc/bash_completion.d/git ]; then
+        . /etc/bash_completion.d/git
+    fi
 fi
 
 ## uv
