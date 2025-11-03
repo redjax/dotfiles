@@ -61,7 +61,17 @@ fi
 
 ## -----------------------------------------------------------
 
-## Source completions
+## Source /usr/share/bash-completion/
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+fi
+
+## Source /etc/bash_completion/
+if [ -f /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
+
+## Source custom completions
 for completion in "{{ .chezmoi.homeDir }}/.local/share/bash-completions/"*.bash; do
   ## avoid globbing literal if no files (optional, defensive)
   [ -f "$completion" ] && source "$completion"
