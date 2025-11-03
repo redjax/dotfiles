@@ -28,14 +28,6 @@ matches:
         params:
           format: "%m/%d/%Y"
 
-  - trigger: ":utcdate"
-    replace: "{{utcDate}}"
-    vars:
-      - name: utcDate
-        type: date
-        params:
-          format: "%Y-%m-%dT%H:%M:%SZ"
-
   # Print the output of a shell command
   # - trigger: ":shell"
   #   replace: "{{output}}"
