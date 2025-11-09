@@ -122,6 +122,25 @@ if ! git remote add origin $REMOTE_URL; then
   exit 1
 fi
 
+## Fetch remote branches so tracking info can be updated
+echo "Fetching remote branches to update local upstream URLs"
+git fetch origin --prune
+
+## Try to restore upstream tracking for each local branch
+echo "Updating local branches to track remote branches (if available)"
+for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
+  ## Check if branch exists on remote
+  if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    ## Update branch
+    git branch --set-upstream-to="origin/$branch" "$branch" 2>/dev/null &&
+      echo "[OK] Linked local branch '$branch' -> origin/$branch" ||
+      echo "[WARN] Failed to set upstream for branch '$branch'"
+  else
+    echo "[INFO] Skipping '$branch' (not on remote)"
+  fi
+
+done
+
 echo ""
 echo "[SUCCESS] Set remote origin URL to: (${REMOTE_TYPE}) ${REMOTE_URL}"
 exit 0
