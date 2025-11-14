@@ -89,6 +89,42 @@ if command -v mise &>/dev/null; then
   mise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
 fi
 
+## Docker
+if command -v docker &>/dev/null; then
+  docker_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/docker.bash"
+  
+  if [ ! -f "$docker_complete" ]; then
+    # Try to find Docker completion script in common locations
+    if [ -f /usr/share/bash-completion/completions/docker ]; then
+      cp /usr/share/bash-completion/completions/docker "$docker_complete"
+    elif [ -f /etc/bash_completion.d/docker ]; then
+      cp /etc/bash_completion.d/docker "$docker_complete"
+    elif [ -f /usr/local/etc/bash_completion.d/docker ]; then
+      cp /usr/local/etc/bash_completion.d/docker "$docker_complete"
+    fi
+  fi
+fi
+
+## Docker Compose (V2 plugin)
+if command -v docker &>/dev/null && docker compose version &>/dev/null; then
+  docker_compose_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/docker-compose.bash"
+  
+  if [ ! -f "$docker_compose_complete" ]; then
+    # Try to find Docker Compose completion script in common locations
+    if [ -f /usr/share/bash-completion/completions/docker-compose ]; then
+      cp /usr/share/bash-completion/completions/docker-compose "$docker_compose_complete"
+    elif [ -f /etc/bash_completion.d/docker-compose ]; then
+      cp /etc/bash_completion.d/docker-compose "$docker_compose_complete"
+    elif [ -f /usr/local/etc/bash_completion.d/docker-compose ]; then
+      cp /usr/local/etc/bash_completion.d/docker-compose "$docker_compose_complete"
+    fi
+  fi
+  
+  # Ensure 'docker compose' subcommand gets proper completion
+  # Source the completion if it exists
+  [ -f "$docker_compose_complete" ] && source "$docker_compose_complete"
+fi
+
 ## -----------------------------------------------------------
 
 ## Source custom completions
