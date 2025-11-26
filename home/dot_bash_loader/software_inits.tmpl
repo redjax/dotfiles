@@ -33,26 +33,27 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
 fi
 
 ## Add Go to PATH
+
+## Set default GOPATH for user
+export GOPATH="{{ .chezmoi.homeDir }}/go"
+
+## Check if Go is installed in ~/.go
 if [[ -d "{{ .chezmoi.homeDir }}/.go" ]]; then
-  export GOROOT="{{ .chezmoi.homeDir }}/.go"
-  export GOPATH="{{ .chezmoi.homeDir }}/go"
-  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
+    export GOROOT="{{ .chezmoi.homeDir }}/.go"
+    export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+## Check if Go is installed in standard /usr/local/go
 elif [[ -d /usr/local/go ]]; then
-  export GOROOT="/usr/local/go"
-  export GOPATH="{{ .chezmoi.homeDir }}/go"
-  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
+    export GOROOT="/usr/local/go"
+    export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
 fi
 
-## Add gobins to path
-if [[ -d /opt/gobins ]]; then
-  export PATH="$PATH:/opt/gobins"
-fi
-if [[ -d "{{ .chezmoi.homeDir }}/gobins" ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
-fi
-if [[ -d "{{ .chezmoi.homeDir }}/.gobins" ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
-fi
+## Disable Go toolchain auto-downloads (matches installer)
+export GOTOOLCHAIN=local
+
+## Add optional gobins directories
+[[ -d /opt/gobins ]] && export PATH="$PATH:/opt/gobins"
+[[ -d "{{ .chezmoi.homeDir }}/gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
+[[ -d "{{ .chezmoi.homeDir }}/.gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
 
 ## Add chezmoi to PATH
 if [[ -f {{ .chezmoi.homeDir }}/.local/bin/chezmoi ]]; then
