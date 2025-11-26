@@ -32,23 +32,7 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 fi
 
-## Add Go to PATH
-
-## Set default GOPATH for user
-export GOPATH="{{ .chezmoi.homeDir }}/go"
-
-## Check if Go is installed in ~/.go
-if [[ -d "{{ .chezmoi.homeDir }}/.go" ]]; then
-    export GOROOT="{{ .chezmoi.homeDir }}/.go"
-    export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
-## Check if Go is installed in standard /usr/local/go
-elif [[ -d /usr/local/go ]]; then
-    export GOROOT="/usr/local/go"
-    export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
-fi
-
-## Disable Go toolchain auto-downloads (matches installer)
-export GOTOOLCHAIN=local
+## Go
 
 ## Add optional gobins directories
 [[ -d /opt/gobins ]] && export PATH="$PATH:/opt/gobins"
