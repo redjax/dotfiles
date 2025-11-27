@@ -19,22 +19,3 @@ if [ -d "{{ .chezmoi.homeDir }}/.local/bin" ] ; then
     PATH="{{ .chezmoi.homeDir }}/.local/bin:$PATH"
   fi
 fi
-
-## Go
-#  Go doesn't like being sourced in ~/.bash_loader/software_inits for some reason.
-
-## GOPATH for your user
-export GOPATH="{{ .chezmoi.homeDir }}/go"
-
-## GOROOT (prefer /usr/local/go if installed)
-if [ -d "/usr/local/go" ]; then
-    export GOROOT="/usr/local/go"
-elif [ -d "{{ .chezmoi.homeDir }}/.go" ]; then
-    export GOROOT="{{ .chezmoi.homeDir }}/.go"
-fi
-
-## Add Go binaries to PATH
-export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
-
-## Disable Go toolchain auto-downloads
-export GOTOOLCHAIN=local
