@@ -34,6 +34,21 @@ fi
 
 ## Go
 
+## GOPATH for your user
+export GOPATH="{{ .chezmoi.homeDir }}/go"
+
+## Set GOROOT
+if [ -d "/usr/local/go" ]; then
+    export GOROOT="/usr/local/go"
+fi
+
+## Add Go binaries to PATH
+export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+
+## Disable Go toolchain auto-downloads
+export GOTOOLCHAIN=local
+
+
 ## Add optional gobins directories
 [[ -d /opt/gobins ]] && export PATH="$PATH:/opt/gobins"
 [[ -d "{{ .chezmoi.homeDir }}/gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
