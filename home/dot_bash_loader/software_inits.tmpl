@@ -48,7 +48,6 @@ export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
 ## Disable Go toolchain auto-downloads
 export GOTOOLCHAIN=local
 
-
 ## Add optional gobins directories
 [[ -d /opt/gobins ]] && export PATH="$PATH:/opt/gobins"
 [[ -d "{{ .chezmoi.homeDir }}/gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
@@ -124,9 +123,9 @@ fi
 
 ## Atuin
 if [[ -d "{{ .chezmoi.homeDir }}/.atuin" ]]; then
-  if command -v atuin &>/dev/null; then
-    export PATH="{{ .chezmoi.homeDir }}/.atuin:$PATH"
+  export PATH="{{ .chezmoi.homeDir }}/.atuin/bin:$PATH"
 
+  if command -v atuin &>/dev/null; then
     . "$HOME/.atuin/bin/env"
 
     [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
