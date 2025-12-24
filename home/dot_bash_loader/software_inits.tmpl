@@ -139,3 +139,8 @@ if command -v k0s &>/dev/null; then
   alias kc="sudo k0s kubectl"
 fi
 
+## Aqua (github.com/aquaproj/aqua)
+if command -v aqua &>/dev/null || [[ -f "${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin/aqua" ]]; then
+    export PATH="${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin:$PATH"
+fi
+
