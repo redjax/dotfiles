@@ -125,6 +125,13 @@ if command -v docker &>/dev/null && docker compose version &>/dev/null; then
   [ -f "$docker_compose_complete" ] && source "$docker_compose_complete"
 fi
 
+## Dagger
+if command -v dagger &>/dev/null; then
+  dagger_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/dagger.bash"
+  [ ! -f "$dagger_complete" ] && dagger completion bash > "$dagger_complete"
+  [ -f "$dagger_complete" ] && . "$dagger_complete"
+fi
+
 ## -----------------------------------------------------------
 
 ## Source custom completions
