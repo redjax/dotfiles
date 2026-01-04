@@ -22,6 +22,11 @@ bold_italic_font auto
 ## Hide cursor after delay wwhen typing
 mouse_hide_wait -3.0
 
+## Disable cursor integration from shell so Kitty controls cursor shape
+shell_integration no-cursor
+## Options: block, beam, underline, ibeam
+cursor_shape block
+
 ##############
 # Scrollback #
 ##############
@@ -73,9 +78,6 @@ clear_selection_on_clipboard_loss no
 #  value of smart will do it when using normal selections, but not
 #  rectangle selections. A value of always will always do it.
 strip_trailing_spaces never
-
-default_pointer_shape beam
-pointer_shape_when_dragging beam crosshair
 
 #################
 # Terminal bell #
