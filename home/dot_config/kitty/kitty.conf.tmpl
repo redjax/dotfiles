@@ -1,0 +1,398 @@
+#########
+# Theme #
+#########
+
+include current-theme.conf
+
+#########
+# Fonts #
+#########
+
+font_size 13.0
+
+font_family      family='Hack Nerd Font Mono' postscript_name=HackNFM-Regular
+bold_font        auto
+italic_font      auto
+bold_italic_font auto
+
+#########
+# Mouse #
+#########
+
+## Hide cursor after delay wwhen typing
+mouse_hide_wait -3.0
+
+##############
+# Scrollback #
+##############
+
+scrollback_lines 10000
+scrollback_pager_history_size 10
+
+## Control when the scrollbar is displayed.
+#   scrolled: on backward/upward scroll
+#   hovered: when the mouse is hovering on the right edge of the window.
+#   scrolled-and-hovered: combine 'scrolled' and 'hovered'
+#   always: whenever any scrollback is present
+#   never: disable the scrollbar.
+scrollbar scrolled
+
+########
+# URLs #
+########
+
+## When the mouse hovers over a terminal hyperlink, show the actual
+#  URL that will be activated when the hyperlink is clicked.
+show_hyperlink_targets no
+
+## When to underline hyperlinks.
+#    always: underline all hyperlinks
+#    hover: underline hyperlink when mouse hovers
+#    never: don't underline hyperlinks
+underline_hyperlinks always
+
+##################
+# Text selection #
+##################
+
+## Zellij-like copy on highlight text
+# copy_on_select no
+
+## When the contents of the clipboard no longer reflect the current
+#  selection, clear it. This is primarily useful on platforms such as
+#  Linux where selecting text automatically copies it to a special
+#  "primary selection" clipboard or if you have copy_on_select set to
+#  clipboard.
+#  Note that on macOS the system does not provide notifications when
+#  the clipboard owner is changed, so there, copying to clipboard in a
+#  non-kitty application will not clear selections even if
+#  copy_on_select is enabled.
+clear_selection_on_clipboard_loss no
+
+## Remove spaces at the end of lines when copying to clipboard. A
+#  value of smart will do it when using normal selections, but not
+#  rectangle selections. A value of always will always do it.
+strip_trailing_spaces never
+
+default_pointer_shape beam
+pointer_shape_when_dragging beam crosshair
+
+#################
+# Terminal bell #
+#################
+
+enable_audio_bell no
+
+#################
+# Window layout #
+#################
+
+remember_window_size  no
+## Add 'c' to end of size value to use cell measurements instead of pixels,
+#  i.e. 110c
+initial_window_width  110c
+initial_window_height 25c
+
+## Fade the text in inactive windows by the specified amount (a number
+#  between zero and one, with zero being fully faded).
+inactive_text_alpha 0.4
+
+## Hide the window decorations (title-bar and window borders) with
+#  yes. On macOS, titlebar-only and titlebar-and-corners can be used
+#  to only hide the titlebar and the rounded corners. Whether this
+#  works and exactly what effect it has depends on the window
+#  manager/operating system. Note that the effects of changing this
+#  option when reloading config are undefined. When using titlebar-
+#  only, it is useful to also set window_margin_width and
+#  placement_strategy to prevent the rounded corners from clipping
+#  text. Or use titlebar-and-corners.
+hide_window_decorations no
+
+###########
+# Tab bar #
+###########
+
+## The edge to show the tab bar on, top or bottom.
+# tab_bar_edge bottom
+
+## The margin to the left and right of the tab bar (in pts).
+tab_bar_margin_width 0.0
+
+## The margin above and below the tab bar (in pts). The first number
+#  is the margin between the edge of the OS Window and the tab bar.
+#  The second number is the margin between the tab bar and the
+#  contents of the current tab.
+tab_bar_margin_height 0.0 0.0
+
+## The tab bar style, can be one of:
+#  fade
+#      Each tab's edges fade into the background color. (See also tab_fade)
+#  slant
+#      Tabs look like the tabs in a physical file.
+#  separator
+#      Tabs are separated by a configurable separator. (See also
+#      tab_separator)
+#  powerline
+#      Tabs are shown as a continuous line with "fancy" separators.
+#      (See also tab_powerline_style)
+#  custom
+#      A user-supplied Python function called draw_tab is loaded from the file
+#      tab_bar.py in the kitty config directory. For examples of how to
+#      write such a function, see the functions named draw_tab_with_* in
+#      kitty's source code: kitty/tab_bar.py. See also
+#      this discussion <https://github.com/kovidgoyal/kitty/discussions/4447>
+#      for examples from kitty users.
+#  hidden
+#      The tab bar is hidden. If you use this, you might want to create
+#      a mapping for the select_tab action which presents you with a list of
+#      tabs and allows for easy switching to a tab.
+tab_bar_style powerline
+
+## The horizontal alignment of the tab bar, can be one of: left, center, right.
+tab_bar_align center
+
+## The separator between tabs in the tab bar when using separator as
+#  the tab_bar_style.
+# tab_separator " ┇"
+
+## The powerline separator style between tabs in the tab bar when
+#  using powerline as the tab_bar_style, can be one of:
+# angled, slanted, round.
+tab_powerline_style round
+
+## Some text or a Unicode symbol to show on the tab if a window in the
+#  tab that does not have focus has some activity. If you want to use
+#  leading or trailing spaces, surround the text with quotes. See
+#  tab_title_template for how this is rendered.
+tab_activity_symbol " ! "
+
+## The maximum number of cells that can be used to render the text in
+#  a tab. A value of zero means that no limit is applied.
+# tab_title_max_length 0
+
+##  A template to render the tab title. The default just renders the
+#  title with optional symbols for bell and activity. If you wish to
+#  include the tab-index as well, use something like: {index}:{title}.
+#  Useful if you have shortcuts mapped for goto_tab N. If you prefer
+#  to see the index as a superscript, use {sup.index}. All data
+#  available is:
+#    title
+#      The current tab title.
+#    index
+#      The tab index usable with goto_tab N goto_tab shortcuts.
+#    layout_name
+#      The current layout name.
+#    session_name
+#      The name of the kitty session file from which this tab was created, if any.
+#    active_session_name
+#      The name of the kitty session file from which the active window in this tab was created, if any.
+#    num_windows
+#      The number of windows in the tab.
+#    num_window_groups
+#      The number of window groups (a window group is a window and all of its overlay windows) in the tab.
+#    tab.active_wd
+#      The working directory of the currently active window in the tab
+#      (expensive, requires syscall). Use tab.active_oldest_wd to get
+#      the directory of the oldest foreground process rather than the newest.
+#    tab.active_exe
+#      The name of the executable running in the foreground of the currently
+#      active window in the tab (expensive, requires syscall). Use
+#      tab.active_oldest_exe for the oldest foreground process.
+#    max_title_length
+#      The maximum title length available.
+#    keyboard_mode
+#      The name of the current keyboard mode <https://sw.kovidgoyal.net/kitty/mapping/#modal-mappings> or the empty string if no keyboard mode is active.
+#    tab.last_focused_progress_percent
+#      If a command running in a window reports the progress for a task, show this progress as a percentage
+#      from the most recently focused window in the tab. Empty string if no progress is reported.
+#    tab.progress_percent
+#      If a command running in a window reports the progress for a task, show this progress as a percentage
+#      from all windows in the tab, averaged. Empty string is no progress is reported.
+#    custom
+#      This will call a function named draw_title(data) from the file tab_bar.py placed in
+#      the kitty config directory. The function will be passed a dictionary of data, the same data that
+#      can be used in this template. It can then perform arbitrarily complex processing and return a string.
+#      For example: tab_title_template "{custom}" will use the output of the function as the tab title.
+#      Any print statements in the draw_title() will print to the STDOUT of the kitty process, useful
+#      for debugging.
+#  Note that formatting is done by Python's string formatting
+#  machinery, so you can use, for instance, {layout_name[:2].upper()}
+#  to show only the first two letters of the layout name, upper-cased.
+#  If you want to style the text, you can use styling directives, for
+#  example:
+#  `{fmt.fg.red}red{fmt.fg.tab}normal{fmt.bg._00FF00}greenbg{fmt.bg.tab}`.
+#  Similarly, for bold and italic:
+#  `{fmt.bold}bold{fmt.nobold}normal{fmt.italic}italic{fmt.noitalic}`.
+#  The 256 eight terminal colors can be used as `fmt.fg.color0`
+#  through `fmt.fg.color255`. Note that for backward compatibility, if
+#  {bell_symbol} or {activity_symbol} are not present in the template,
+#  they are prepended to it.
+tab_title_template "{fmt.fg.red}{bell_symbol}{activity_symbol}{fmt.fg.tab}{tab.last_focused_progress_percent}{title}"
+
+## Template to use for active tabs. If not specified falls back to
+#  tab_title_template.
+# active_tab_title_template none
+
+#################
+# Notifications #
+#################
+
+notify_on_cmd_finish invisible 20
+
+############
+# Advanced #
+############
+
+## The shell program to execute. The default value of . means to use
+#  the value of of the SHELL environment variable or if unset,
+#  whatever shell is set as the default shell for the current user.
+#  Note that on macOS if you change this, you might need to add
+#  --login and --interactive to ensure that the shell starts in
+#  interactive mode and reads its startup rc files. Environment
+#  variables are expanded in this setting.
+shell .
+
+## The terminal based text editor (such as vim or nano) to use when
+#  editing the kitty config file or similar tasks.
+#  The default value of . means to use the environment variables
+#  VISUAL and EDITOR in that order. If these variables aren't set,
+#  kitty will run your shell ($SHELL -l -i -c env) to see if your
+#  shell startup rc files set VISUAL or EDITOR. If that doesn't work,
+#  kitty will cycle through various known editors (vim, emacs, etc.)
+#  and take the first one that exists on your system.
+# editor .
+
+## Close the window when the child process (usually the shell) exits.
+# With the default value no, the terminal will remain open when the
+# child exits as long as there are still other processes outputting
+# to the terminal (for example disowned or backgrounded processes).
+# When enabled with yes, the window will close as soon as the child
+# process exits. Note that setting it to yes means that any
+# background processes still using the terminal can fail silently
+# because their stdout/stderr/stdin no longer work.
+# close_on_child_death no
+
+## Allow other Kitty sessions to connect
+#  Options:
+#    password: Remote control requests received over both the TTY device and the socket
+#      are confirmed based on passwords, see remote_control_password.
+#    socket-only: Remote control requests received over a socket are accepted unconditionally.
+#      Requests received over the TTY are denied. See listen_on.
+#    socket: Remote control requests received over a socket are accepted unconditionally.
+#      Requests received over the TTY are confirmed based on password.
+#    no: Remote control is completely disabled.
+#    yes:
+#      Remote control requests are always accepted.
+allow_remote_control no
+## Set a password for remote control
+# remote_control_password
+
+## Listen to the specified socket for remote control connections. Note
+#  that this will apply to all kitty instances. It can be overridden
+#  by the kitty --listen-on command line option. For UNIX sockets,
+#  such as unix:${TEMP}/mykitty or unix:@mykitty (on Linux).
+#  Environment variables are expanded and relative paths are resolved
+#  with respect to the temporary directory. If {kitty_pid} is present,
+#  then it is replaced by the PID of the kitty process, otherwise the
+#  PID of the kitty process is appended to the value, with a hyphen.
+#  For TCP sockets such as tcp:localhost:0 a random port is always
+#  used even if a non-zero port number is specified.  See the help for
+#  kitty --listen-on for more details. Note that this will be ignored
+#  unless allow_remote_control is set to either: yes, socket or
+#  socket-only. Changing this option by reloading the config is not
+#  supported.
+listen_on none
+
+## Control where kitty finds the programs to run. The default search
+#  order is: First search the system wide PATH, then ~/.local/bin and
+#  ~/bin. If still not found, the PATH defined in the login shell
+#  after sourcing all its startup files is tried. Finally, if present,
+#  the PATH specified by the env option is tried.
+#  This option allows you to prepend, append, or remove paths from
+#  this search order. It can be specified multiple times for multiple
+#  paths. A simple path will be prepended to the search order. A path
+#  that starts with the + sign will be append to the search order,
+#  after ~/bin above. A path that starts with the - sign will be
+#  removed from the entire search order. For example::
+#    exe_search_path /some/prepended/path
+#    exe_search_path +/some/appended/path
+#    exe_search_path -/some/excluded/path
+# exe_search_path
+
+
+## The interval to periodically check if an update to kitty is
+#  available (in hours). If an update is found, a system notification
+#  is displayed informing you of the available update. The default is
+#  to check every 24 hours, set to zero to disable. Update checking is
+#  only done by the official binary builds. Distro packages or source
+#  builds do not do update checking. Changing this option by reloading
+#  the config is not supported.
+update_check_interval 24
+
+## Path to a session file to use for all kitty instances. Can be
+#  overridden by using the kitty --session =none command line option
+#  for individual instances. See sessions
+#  <https://sw.kovidgoyal.net/kitty/sessions/> in the kitty
+#  documentation for details. Note that relative paths are interpreted
+#  with respect to the kitty config directory. Environment variables
+#  in the path are expanded. Changing this option by reloading the
+#  config is not supported. Note that if kitty is invoked with command
+#  line arguments specifying a command to run, this option is ignored.
+startup_session none
+
+##  The maximum size (in MB) of data from programs running in kitty
+#  that will be stored for writing to the system clipboard. A value of
+#  zero means no size limit is applied. See also clipboard_control.
+clipboard_max_size 512
+
+######################
+# OS specific tweaks #
+######################
+
+## The color of the kitty window's titlebar on Wayland systems with
+#  client side window decorations such as GNOME. A value of system
+#  means to use the default system colors, a value of background means
+#  to use the background color of the currently active kitty window
+#  and finally you can use an arbitrary color, such as #12af59 or red.
+# wayland_titlebar_color system
+# macos_titlebar_color system
+
+## Choose between Wayland and X11 backends. By default, an appropriate
+#  backend based on the system state is chosen automatically. Set it
+#  to x11 or wayland to force the choice. Changing this option by
+#  reloading the config is not supported.
+linux_display_server auto
+
+######################
+# Keyboard shortcuts #
+######################
+
+## Keys are identified simply by their lowercase Unicode characters.
+#  For example: a for the A key, [ for the left square bracket key,
+#  etc. For functional keys, such as Enter or Escape, the names are
+#  present at Functional key definitions
+#  <https://sw.kovidgoyal.net/kitty/keyboard-protocol/#functional>.
+#  For modifier keys, the names are ctrl (control, ⌃), shift (⇧), alt
+#  (opt, option, ⌥), super (cmd, command, ⌘).
+
+#  Simple shortcut mapping is done with the map directive. For full
+#  details on advanced mapping including modal and per application
+#  maps, see mapping <https://sw.kovidgoyal.net/kitty/mapping/>. Some
+#  quick examples to illustrate common tasks::
+
+#      # unmap a keyboard shortcut, passing it to the program running in kitty
+#      map kitty_mod+space
+#      # completely ignore a keyboard event
+#      map ctrl+alt+f1 discard_event
+#      # combine multiple actions
+#      map kitty_mod+e combine : new_window : next_layout
+#      # multi-key shortcuts
+#      map ctrl+x>ctrl+y>z action
+
+#  The full list of actions that can be mapped to key presses is
+#  available here <https://sw.kovidgoyal.net/kitty/actions/>.
+
+## Special modifier key alias for default shortcuts. You can change
+#  the value of this option to alter all default shortcuts that use
+#  kitty_mod.
+kitty_mod ctrl+shift
