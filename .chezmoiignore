@@ -7,3 +7,13 @@ scripts/*
 .gitignore
 
 .config/tmux/plugins
+
+## Ignore Windows files on Linux
+{{ if ne .chezmoi.os "windows" }}
+dot_config/kitty/windows.conf.tmpl
+{{ end }}
+
+## Ignore Linux files on Windows  
+{{ if ne .chezmoi.os "linux" }}
+dot_config/kitty/linux.conf.tmpl
+{{ end }}
