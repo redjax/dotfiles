@@ -2,7 +2,7 @@
 # Theme #
 #########
 
-include current-theme.conf
+include themes/grape-dark.conf
 
 #########
 # Fonts #
@@ -21,6 +21,15 @@ bold_italic_font auto
 
 ## Hide cursor after delay wwhen typing
 mouse_hide_wait -3.0
+
+## Force CTRL+Click for opening links (instead of just a click)
+mouse_map left click ungrabbed no-op
+mouse_map ctrl+left click ungrabbed mouse_handle_click link
+
+## Disable cursor integration from shell so Kitty controls cursor shape
+shell_integration no-cursor
+## Options: block, beam, underline, ibeam
+cursor_shape block
 
 ##############
 # Scrollback #
@@ -73,9 +82,6 @@ clear_selection_on_clipboard_loss no
 #  value of smart will do it when using normal selections, but not
 #  rectangle selections. A value of always will always do it.
 strip_trailing_spaces never
-
-default_pointer_shape beam
-pointer_shape_when_dragging beam crosshair
 
 #################
 # Terminal bell #
@@ -396,3 +402,6 @@ linux_display_server auto
 #  the value of this option to alter all default shortcuts that use
 #  kitty_mod.
 kitty_mod ctrl+shift
+
+## Map CTRL+Backspace to delete whole word
+map ctrl+backspace send_text normal \x1b\x7f
