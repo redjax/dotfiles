@@ -19,6 +19,9 @@ bold_italic_font auto
 # Mouse #
 #########
 
+## Clear default mouse actions to create custom mappings
+clear_all_mouse_actions
+
 ## Hide cursor after delay wwhen typing
 mouse_hide_wait -3.0
 
@@ -31,8 +34,12 @@ shell_integration no-cursor
 ## Options: block, beam, underline, ibeam
 cursor_shape block
 
-## Paste clipboard on right click (like Konsole/Windows Terminal)
-mouse_map right press ungrabbed paste_from_selection
+## Copy on highlight + right click
+mouse_map right release ungrabbed copy_to_clipboard
+mouse_map right release grabbed copy_to_clipboard
+
+## Paste from clipboard on CTRL+right click
+mouse_map ctrl+right release ungrabbed,grabbed paste_from_clipboard
 
 ##############
 # Scrollback #
@@ -407,3 +414,4 @@ kitty_mod ctrl+shift
 
 ## Map CTRL+Backspace to delete whole word
 map ctrl+backspace send_text normal \x1b\x7f
+
