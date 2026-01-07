@@ -31,6 +31,9 @@ shell_integration no-cursor
 ## Options: block, beam, underline, ibeam
 cursor_shape block
 
+## Paste clipboard on right click (like Konsole/Windows Terminal)
+mouse_map right press ungrabbed paste_from_selection
+
 ##############
 # Scrollback #
 ##############
@@ -64,8 +67,7 @@ underline_hyperlinks always
 # Text selection #
 ##################
 
-## Zellij-like copy on highlight text
-# copy_on_select no
+copy_on_select yes
 
 ## When the contents of the clipboard no longer reflect the current
 #  selection, clear it. This is primarily useful on platforms such as
