@@ -52,7 +52,7 @@ if command -v resticprofile &>/dev/null; then
   [ ! -f "$resticprofile_complete" ] && resticprofile generate --bash-completion > "$resticprofile_complete"
 fi
 
-## Zellij
+## Zellij - generate completion file (sourced later)
 if command -v zellij &>/dev/null; then
   zellij_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/zellij.bash"
   [ ! -f "$zellij_complete" ] && zellij setup --generate-completion bash > "$zellij_complete"
@@ -139,4 +139,46 @@ for completion in "{{ .chezmoi.homeDir }}/.local/share/bash-completions/"*.bash;
   ## avoid globbing literal if no files (optional, defensive)
   [ -f "$completion" ] && source "$completion"
 done
+
+## -----------------------------------------------------------
+
+## Zellij Session Name Completions
+#  This section must stay beneath the 'source custom completions' section above.
+#  It must be loaded after the default zellij completion is sourced, so that
+#  it can wrap Zellij's completions and enhance it with session name completions.
+if command -v zellij &>/dev/null; then
+  ## Save the original completion spec (sourced from the loop above)
+  _zellij_original_completion=$(complete -p zellij 2>/dev/null | sed 's/.*-F \([^ ]*\).*/\1/')
+  
+  ## Custom completion wrapper for zellij session names
+  _zellij_session_completion() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+    
+    ## Complete session names for attach/a command
+    if [[ "$prev" == "attach" ]] || [[ "$prev" == "a" ]]; then
+      ## Get list of active sessions (without formatting/colors)
+      local sessions=$(zellij list-sessions --no-formatting 2>/dev/null | awk '{print $1}')
+      if [[ -n "$sessions" ]]; then
+        COMPREPLY=($(compgen -W "$sessions" -- "$cur"))
+      else
+        COMPREPLY=()
+      fi
+      return 0
+    fi
+    
+    ## For all other cases, call the original completion function
+    if [[ -n "$_zellij_original_completion" ]] && declare -f "$_zellij_original_completion" >/dev/null; then
+      "$_zellij_original_completion"
+      return $?
+    fi
+    
+    ## If no original completion, return with empty suggestions
+    COMPREPLY=()
+    return 0
+  }
+  
+  ## Register the enhanced completion function
+  complete -o nospace -F _zellij_session_completion zellij
+fi
 
