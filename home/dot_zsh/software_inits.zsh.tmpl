@@ -81,3 +81,7 @@ if command -v atuin &>/dev/null; then
   eval "$(atuin init zsh)"
 fi
 
+## Jiu-jitsu (jj)
+if command -v jj &>/dev/null; then
+  source <(jj util completion zsh)
+fi
