@@ -132,6 +132,11 @@ if command -v dagger &>/dev/null; then
   [ -f "$dagger_complete" ] && . "$dagger_complete"
 fi
 
+## Jiu-jitsu (jj)
+if command -v jj &>/dev/null; then
+  jj util completion bash > "{{ .chezmoi.homeDir }}/.local/share/bash-completions/jj.bash"
+fi
+
 ## -----------------------------------------------------------
 
 ## Source custom completions
