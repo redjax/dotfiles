@@ -1,0 +1,134 @@
+####################
+# Helper Functions #
+####################
+
+# Add a directory to PATH if it exists and isn't already in PATH
+path_add() {
+    [[ -d $1 ]] || return
+    case ":$PATH:" in
+        *":$1:"*) return ;;  # Already in PATH
+        *) PATH="$PATH:$1" ;;
+    esac
+}
+
+# Source a file if it exists
+source_if_exists() {
+    [[ -f $1 ]] && source "$1"
+}
+
+# Enable Bash compatibility for completions
+autoload -U +X bashcompinit && bashcompinit
+
+###########
+# Chezmoi #
+###########
+
+CHEZMOI_ZSH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_chezmoi"
+
+# Generate completions file if it doesn't exist
+[[ -f "$CHEZMOI_ZSH_COMPLETION" ]] || chezmoi completion zsh > "$CHEZMOI_ZSH_COMPLETION"
+
+# Source completions
+source_if_exists "$CHEZMOI_ZSH_COMPLETION"
+
+#########
+# Pyenv #
+#########
+if command -v pyenv &>/dev/null; then
+    path_add "{{ .chezmoi.homeDir }}/.pyenv/bin"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+fi
+
+##############################
+# NVM (Node Version Manager) #
+##############################
+if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
+    export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
+    source_if_exists "$NVM_DIR/nvm.sh"
+    source_if_exists "$NVM_DIR/bash_completion"
+fi
+
+###################
+# Astral uv / uvx #
+###################
+UV_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_uv"
+UVX_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_uvx"
+
+if command -v uv &>/dev/null; then
+    [[ -f "$UV_COMPLETION" ]] || uv generate-shell-completion bash > "$UV_COMPLETION"
+    [[ -f "$UVX_COMPLETION" ]] || uvx --generate-shell-completion bash > "$UVX_COMPLETION"
+
+    source_if_exists "$UV_COMPLETION"
+    source_if_exists "$UVX_COMPLETION"
+fi
+
+########################
+# Homebrew / Linuxbrew #
+########################
+if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    export HOMEBREW_NO_ANALYTICS=1
+    path_add "/home/linuxbrew/.linuxbrew/bin"
+fi
+
+##############
+# Go Lanuage #
+##############
+path_add "/usr/local/go/bin"
+path_add "/opt/gobins"
+
+####################
+# Dotnet CLI tools #
+####################
+if [[ -d "{{ .chezmoi.homeDir }}/.dotnet" ]]; then
+    export DOTNET_TOOLS="{{ .chezmoi.homeDir }}/.dotnet/tools"
+    path_add "$DOTNET_TOOLS"
+fi
+
+#########################
+# Terraform completions #
+#########################
+if command -v terraform &>/dev/null; then
+    autoload -U +X bashcompinit && bashcompinit
+    complete -o nospace -C "$(command -v terraform)" terraform
+fi
+
+########################
+# Mise CLI completions #
+########################
+MISE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_mise"
+
+if command -v mise &>/dev/null; then
+    mkdir -p "$(dirname "$MISE_COMPLETION")" &>/dev/null
+    [[ -f "$MISE_COMPLETION" ]] || mise completion zsh > "$MISE_COMPLETION"
+    source_if_exists "$MISE_COMPLETION"
+fi
+
+###############################
+# Atuin shell history tracker #
+###############################
+if command -v atuin &>/dev/null; then
+    source_if_exists "{{ .chezmoi.homeDir }}/.atuin/bin/env"
+    eval "$(atuin init zsh)"
+fi
+
+#########
+# x-cmd #
+#########
+source_if_exists "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
+
+#########################
+# Local Zsh completions #
+#########################
+
+# List completions to source
+LOCAL_ZSH_COMPLETIONS=(
+    "$UV_COMPLETION"
+    "$UVX_COMPLETION"
+    "$MISE_COMPLETION"
+)
+
+for completion in "${LOCAL_ZSH_COMPLETIONS[@]}"; do
+    source_if_exists "$completion"
+done
