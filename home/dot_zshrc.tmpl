@@ -1,0 +1,70 @@
+#################
+# Shell Options #
+#################
+
+# Type a directory name to cd to it
+setopt AUTO_CD
+# Push dirs onto a stack
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
+###################
+# History Options #
+###################
+
+# History
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+setopt APPEND_HISTORY
+
+HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+
+################
+# PATH Options #
+################
+
+# Treat path as a unique array (removes duplicate entries automatically)
+typeset -U path
+
+path=(
+  {{ .chezmoi.homeDir }}/.local/bin
+  {{ .chezmoi.homeDir }}/bin
+  /usr/loca/bin
+  /usr/bin
+  $path
+)
+
+#######################
+# Environment Options #
+#######################
+
+export EDITOR=nvim
+export VISUAL=$EDITOR
+export PAGER=less
+export LESS=-R
+export LANG=en_US.UTF-8
+
+######################
+# Completion Options #
+######################
+
+autoload -Uz compinit
+compinit
+
+##################
+# Prompt Options #
+##################
+
+setopt PROMPT_SUBST
+PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
+
+###########
+# Aliases #
+###########
+
+alias ll='ls -lah'
+alias reload='exec zsh'
