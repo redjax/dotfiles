@@ -65,7 +65,15 @@ done
 
 export PAGER=less
 export LESS=-R
-export LANG=en_US.UTF-8
+
+# Locale
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
+# Add manpages if /usr/local/man exists
+if [[ -d /usr/local/man ]]; then
+    export MANPATH="/usr/local/man:$MANPATH"
+fi
 
 ######################
 # Completion Options #
