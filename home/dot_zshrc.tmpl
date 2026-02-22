@@ -4,19 +4,31 @@
 
 # Type a directory name to cd to it
 setopt AUTO_CD
-# Push dirs onto a stack
+
+# Push dirs onto a stack. Show the stack with dirs -v.
+# Go back to previous directory with cd -.
+# Jump to a specific stack entry with cd ~2 (or whatever stack number).
+# Rotate through dirs with pushd and popd
 setopt AUTO_PUSHD
+
+# Prevent the same directory from appearing multiple times
+# in the directory stack
 setopt PUSHD_IGNORE_DUPS
+# Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
 ###################
 # History Options #
 ###################
 
-# History
+# Limit occurence of individual commands to 1 in the history.
+# Only limits repeat instances of the same command in a row.
 setopt HIST_IGNORE_DUPS
+# If a command starts with a space, it will not be stored in history.
 setopt HIST_IGNORE_SPACE
+# Share shell history between all open shells.
 setopt SHARE_HISTORY
+# Append to history file instead of overwriting.
 setopt APPEND_HISTORY
 
 HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
@@ -42,8 +54,15 @@ path=(
 # Environment Options #
 #######################
 
-export EDITOR=nvim
-export VISUAL=$EDITOR
+# Iterate through preferred shells, set $EDITOR when one is installed.
+for editor in nvim vim nano vi; do
+  if (( $+commands[$editor] )); then
+    export EDITOR="$editor"
+    export VISUAL="$editor"
+    break
+  fi
+done
+
 export PAGER=less
 export LESS=-R
 export LANG=en_US.UTF-8
@@ -66,5 +85,30 @@ PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
 # Aliases #
 ###########
 
-alias ll='ls -lah'
 alias reload='exec zsh'
+alias mkdir='mkdir -pv'
+alias getchmod="stat --format '%a'"
+
+## ls
+alias ll='ls -lah'
+alias l='ls -CF'
+
+## grep
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+## Neovim
+alias nvimi="nvim --headless '+Lazy sync +qa'"
+alias nvimu="nvim --headless '+Lazy update +qa'"
+alias snvim="sudo -E nvim"
+
+## Lazygit
+alias lg='lazygit'
+
+## Terraform
+alias tf='terraform'
+alias tg='terragrunt'
+
+## Misc
+alias myip='curl -s http://ipecho.net/plain; echo'
