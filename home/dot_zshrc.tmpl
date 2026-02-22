@@ -54,6 +54,26 @@ path=(
 # Environment Options #
 #######################
 
+# XDG config path
+export XDG_CONFIG_HOME="{{ .chezmoi.homeDir }}/.config"
+
+# Default file creation permissions
+umask 022
+
+# Set TERM value. Ensure terminal supports colors first
+if [[ "$TERM" == xterm* || "$TERM" == *-256color || "$TERM" == "xterm-kitty" ]]; then
+    COLOR_PROMPT=1
+fi
+
+# Set terminal title for xterm-like terminals
+if [[ "$TERM" == xterm* || "$TERM" == rxvt* || "$TERM" == xterm-kitty ]]; then
+    set_terminal_title() {
+        print -Pn "\e]0;%n@%m: %~\a"
+    }
+    autoload -Uz add-zsh-hook
+    add-zsh-hook precmd set_terminal_title
+fi
+
 # Iterate through preferred shells, set $EDITOR when one is installed.
 for editor in nvim vim nano vi; do
   if (( $+commands[$editor] )); then
