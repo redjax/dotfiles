@@ -50,6 +50,16 @@ path=(
   $path
 )
 
+# Add user-controlled site-functions dir for zsh completions
+mkdir -p ~/.local/share/zsh/site-functions
+fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
+autoload -Uz compinit
+compinit
+
+# Enable Bash completions in Zsh
+autoload -U +X bashcompinit
+bashcompinit
+
 #######################
 # Environment Options #
 #######################
@@ -145,13 +155,17 @@ precmd() {
   fi
 }
 
+# Reset exit status at shell start
+add-zsh-hook precmd reset_status
+reset_status() { (( $? == 0 )) || true }
+
 setopt PROMPT_SUBST
 
 # Basic, simple prompt
 # PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
 
 # Prompt with git branch, failure indicator, execution time
-PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f %# '
+PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
 
 ###########
 # Aliases #
