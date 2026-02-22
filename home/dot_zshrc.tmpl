@@ -78,8 +78,52 @@ compinit
 # Prompt Options #
 ##################
 
+# Git branch via vcs_info plugin
+autoload -Uz vcs_info add-zsh-hook
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' formats '(%b)'
+
+# Command duration tracking
+format_duration() {
+  local total=$1
+  local days=$(( total / 86400 ))
+  local hours=$(( (total % 86400) / 3600 ))
+  local mins=$(( (total % 3600) / 60 ))
+  local secs=$(( total % 60 ))
+  local str=""
+
+  (( days > 0 )) && str+="${days}d "
+  (( hours > 0 )) && str+="${hours}h "
+  (( mins > 0 )) && str+="${mins}m "
+  str+="${secs}s"
+
+  echo "$str"
+}
+
+# Track command start
+preexec() {
+  cmd_start_time=$SECONDS
+}
+
+# Before prompt
+precmd() {
+  vcs_info
+  if [[ -n $cmd_start_time ]]; then
+    cmd_duration=$(( SECONDS - cmd_start_time ))
+    psvar[1]=$(format_duration $cmd_duration)
+    unset cmd_start_time
+  else
+    psvar[1]="0s"
+  fi
+}
+
 setopt PROMPT_SUBST
-PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
+
+# Basic, simple prompt
+# PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
+
+# Prompt with git branch, failure indicator, execution time
+PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f %# '
 
 ###########
 # Aliases #
