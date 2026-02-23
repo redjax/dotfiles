@@ -29,6 +29,20 @@ setopt PUSHD_IGNORE_DUPS
 ## Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
+## Allow editing a command with CTRL+X + e
+autoload -Uz edit-command-line
+zle -N edit-command-line
+
+## !IMPORTANT!
+#  Only uncomment one of the lines below.
+#  If you're using emacs mode (bind -e somewhere in the zsh config),
+#  use the first one, otherwise if using vi-mode, use the last 2.
+## Emacs mode (bind -e)
+bindkey '^Xe' edit-command-line
+## Vi mode
+# bindkey -M vicmd '^Xe' edit-command-line
+# bindkey -M viins '^Xe' edit-command-line
+
 ###################
 # History Options #
 ###################
