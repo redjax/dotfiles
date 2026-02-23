@@ -1,7 +1,37 @@
 ## Ensure ~/.local/share/bash-completions exists
 [ ! -d "{{ .chezmoi.homeDir }}/.local/share/bash-completions" ] && mkdir -p "{{ .chezmoi.homeDir }}/.local/share/bash-completions" &>/dev/null
 
+## Source default completions
+
+## Source /usr/share/bash-completion/
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+fi
+
+## Source /etc/bash_completion/
+if [ -f /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
+
+## Source /etc/bash_completion.d/
+if [ -d /etc/bash_completion.d ]; then
+  for bc_script in /etc/bash_completion.d/*; do
+    [ -f "$bc_script" ] && . "$bc_script"
+  done
+fi
+
 ## -----------------------------------------------------------
+
+## Git
+if ! declare -F __git_complete >/dev/null; then
+    if [ -f /usr/share/bash-completion/completions/git ]; then
+        . /usr/share/bash-completion/completions/git
+    elif [ -f /usr/local/share/bash-completion/completions/git ]; then
+        . /usr/local/share/bash-completion/completions/git
+    elif [ -f /etc/bash_completion.d/git ]; then
+        . /etc/bash_completion.d/git
+    fi
+fi
 
 ## uv
 if command -v uv &>/dev/null; then
@@ -22,7 +52,7 @@ if command -v resticprofile &>/dev/null; then
   [ ! -f "$resticprofile_complete" ] && resticprofile generate --bash-completion > "$resticprofile_complete"
 fi
 
-## Zellij
+## Zellij - generate completion file (sourced later)
 if command -v zellij &>/dev/null; then
   zellij_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/zellij.bash"
   [ ! -f "$zellij_complete" ] && zellij setup --generate-completion bash > "$zellij_complete"
@@ -59,11 +89,96 @@ if command -v mise &>/dev/null; then
   mise completion bash --include-bash-completion-lib > ~/.local/share/bash-completion/completions/mise
 fi
 
+## Docker
+if command -v docker &>/dev/null; then
+  docker_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/docker.bash"
+  
+  if [ ! -f "$docker_complete" ]; then
+    # Try to find Docker completion script in common locations
+    if [ -f /usr/share/bash-completion/completions/docker ]; then
+      cp /usr/share/bash-completion/completions/docker "$docker_complete"
+    elif [ -f /etc/bash_completion.d/docker ]; then
+      cp /etc/bash_completion.d/docker "$docker_complete"
+    elif [ -f /usr/local/etc/bash_completion.d/docker ]; then
+      cp /usr/local/etc/bash_completion.d/docker "$docker_complete"
+    fi
+  fi
+fi
+
+## Docker Compose (V2 plugin)
+if command -v docker &>/dev/null && docker compose version &>/dev/null; then
+  docker_compose_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/docker-compose.bash"
+  
+  if [ ! -f "$docker_compose_complete" ]; then
+    # Try to find Docker Compose completion script in common locations
+    if [ -f /usr/share/bash-completion/completions/docker-compose ]; then
+      cp /usr/share/bash-completion/completions/docker-compose "$docker_compose_complete"
+    elif [ -f /etc/bash_completion.d/docker-compose ]; then
+      cp /etc/bash_completion.d/docker-compose "$docker_compose_complete"
+    elif [ -f /usr/local/etc/bash_completion.d/docker-compose ]; then
+      cp /usr/local/etc/bash_completion.d/docker-compose "$docker_compose_complete"
+    fi
+  fi
+  
+  # Ensure 'docker compose' subcommand gets proper completion
+  # Source the completion if it exists
+  [ -f "$docker_compose_complete" ] && source "$docker_compose_complete"
+fi
+
+## Dagger
+if command -v dagger &>/dev/null; then
+  dagger_complete="{{ .chezmoi.homeDir }}/.local/share/bash-completions/dagger.bash"
+  [ ! -f "$dagger_complete" ] && dagger completion bash > "$dagger_complete"
+  [ -f "$dagger_complete" ] && . "$dagger_complete"
+fi
+
 ## -----------------------------------------------------------
 
-## Source completions
+## Source custom completions
 for completion in "{{ .chezmoi.homeDir }}/.local/share/bash-completions/"*.bash; do
   ## avoid globbing literal if no files (optional, defensive)
   [ -f "$completion" ] && source "$completion"
 done
+
+## -----------------------------------------------------------
+
+## Zellij Session Name Completions
+#  This section must stay beneath the 'source custom completions' section above.
+#  It must be loaded after the default zellij completion is sourced, so that
+#  it can wrap Zellij's completions and enhance it with session name completions.
+if command -v zellij &>/dev/null; then
+  ## Save the original completion spec (sourced from the loop above)
+  _zellij_original_completion=$(complete -p zellij 2>/dev/null | sed 's/.*-F \([^ ]*\).*/\1/')
+  
+  ## Custom completion wrapper for zellij session names
+  _zellij_session_completion() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+    
+    ## Complete session names for attach/a command
+    if [[ "$prev" == "attach" ]] || [[ "$prev" == "a" ]]; then
+      ## Get list of active sessions (without formatting/colors)
+      local sessions=$(zellij list-sessions --no-formatting 2>/dev/null | awk '{print $1}')
+      if [[ -n "$sessions" ]]; then
+        COMPREPLY=($(compgen -W "$sessions" -- "$cur"))
+      else
+        COMPREPLY=()
+      fi
+      return 0
+    fi
+    
+    ## For all other cases, call the original completion function
+    if [[ -n "$_zellij_original_completion" ]] && declare -f "$_zellij_original_completion" >/dev/null; then
+      "$_zellij_original_completion"
+      return $?
+    fi
+    
+    ## If no original completion, return with empty suggestions
+    COMPREPLY=()
+    return 0
+  }
+  
+  ## Register the enhanced completion function
+  complete -o nospace -F _zellij_session_completion zellij
+fi
 

@@ -32,27 +32,26 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 fi
 
-## Add Go to PATH
-if [[ -d "{{ .chezmoi.homeDir }}/.go" ]]; then
-  export GOROOT="{{ .chezmoi.homeDir }}/.go"
-  export GOPATH="{{ .chezmoi.homeDir }}/go"
-  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
-elif [[ -d /usr/local/go ]]; then
-  export GOROOT="/usr/local/go"
-  export GOPATH="{{ .chezmoi.homeDir }}/go"
-  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
+## Go
+
+## GOPATH for your user
+export GOPATH="{{ .chezmoi.homeDir }}/go"
+
+## Set GOROOT
+if [ -d "/usr/local/go" ]; then
+    export GOROOT="/usr/local/go"
 fi
 
-## Add gobins to path
-if [[ -d /opt/gobins ]]; then
-  export PATH="$PATH:/opt/gobins"
-fi
-if [[ -d "{{ .chezmoi.homeDir }}/gobins" ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
-fi
-if [[ -d "{{ .chezmoi.homeDir }}/.gobins" ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
-fi
+## Add Go binaries to PATH
+export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+
+## Disable Go toolchain auto-downloads
+export GOTOOLCHAIN=local
+
+## Add optional gobins directories
+[[ -d /opt/gobins ]] && export PATH="$PATH:/opt/gobins"
+[[ -d "{{ .chezmoi.homeDir }}/gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
+[[ -d "{{ .chezmoi.homeDir }}/.gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
 
 ## Add chezmoi to PATH
 if [[ -f {{ .chezmoi.homeDir }}/.local/bin/chezmoi ]]; then
@@ -124,17 +123,24 @@ fi
 
 ## Atuin
 if [[ -d "{{ .chezmoi.homeDir }}/.atuin" ]]; then
-  export PATH="{{ .chezmoi.homeDir }}/.atuin}}:$PATH"
+  export PATH="{{ .chezmoi.homeDir }}/.atuin/bin:$PATH"
 
-  . "$HOME/.atuin/bin/env"
+  if command -v atuin &>/dev/null; then
+    . "$HOME/.atuin/bin/env"
 
-  [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-  eval "$(atuin init bash)"
+    [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+    eval "$(atuin init bash)"
+  fi
 fi
 
 ## k0s
 if command -v k0s &>/dev/null; then
   alias k="sudo k0s"
   alias kc="sudo k0s kubectl"
+fi
+
+## Aqua (github.com/aquaproj/aqua)
+if command -v aqua &>/dev/null || [[ -f "${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin/aqua" ]]; then
+    export PATH="${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin:$PATH"
 fi
 
