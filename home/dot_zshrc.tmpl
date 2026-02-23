@@ -220,3 +220,7 @@ fi
 # i.e. if `bindkey -e` is set somewhere in this config
 bindkey '^?' backward-delete-char   # Backspace key
 bindkey '^[[3~' delete-char         # Delete key
+
+# CTRL+Backspace deletes a whole word
+bindkey '^H' backward-kill-word   # Some terminals send ^H
+bindkey '^[^?' backward-kill-word # Some terminals send ESC + DEL
