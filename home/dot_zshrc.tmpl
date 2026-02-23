@@ -34,6 +34,9 @@ setopt PUSHD_IGNORE_DUPS
 ## Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
+## Set shell to emacs mode
+bindkey -e
+
 ## Allow editing a command with CTRL+X + e
 autoload -Uz edit-command-line
 zle -N edit-command-line
