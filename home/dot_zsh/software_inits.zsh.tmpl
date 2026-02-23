@@ -49,12 +49,6 @@ fi
 if [[ -d "${HOME}/.nvm" ]]; then
     export NVM_DIR="${HOME}/.nvm"
     source_if_exists "$NVM_DIR/nvm.sh"
-
-    ## Bash completions can work with Zsh using bashcompinit
-    if command -v bashcompinit &>/dev/null; then
-        bashcompinit
-        source_if_exists "$NVM_DIR/bash_completion"
-    fi
 fi
 
 ###################
