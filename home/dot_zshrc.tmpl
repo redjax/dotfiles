@@ -204,7 +204,7 @@ alias myip='curl -s http://ipecho.net/plain; echo'
 ##################
 
 # Source ~/.zsh/software_inits.zsh if it exists
-[[ -f "$HOME/.zsh/software_inits.zsh" ]] && source "$HOME/.zsh/software_inits.zsh"
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
 
 ##########
 # Keymap #
