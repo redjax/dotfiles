@@ -2,33 +2,37 @@
 # Shell Options #
 #################
 
-# Type a directory name to cd to it
+## Type a directory name to cd to it
 setopt AUTO_CD
 
-# Push dirs onto a stack. Show the stack with dirs -v.
-# Go back to previous directory with cd -.
-# Jump to a specific stack entry with cd ~2 (or whatever stack number).
-# Rotate through dirs with pushd and popd
+## Push dirs onto a stack. Show the stack with dirs -v.
+#  Go back to previous directory with cd -.
+#  Jump to a specific stack entry with cd ~2 (or whatever stack number).
+#  Rotate through dirs with pushd and popd
 setopt AUTO_PUSHD
 
-# Prevent the same directory from appearing multiple times
-# in the directory stack
+## Prevent the same directory from appearing multiple times
+#  in the directory stack
 setopt PUSHD_IGNORE_DUPS
-# Prevent zsh from printing the directory stack after each change
+
+## Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
 ###################
 # History Options #
 ###################
 
-# Limit occurence of individual commands to 1 in the history.
-# Only limits repeat instances of the same command in a row.
+## Limit occurence of individual commands to 1 in the history.
+#  Only limits repeat instances of the same command in a row.
 setopt HIST_IGNORE_DUPS
-# If a command starts with a space, it will not be stored in history.
+
+## If a command starts with a space, it will not be stored in history.
 setopt HIST_IGNORE_SPACE
-# Share shell history between all open shells.
+
+## Share shell history between all open shells.
 setopt SHARE_HISTORY
-# Append to history file instead of overwriting.
+
+## Append to history file instead of overwriting.
 setopt APPEND_HISTORY
 
 HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
@@ -39,7 +43,7 @@ SAVEHIST=10000
 # PATH Options #
 ################
 
-# Treat path as a unique array (removes duplicate entries automatically)
+## Treat path as a unique array (removes duplicate entries automatically)
 typeset -U path
 
 path=(
@@ -50,13 +54,13 @@ path=(
   $path
 )
 
-# Add user-controlled site-functions dir for zsh completions
+## Add user-controlled site-functions dir for zsh completions
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
 autoload -Uz compinit
 compinit
 
-# Enable Bash completions in Zsh
+## Enable Bash completions in Zsh
 autoload -U +X bashcompinit
 bashcompinit
 
@@ -64,27 +68,28 @@ bashcompinit
 # Environment Options #
 #######################
 
-# XDG config path
+## XDG config path
 export XDG_CONFIG_HOME="{{ .chezmoi.homeDir }}/.config"
 
-# Default file creation permissions
+## Default file creation permissions
 umask 022
 
-# Set TERM value. Ensure terminal supports colors first
+## Set TERM value. Ensure terminal supports colors first
 if [[ "$TERM" == xterm* || "$TERM" == *-256color || "$TERM" == "xterm-kitty" ]]; then
     COLOR_PROMPT=1
 fi
 
-# Set terminal title for xterm-like terminals
+## Set terminal title for xterm-like terminals
 if [[ "$TERM" == xterm* || "$TERM" == rxvt* || "$TERM" == xterm-kitty ]]; then
     set_terminal_title() {
         print -Pn "\e]0;%n@%m: %~\a"
     }
+
     autoload -Uz add-zsh-hook
     add-zsh-hook precmd set_terminal_title
 fi
 
-# Iterate through preferred shells, set $EDITOR when one is installed.
+## Iterate through preferred shells, set $EDITOR when one is installed.
 for editor in nvim vim nano vi; do
   if (( $+commands[$editor] )); then
     export EDITOR="$editor"
@@ -96,11 +101,11 @@ done
 export PAGER=less
 export LESS=-R
 
-# Locale
+## Locale
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-# Add manpages if /usr/local/man exists
+## Add manpages if /usr/local/man exists
 if [[ -d /usr/local/man ]]; then
     export MANPATH="/usr/local/man:$MANPATH"
 fi
@@ -116,12 +121,12 @@ compinit
 # Prompt Options #
 ##################
 
-# Git branch via vcs_info plugin
+## Git branch via vcs_info plugin
 autoload -Uz vcs_info add-zsh-hook
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' formats '(%b)'
 
-# Command duration tracking
+## Command duration tracking
 format_duration() {
   local total=$1
   local days=$(( total / 86400 ))
@@ -138,12 +143,12 @@ format_duration() {
   echo "$str"
 }
 
-# Track command start
+## Track command start
 preexec() {
   cmd_start_time=$SECONDS
 }
 
-# Before prompt
+## Before prompt
 precmd() {
   vcs_info
   if [[ -n $cmd_start_time ]]; then
@@ -155,16 +160,16 @@ precmd() {
   fi
 }
 
-# Reset exit status at shell start
+## Reset exit status at shell start
 add-zsh-hook precmd reset_status
 reset_status() { (( $? == 0 )) || true }
 
 setopt PROMPT_SUBST
 
-# Basic, simple prompt
+## Basic, simple prompt
 # PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
 
-# Prompt with git branch, failure indicator, execution time
+## Prompt with git branch, failure indicator, execution time
 PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
 
 ###########
@@ -203,24 +208,24 @@ alias myip='curl -s http://ipecho.net/plain; echo'
 # Software inits #
 ##################
 
-# Source Oh My Zsh if it's installed
+## Source Oh My Zsh if it's installed
 if [[ -f "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh" ]] && [[ -f "{{ .chezmoi.homeDir }}/.oh-my-zsh/oh-my-zsh.sh" ]]; then
     source "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh"
     source "{{ .chezmoi.homeDir }}/.oh-my-zsh/oh-my-zsh.sh"
 fi
 
-# Source ~/.zsh/software_inits.zsh if it exists
+## Source ~/.zsh/software_inits.zsh if it exists
 [[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
 
 ##########
 # Keymap #
 ##########
 
-# Fix Delete / Backspace in Emacs mode
-# i.e. if `bindkey -e` is set somewhere in this config
+## Fix Delete / Backspace in Emacs mode
+#  i.e. if `bindkey -e` is set somewhere in this config
 bindkey '^?' backward-delete-char   # Backspace key
 bindkey '^[[3~' delete-char         # Delete key
 
-# CTRL+Backspace deletes a whole word
+## CTRL+Backspace deletes a whole word
 bindkey '^H' backward-kill-word   # Some terminals send ^H
 bindkey '^[^?' backward-kill-word # Some terminals send ESC + DEL
