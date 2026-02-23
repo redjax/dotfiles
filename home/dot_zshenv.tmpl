@@ -1,0 +1,15 @@
+#################
+# Tool binaries #
+#################
+
+## Add tools here that install to non-standard paths, i.e. ~/.bin-name/bin instead of ~/.local/bin
+[[ -d {{ .chezmoi.homeDir }}/.atuin/bin ]] && path=({{ .chezmoi.homeDir }}/.atuin/bin $path)
+[[ -d {{ .chezmoi.homeDir }}/.pyenv/bin ]] && path=({{ .chezmoi.homeDir }}/.pyenv/bin $path)
+
+## Custom paths, i.e. ~/.local/bin
+path+=({{ .chezmoi.homeDir }}/.local/bin {{ .chezmoi.homeDir }}/bin)
+
+#################################
+# System Paths (keep at bottom) #
+#################################
+path+=(/usr/local/bin /usr/bin /bin /usr/local/sbin /usr/sbin /sbin)

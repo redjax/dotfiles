@@ -76,17 +76,6 @@ SAVEHIST=10000
 ## Treat path as a unique array (removes duplicate entries automatically)
 typeset -U path
 
-path=(
-  {{ .chezmoi.homeDir }}/.local/bin
-  {{ .chezmoi.homeDir }}/bin
-  /usr/local/bin
-  /usr/bin
-  $path
-)
-
-## If atuin is installed at ~/.atuin/bin, add to path
-[[ -d ~/.atuin/bin ]] && path=(~/.atuin/bin $path)
-
 ## Add user-controlled site-functions dir for zsh completions
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
