@@ -203,14 +203,14 @@ alias myip='curl -s http://ipecho.net/plain; echo'
 # Software inits #
 ##################
 
-# Source ~/.zsh/software_inits.zsh if it exists
-[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
-
 # Source Oh My Zsh if it's installed
 if [[ -f "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh" ]] && [[ -f "{{ .chezmoi.homeDir }}/.oh-my-zsh/oh-my-zsh.sh" ]]; then
     source "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh"
     source "{{ .chezmoi.homeDir }}/.oh-my-zsh/oh-my-zsh.sh"
 fi
+
+# Source ~/.zsh/software_inits.zsh if it exists
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
 
 ##########
 # Keymap #
