@@ -14,6 +14,12 @@
 #                                                            #
 #============================================================#
 
+## Performance profiling (uncomment both lines to enable)
+#  Uncomment the line below AND the 'zprof' line at the bottom of this file
+#  Then run: time zsh -i -c exit
+#  Or just start a new shell and see the profile results
+# zmodload zsh/zprof
+
 #################
 # Shell Options #
 #################
@@ -55,6 +61,9 @@ setopt NULL_GLOB
 ## Case-insensitive globbing
 setopt NO_CASE_GLOB
 
+## Make arrays start at 0 like bash (instead of 1)
+setopt KSH_ARRAYS
+
 ## Set shell to emacs mode
 bindkey -e
 
@@ -71,6 +80,10 @@ bindkey '^Xe' edit-command-line
 ## Vi mode
 # bindkey -M vicmd '^Xe' edit-command-line
 # bindkey -M viins '^Xe' edit-command-line
+
+## Load useful zsh functions
+autoload -U zmv     # Advanced rename: zmv '(*).txt' '$1.md'
+autoload -U zcalc   # Calculator: zcalc
 
 ###################
 # History Options #
@@ -134,6 +147,14 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"        # Colored complet
 zstyle ':completion:*' group-name ''                            # Group completions by category
 zstyle ':completion:*:descriptions' format '%B%d%b'            # Bold category descriptions
 zstyle ':completion:*:warnings' format '%F{red}No matches%f'   # Red warning for no matches
+
+## Additional completion enhancements
+zstyle ':completion:*' rehash true                              # Auto-find new executables in PATH
+zstyle ':completion:*' accept-exact '*(N)'                      # Speed up by accepting exact matches
+zstyle ':completion:*' use-cache on                             # Use completion cache
+zstyle ':completion:*' cache-path ~/.zsh/cache                  # Cache location
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'  # Colored kill completion
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'   # Better kill menu
 
 ## Enable Bash completions in Zsh
 autoload -U +X bashcompinit
@@ -318,3 +339,7 @@ if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
     bindkey '^[OD' backward-word        # CTRL+Left arrow (alternative)
     bindkey '^[OC' forward-word         # CTRL+Right arrow (alternative)
 fi
+
+## Performance profiling results (must also uncomment zmodload at top)
+#  Uncomment the line below to see profiling results on shell startup
+# zprof
