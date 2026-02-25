@@ -10,13 +10,26 @@ ZSH_THEME="mortalscumbag"
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
 # Set plugins
-plugins=(git)
+plugins=(
+    git
+    extract                # Extract any archive with 'extract <file>'
+    sudo                   # Press ESC twice to add/remove sudo
+    colored-man-pages      # Colorized man pages
+    history                # History aliases (h, hs, hsi)
+    command-not-found      # Suggests package to install for unknown commands
+    copybuffer             # CTRL+O copies current command line to clipboard
+)
+
 if command -v direnv >&/dev/null; then
     plugins+=(direnv)
 fi
 
-## Enable case-sensitive completion (like Bash)
-CASE_SENSITIVE="true"
+if command -v terraform &>/dev/null; then
+    plugins+=(terraform)
+fi
+
+## Enable case-insensitive completion (leverage zsh's smart completion)
+CASE_SENSITIVE="false"
 
 ## Enable hyphen-insensitive completion, which makes _ and - interchangable
 HYPHEN_INSENSITIVE="false"

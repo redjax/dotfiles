@@ -12,7 +12,14 @@
 #                                                            #
 # Sources Oh-My-Zsh configuration if Oh-My-Zsh is installed. #
 #                                                            #
+# Run `zsh -f` to run ZSH with no config/customizations.     #
 #============================================================#
+
+## Performance profiling (uncomment both lines to enable)
+#  Uncomment the line below AND the 'zprof' line at the bottom of this file
+#  Then run: time zsh -i -c exit
+#  Or just start a new shell and see the profile results
+# zmodload zsh/zprof
 
 #################
 # Shell Options #
@@ -34,6 +41,30 @@ setopt PUSHD_IGNORE_DUPS
 ## Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
+## Advanced pattern matching (use #, ~, ^ for globbing)
+setopt EXTENDED_GLOB
+
+## Include dotfiles in * globs without explicit .*
+setopt GLOB_DOTS
+
+## Allow # comments in interactive shell
+setopt INTERACTIVE_COMMENTS
+
+## cd to variable values (e.g., x=/tmp; cd x)
+setopt CDABLE_VARS
+
+## Sort numeric filenames numerically (file1 file2 file10, not file1 file10 file2)
+setopt NUMERIC_GLOB_SORT
+
+## Remove pattern if no matches (prevents "no matches found" error)
+setopt NULL_GLOB
+
+## Case-insensitive globbing
+setopt NO_CASE_GLOB
+
+## Set shell to emacs mode
+bindkey -e
+
 ## Allow editing a command with CTRL+X + e
 autoload -Uz edit-command-line
 zle -N edit-command-line
@@ -48,16 +79,34 @@ bindkey '^Xe' edit-command-line
 # bindkey -M vicmd '^Xe' edit-command-line
 # bindkey -M viins '^Xe' edit-command-line
 
+## Load useful zsh functions
+autoload -U zmv     # Advanced rename: zmv '(*).txt' '$1.md'
+autoload -U zcalc   # Calculator: zcalc
+
 ###################
 # History Options #
 ###################
 
-## Limit occurence of individual commands to 1 in the history.
-#  Only limits repeat instances of the same command in a row.
-setopt HIST_IGNORE_DUPS
+## Remove ALL duplicate entries in history (not just consecutive)
+setopt HIST_IGNORE_ALL_DUPS
+
+## Don't show duplicates when searching history
+setopt HIST_FIND_NO_DUPS
+
+## Don't save duplicates to history file
+setopt HIST_SAVE_NO_DUPS
 
 ## If a command starts with a space, it will not be stored in history.
 setopt HIST_IGNORE_SPACE
+
+## Save timestamps and duration for each command (like bash HISTTIMEFORMAT)
+setopt EXTENDED_HISTORY
+
+## Remove superfluous blanks from history entries
+setopt HIST_REDUCE_BLANKS
+
+## Show history expansion before running it (e.g., !! shows command first)
+setopt HIST_VERIFY
 
 ## Share shell history between all open shells.
 setopt SHARE_HISTORY
@@ -66,8 +115,8 @@ setopt SHARE_HISTORY
 setopt APPEND_HISTORY
 
 HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=50000
+SAVEHIST=50000
 
 ################
 # PATH Options #
@@ -79,12 +128,35 @@ typeset -U path
 ## Add user-controlled site-functions dir for zsh completions
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
+
+## Initialize completion system with cache optimization
+#  Only fully recompile once per day, otherwise use cached version
 autoload -Uz compinit
-compinit
+if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
+
+## Completion system styling
+zstyle ':completion:*' menu select                              # Visual menu for completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'      # Case-insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"        # Colored completion (uses LS_COLORS)
+zstyle ':completion:*' group-name ''                            # Group completions by category
+zstyle ':completion:*:descriptions' format '%B%d%b'            # Bold category descriptions
+zstyle ':completion:*:warnings' format '%F{red}No matches%f'   # Red warning for no matches
+
+## Additional completion enhancements
+zstyle ':completion:*' rehash true                              # Auto-find new executables in PATH
+zstyle ':completion:*' accept-exact '*(N)'                      # Speed up by accepting exact matches
+zstyle ':completion:*' use-cache on                             # Use completion cache
+zstyle ':completion:*' cache-path ~/.zsh/cache                  # Cache location
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'  # Colored kill completion
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'   # Better kill menu
 
 ## Enable Bash completions in Zsh
-# autoload -U +X bashcompinit
-# bashcompinit
+autoload -U +X bashcompinit
+bashcompinit
 
 #######################
 # Environment Options #
@@ -176,16 +248,17 @@ precmd() {
 }
 
 ## Reset exit status at shell start
-add-zsh-hook precmd reset_status
 reset_status() { (( $? == 0 )) || true }
+add-zsh-hook precmd reset_status
 
 setopt PROMPT_SUBST
 
-## Basic, simple prompt
-# PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
-
-## Prompt with git branch, failure indicator, execution time
-PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
+## Custom prompt (disabled if Oh-My-Zsh sets a theme)
+#  This will be overridden by Oh-My-Zsh if a theme is configured
+if [[ -z "$ZSH_THEME" ]] || [[ "$ZSH_THEME" == "" ]]; then
+    ## Prompt with git branch, failure indicator, execution time
+    PROMPT='[%1v]%(?..%F{red} X %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
+fi
 
 ###########
 # Aliases #
@@ -230,7 +303,7 @@ if [[ -f "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh" ]] && [[ -f "{{ .chezmoi.ho
 fi
 
 ## Source ~/.zsh/software_inits.zsh if it exists
-[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" || true
 
 ##########
 # Keymap #
@@ -244,3 +317,42 @@ bindkey '^[[3~' delete-char         # Delete key
 ## CTRL+Backspace deletes a whole word
 bindkey '^H' backward-kill-word   # Some terminals send ^H
 bindkey '^[^?' backward-kill-word # Some terminals send ESC + DEL
+
+## Home and End keys
+bindkey '^[[H' beginning-of-line    # Home key
+bindkey '^[[F' end-of-line          # End key
+bindkey '^[[1~' beginning-of-line   # Home key (alternative)
+bindkey '^[[4~' end-of-line         # End key (alternative)
+
+## Page Up / Page Down for history search
+bindkey '^[[5~' history-search-backward  # Page Up
+bindkey '^[[6~' history-search-forward   # Page Down
+
+## CTRL+Arrow keys for word navigation
+#  Only enabled when NOT inside a multiplexer (Zellij, tmux, etc.)
+#  This prevents conflicts with multiplexer keybindings
+if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
+    bindkey '^[[1;5D' backward-word     # CTRL+Left arrow
+    bindkey '^[[1;5C' forward-word      # CTRL+Right arrow
+    bindkey '^[OD' backward-word        # CTRL+Left arrow (alternative)
+    bindkey '^[OC' forward-word         # CTRL+Right arrow (alternative)
+fi
+
+#################
+# Local Configs #
+#################
+
+## Source shared local overrides from .bashrc.local
+#  This allows sharing common environment variables, aliases, and PATH
+#  additions between bash and zsh without duplication
+[[ -f "${HOME}/.bashrc.local" ]] && source "${HOME}/.bashrc.local" || true
+
+## Source zsh-specific local overrides
+#  Use this for zsh-only features like prompts, plugins, key bindings, etc.
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local" || true
+
+## -------------------------------------------------------------------------------
+
+## Performance profiling results (must also uncomment zmodload at top)
+#  Uncomment the line below to see profiling results on shell startup
+# zprof

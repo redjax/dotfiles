@@ -1,3 +1,78 @@
+###############################################################
+#              Software Initialization & Completions          #
+###############################################################
+#                                                             #
+# This file is sourced by .zshrc and contains initialization  #
+# code for various CLI tools and their completions.           #
+#                                                             #
+# Managing Auto-Added Configuration                           #
+# --------------------------------------------                #
+# Many installers automatically add lines to ~/.zshrc:        #
+#   - NVM, pyenv, cargo, conda, etc.                          #
+#                                                             #
+# When this happens:                                          #
+#   - Check ~/.zshrc for new additions (usually at the end)   #
+#   - CUT the added lines from ~/.zshrc                       #
+#   - PASTE them into the appropriate section below           #
+#   - Wrap them in a conditional check (see examples)         #
+#   - Run: chezmoi add ~/.zsh/software_inits.zsh              #
+#   - Run: chezmoi apply                                      #
+#                                                             #
+# Example: If rust installer adds to .zshrc:                  #
+#   [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"    #
+#                                                             #
+# Move it here as:                                            #
+#   if [[ -f "$HOME/.cargo/env" ]]; then                      #
+#       source "$HOME/.cargo/env"                             #
+#   fi                                                        #
+#                                                             #
+# Template Variables:                                         #
+#   - {{ .chezmoi.homeDir }} = Your home directory            #
+#   - Use this for portable paths across machines             #
+###############################################################
+
+# Template for new tools:
+#
+# ##############
+# # Tool Name #
+# ##############
+#
+# ## Brief description
+# #  Install command or URL
+# #  Note if installer adds to .zshrc automatically
+# if command -v toolname &>/dev/null; then
+#     eval "$(toolname init zsh)"
+#     # OR
+#     source_if_exists "$HOME/.toolname/init.zsh"
+#     # OR
+#     export TOOLNAME_VAR="value"
+#     path_add "$HOME/.toolname/bin"
+# fi
+#
+
+## Examples of tools that commonly auto-add to .zshrc:
+#
+## HOMEBREW (on Linux):
+#    Adds: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#    Move here wrapped in:
+#      if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+#        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#      fi
+#
+## NVM:
+#    Adds: export NVM_DIR="$HOME/.nvm"
+#          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#    Move here wrapped in:
+#      if [[ -d "${HOME}/.nvm" ]]; then
+#          export NVM_DIR="${HOME}/.nvm"
+#          source_if_exists "$NVM_DIR/nvm.sh"
+#          source_if_exists "$NVM_DIR/bash_completion"
+#      fi
+#
+
+## --------------------------------------------------------------------------------------------
+
 ####################
 # Helper Functions #
 ####################
@@ -15,6 +90,8 @@ path_add() {
 source_if_exists() {
     [[ -f $1 ]] && source "$1"
 }
+
+## --------------------------------------------------------------------------------------------
 
 ###########
 # Chezmoi #
@@ -48,13 +125,7 @@ fi
 ##############################
 if [[ -d "${HOME}/.nvm" ]]; then
     export NVM_DIR="${HOME}/.nvm"
-    source_if_exists "$NVM_DIR/nvm.sh"
-
-    ## Bash completions can work with Zsh using bashcompinit
-    if command -v bashcompinit &>/dev/null; then
-        bashcompinit
-        source_if_exists "$NVM_DIR/bash_completion"
-    fi
+    source_if_exists "$NVM_DIR/nvm.sh" || true
 fi
 
 ###################
@@ -89,6 +160,31 @@ fi
 ###############
 path_add "/usr/local/go/bin"
 path_add "/opt/gobins"
+
+#################
+# Intelli-shell #
+#################
+
+INTELLI_HOME="{{ .chezmoi.homeDir }}/.local/share/intelli-shell"
+if [[ -d "$INTELLI_HOME" ]]; then
+    export INTELLI_HOME
+
+    # Optional hotkeys (uncomment if you want to customize)
+    # export INTELLI_SEARCH_HOTKEY="\\C-@"
+    # export INTELLI_VARIABLE_HOTKEY="\\C-l"
+    # export INTELLI_BOOKMARK_HOTKEY="\\C-b"
+    # export INTELLI_FIX_HOTKEY="\\C-x"
+    # export INTELLI_SKIP_ESC_BIND=0
+
+    # Optional alias
+    # alias is="intelli-shell"
+
+    # Add to PATH using helper function
+    path_add "$INTELLI_HOME/bin"
+
+    # Run IntelliShell zsh init
+    eval "$(intelli-shell init zsh)"
+fi
 
 ####################
 # Dotnet CLI tools #
@@ -133,10 +229,7 @@ fi
 ###############################
 if command -v atuin &>/dev/null; then
     source_if_exists "{{ .chezmoi.homeDir }}/.atuin/bin/env"
-    eval "$(atuin init zsh)"
-
-    ## Force shell into Emacs keymap Atuin init
-    bindkey -e 
+    eval "$(atuin init zsh)" 
 fi
 
 #########
