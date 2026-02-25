@@ -247,3 +247,28 @@ bindkey '^[[3~' delete-char         # Delete key
 ## CTRL+Backspace deletes a whole word
 bindkey '^H' backward-kill-word   # Some terminals send ^H
 bindkey '^[^?' backward-kill-word # Some terminals send ESC + DEL
+
+## Home and End keys
+bindkey '^[[H' beginning-of-line    # Home key
+bindkey '^[[F' end-of-line          # End key
+bindkey '^[[1~' beginning-of-line   # Home key (alternative)
+bindkey '^[[4~' end-of-line         # End key (alternative)
+
+## Page Up / Page Down for history search
+bindkey '^[[5~' history-search-backward  # Page Up
+bindkey '^[[6~' history-search-forward   # Page Down
+
+## CTRL+Arrow and ALT+Arrow keys for word navigation
+#  Only enabled when NOT inside a multiplexer (Zellij, tmux, etc.)
+#  This prevents conflicts with multiplexer keybindings
+if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
+    ## CTRL+Arrow keys for word navigation
+    bindkey '^[[1;5D' backward-word     # CTRL+Left arrow
+    bindkey '^[[1;5C' forward-word      # CTRL+Right arrow
+    bindkey '^[OD' backward-word        # CTRL+Left arrow (alternative)
+    bindkey '^[OC' forward-word         # CTRL+Right arrow (alternative)
+
+    ## ALT+Arrow keys for word navigation (bonus)
+    bindkey '^[[1;3D' backward-word     # ALT+Left arrow
+    bindkey '^[[1;3C' forward-word      # ALT+Right arrow
+fi
