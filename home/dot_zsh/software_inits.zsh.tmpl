@@ -1,3 +1,78 @@
+###############################################################
+#              Software Initialization & Completions          #
+###############################################################
+#                                                             #
+# This file is sourced by .zshrc and contains initialization  #
+# code for various CLI tools and their completions.           #
+#                                                             #
+# Managing Auto-Added Configuration                           #
+# --------------------------------------------                #
+# Many installers automatically add lines to ~/.zshrc:        #
+#   - NVM, pyenv, cargo, conda, etc.                          #
+#                                                             #
+# When this happens:                                          #
+#   - Check ~/.zshrc for new additions (usually at the end)   #
+#   - CUT the added lines from ~/.zshrc                       #
+#   - PASTE them into the appropriate section below           #
+#   - Wrap them in a conditional check (see examples)         #
+#   - Run: chezmoi add ~/.zsh/software_inits.zsh              #
+#   - Run: chezmoi apply                                      #
+#                                                             #
+# Example: If rust installer adds to .zshrc:                  #
+#   [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"    #
+#                                                             #
+# Move it here as:                                            #
+#   if [[ -f "$HOME/.cargo/env" ]]; then                      #
+#       source "$HOME/.cargo/env"                             #
+#   fi                                                        #
+#                                                             #
+# Template Variables:                                         #
+#   - {{ .chezmoi.homeDir }} = Your home directory            #
+#   - Use this for portable paths across machines             #
+###############################################################
+
+# Template for new tools:
+#
+# ##############
+# # Tool Name #
+# ##############
+#
+# ## Brief description
+# #  Install command or URL
+# #  Note if installer adds to .zshrc automatically
+# if command -v toolname &>/dev/null; then
+#     eval "$(toolname init zsh)"
+#     # OR
+#     source_if_exists "$HOME/.toolname/init.zsh"
+#     # OR
+#     export TOOLNAME_VAR="value"
+#     path_add "$HOME/.toolname/bin"
+# fi
+#
+
+## Examples of tools that commonly auto-add to .zshrc:
+#
+## HOMEBREW (on Linux):
+#    Adds: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#    Move here wrapped in:
+#      if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+#        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#      fi
+#
+## NVM:
+#    Adds: export NVM_DIR="$HOME/.nvm"
+#          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#    Move here wrapped in:
+#      if [[ -d "${HOME}/.nvm" ]]; then
+#          export NVM_DIR="${HOME}/.nvm"
+#          source_if_exists "$NVM_DIR/nvm.sh"
+#          source_if_exists "$NVM_DIR/bash_completion"
+#      fi
+#
+
+## --------------------------------------------------------------------------------------------
+
 ####################
 # Helper Functions #
 ####################
