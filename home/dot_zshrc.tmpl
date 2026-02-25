@@ -248,8 +248,8 @@ precmd() {
 }
 
 ## Reset exit status at shell start
-add-zsh-hook precmd reset_status
 reset_status() { (( $? == 0 )) || true }
+add-zsh-hook precmd reset_status
 
 setopt PROMPT_SUBST
 
@@ -303,7 +303,7 @@ if [[ -f "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh" ]] && [[ -f "{{ .chezmoi.ho
 fi
 
 ## Source ~/.zsh/software_inits.zsh if it exists
-[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" || true
 
 ##########
 # Keymap #
@@ -345,11 +345,11 @@ fi
 ## Source shared local overrides from .bashrc.local
 #  This allows sharing common environment variables, aliases, and PATH
 #  additions between bash and zsh without duplication
-[[ -f "${HOME}/.bashrc.local" ]] && source "${HOME}/.bashrc.local"
+[[ -f "${HOME}/.bashrc.local" ]] && source "${HOME}/.bashrc.local" || true
 
 ## Source zsh-specific local overrides
 #  Use this for zsh-only features like prompts, plugins, key bindings, etc.
-[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local" || true
 
 ## -------------------------------------------------------------------------------
 
