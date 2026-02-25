@@ -338,6 +338,21 @@ if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
     bindkey '^[OC' forward-word         # CTRL+Right arrow (alternative)
 fi
 
+#################
+# Local Configs #
+#################
+
+## Source shared local overrides from .bashrc.local
+#  This allows sharing common environment variables, aliases, and PATH
+#  additions between bash and zsh without duplication
+[[ -f "${HOME}/.bashrc.local" ]] && source "${HOME}/.bashrc.local"
+
+## Source zsh-specific local overrides
+#  Use this for zsh-only features like prompts, plugins, key bindings, etc.
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"
+
+## -------------------------------------------------------------------------------
+
 ## Performance profiling results (must also uncomment zmodload at top)
 #  Uncomment the line below to see profiling results on shell startup
 # zprof
