@@ -34,6 +34,27 @@ setopt PUSHD_IGNORE_DUPS
 ## Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
+## Advanced pattern matching (use #, ~, ^ for globbing)
+setopt EXTENDED_GLOB
+
+## Include dotfiles in * globs without explicit .*
+setopt GLOB_DOTS
+
+## Allow # comments in interactive shell
+setopt INTERACTIVE_COMMENTS
+
+## cd to variable values (e.g., x=/tmp; cd x)
+setopt CDABLE_VARS
+
+## Sort numeric filenames numerically (file1 file2 file10, not file1 file10 file2)
+setopt NUMERIC_GLOB_SORT
+
+## Remove pattern if no matches (prevents "no matches found" error)
+setopt NULL_GLOB
+
+## Case-insensitive globbing
+setopt NO_CASE_GLOB
+
 ## Set shell to emacs mode
 bindkey -e
 
@@ -55,12 +76,26 @@ bindkey '^Xe' edit-command-line
 # History Options #
 ###################
 
-## Limit occurence of individual commands to 1 in the history.
-#  Only limits repeat instances of the same command in a row.
-setopt HIST_IGNORE_DUPS
+## Remove ALL duplicate entries in history (not just consecutive)
+setopt HIST_IGNORE_ALL_DUPS
+
+## Don't show duplicates when searching history
+setopt HIST_FIND_NO_DUPS
+
+## Don't save duplicates to history file
+setopt HIST_SAVE_NO_DUPS
 
 ## If a command starts with a space, it will not be stored in history.
 setopt HIST_IGNORE_SPACE
+
+## Save timestamps and duration for each command (like bash HISTTIMEFORMAT)
+setopt EXTENDED_HISTORY
+
+## Remove superfluous blanks from history entries
+setopt HIST_REDUCE_BLANKS
+
+## Show history expansion before running it (e.g., !! shows command first)
+setopt HIST_VERIFY
 
 ## Share shell history between all open shells.
 setopt SHARE_HISTORY
@@ -69,8 +104,8 @@ setopt SHARE_HISTORY
 setopt APPEND_HISTORY
 
 HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=50000
+SAVEHIST=50000
 
 ################
 # PATH Options #
@@ -82,8 +117,23 @@ typeset -U path
 ## Add user-controlled site-functions dir for zsh completions
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
+
+## Initialize completion system with cache optimization
+#  Only fully recompile once per day, otherwise use cached version
 autoload -Uz compinit
-compinit
+if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
+
+## Completion system styling
+zstyle ':completion:*' menu select                              # Visual menu for completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'      # Case-insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"        # Colored completion (uses LS_COLORS)
+zstyle ':completion:*' group-name ''                            # Group completions by category
+zstyle ':completion:*:descriptions' format '%B%d%b'            # Bold category descriptions
+zstyle ':completion:*:warnings' format '%F{red}No matches%f'   # Red warning for no matches
 
 ## Enable Bash completions in Zsh
 autoload -U +X bashcompinit
@@ -184,11 +234,12 @@ reset_status() { (( $? == 0 )) || true }
 
 setopt PROMPT_SUBST
 
-## Basic, simple prompt
-# PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
-
-## Prompt with git branch, failure indicator, execution time
-PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
+## Custom prompt (disabled if Oh-My-Zsh sets a theme)
+#  This will be overridden by Oh-My-Zsh if a theme is configured
+if [[ -z "$ZSH_THEME" ]] || [[ "$ZSH_THEME" == "" ]]; then
+    ## Prompt with git branch, failure indicator, execution time
+    PROMPT='[%1v]%(?..%F{red} X %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
+fi
 
 ###########
 # Aliases #
@@ -258,17 +309,12 @@ bindkey '^[[4~' end-of-line         # End key (alternative)
 bindkey '^[[5~' history-search-backward  # Page Up
 bindkey '^[[6~' history-search-forward   # Page Down
 
-## CTRL+Arrow and ALT+Arrow keys for word navigation
+## CTRL+Arrow keys for word navigation
 #  Only enabled when NOT inside a multiplexer (Zellij, tmux, etc.)
 #  This prevents conflicts with multiplexer keybindings
 if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
-    ## CTRL+Arrow keys for word navigation
     bindkey '^[[1;5D' backward-word     # CTRL+Left arrow
     bindkey '^[[1;5C' forward-word      # CTRL+Right arrow
     bindkey '^[OD' backward-word        # CTRL+Left arrow (alternative)
     bindkey '^[OC' forward-word         # CTRL+Right arrow (alternative)
-
-    ## ALT+Arrow keys for word navigation (bonus)
-    bindkey '^[[1;3D' backward-word     # ALT+Left arrow
-    bindkey '^[[1;3C' forward-word      # ALT+Right arrow
 fi
