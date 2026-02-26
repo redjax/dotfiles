@@ -260,37 +260,8 @@ if [[ -z "$ZSH_THEME" ]] || [[ "$ZSH_THEME" == "" ]]; then
     PROMPT='[%1v]%(?..%F{red} X %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
 fi
 
-###########
-# Aliases #
-###########
-
-alias reload='exec zsh'
-alias mkdir='mkdir -pv'
-alias getchmod="stat --format '%a'"
-
-## ls
-alias ll='ls -lah'
-alias l='ls -CF'
-
-## grep
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-
-## Neovim
-alias nvimi="nvim --headless '+Lazy sync +qa'"
-alias nvimu="nvim --headless '+Lazy update +qa'"
-alias snvim="sudo -E nvim"
-
-## Lazygit
-alias lg='lazygit'
-
-## Terraform
-alias tf='terraform'
-alias tg='terragrunt'
-
-## Misc
-alias myip='curl -s http://ipecho.net/plain; echo'
+## Source aliases
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/aliases.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/aliases.zsh" || true
 
 ##################
 # Software inits #

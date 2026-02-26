@@ -1,0 +1,45 @@
+###########
+# Aliases #
+###########
+
+alias reload='exec zsh'
+alias mkdir='mkdir -pv'
+alias getchmod="stat --format '%a'"
+
+## ls
+alias ll='ls -lah'
+alias l='ls -CF'
+
+## grep
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+## Neovim
+if command -v nvim &>/dev/null; then
+  alias nvimi="nvim --headless '+Lazy sync +qa'"
+  alias nvimu="nvim --headless '+Lazy update +qa'"
+  alias snvim="sudo -E nvim"
+fi
+
+## Lazygit
+if command -v lazygit &>/dev/null; then
+  alias lg="lazygit"
+fi
+
+## Terraform
+if command -v terraform &>/dev/null; then
+  alias tf='terraform'
+fi
+
+if command -v terragrunt &>/dev/null; then
+  alias tg='terragrunt'
+fi
+
+## Zellij
+if command -v zellij &>/dev/null; then
+  alias zj="zellij"
+fi
+
+## Misc
+alias myip='curl -s http://ipecho.net/plain; echo'
