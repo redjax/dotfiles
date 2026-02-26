@@ -209,19 +209,17 @@ fi
 #  You can install this with:
 #    mise use -g usage
 
-if command -v mise &>/dev/null && command -v usage &>/dev/null; then
-    ## Path for local Zsh completions
-    MISE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_mise"
-    mkdir -p "$(dirname "$MISE_COMPLETION")"
-
-    ## Generate completions if missing
-    [[ -f "$MISE_COMPLETION" ]] || mise completion zsh > "$MISE_COMPLETION"
-
-    ## Source completions (native Zsh)
-    source "$MISE_COMPLETION"
-
-    ## Activate shims
+if command -v mise &>/dev/null; then
+    ## Activate mise (required for mise-installed tools to work)
     eval "$(mise activate zsh)"
+    
+    ## Setup completions only if usage is available
+    if command -v usage &>/dev/null; then
+        MISE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_mise"
+        mkdir -p "$(dirname "$MISE_COMPLETION")"
+        [[ -f "$MISE_COMPLETION" ]] || mise completion zsh > "$MISE_COMPLETION"
+        source "$MISE_COMPLETION"
+    fi
 fi
 
 ###############################
