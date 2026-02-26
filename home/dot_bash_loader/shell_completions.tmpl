@@ -132,6 +132,14 @@ if command -v dagger &>/dev/null; then
   [ -f "$dagger_complete" ] && . "$dagger_complete"
 fi
 
+## Trivy
+if command -v trivy &>/dev/null; then
+    TRIVY_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/bash-completion/completions/trivy"
+    mkdir -p "$(dirname "$TRIVY_COMPLETION")"
+    [[ -f "$TRIVY_COMPLETION" ]] || trivy completion bash > "$TRIVY_COMPLETION"
+    source "$TRIVY_COMPLETION"
+fi
+
 ## -----------------------------------------------------------
 
 ## Source custom completions
