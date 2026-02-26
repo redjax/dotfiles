@@ -231,6 +231,16 @@ if command -v atuin &>/dev/null; then
 fi
 
 #########
+# Trivy #
+#########
+if command -v trivy &>/dev/null; then
+    TRIVY_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_trivy"
+    mkdir -p "$(dirname "$TRIVY_COMPLETION")"
+    [[ -f "$TRIVY_COMPLETION" ]] || trivy completion zsh > "$TRIVY_COMPLETION"
+    source "$TRIVY_COMPLETION"
+fi
+
+#########
 # x-cmd #
 #########
 source_if_exists "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
