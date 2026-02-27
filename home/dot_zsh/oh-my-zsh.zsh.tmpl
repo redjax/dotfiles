@@ -1,17 +1,97 @@
 export ZSH="$HOME/.oh-my-zsh"
 
-## Set theme. Use 'random' to load a random theme each session.
-#  Available themes:
-#    https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-#  Some defaults I like:
-#  bira fino-time gianu half-life lambda lukerandall maran mortalscumbag murilasso xiong-chiamiov/xiong-chiamiov-plus
-# ZSH_THEME="xiong-chiamiov-plus"
-ZSH_THEME="mortalscumbag"
+#####################
+# Theme Configuration
+#####################
 
-## Set list of random themes ZSH can pick from.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+## Default fallback theme (always available in oh-my-zsh)
+DEFAULT_ZSH_THEME="mortalscumbag"
 
-# Set plugins
+## Set your preferred theme
+#  Available themes: https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+#  Use "random" to load a random theme from ZSH_THEME_RANDOM_CANDIDATES each session
+#  Some favorites:
+#    af-magic agnoster amuse bira candy dieter duellj fino-time fino frisk gianu
+#    half-life lambda lukerandall maran mortalscumbag murilasso rkj-repos steeef
+#    strug trapd00r ys xiong-chiamiov-plus
+ZSH_THEME=""
+
+## Random theme candidates (used when ZSH_THEME="random")
+#  Only themes in this list will be selected when using random mode
+ZSH_THEME_RANDOM_CANDIDATES=(
+    "xiong-chiamiov-plus"
+    "agnoster" 
+    "bira"
+    "mortalscumbag"
+    "ys"
+    "strug"
+    "rkj-repos"
+    "frisk"
+    "amuse"
+    "candy"
+)
+
+## Theme validation and fallback logic
+#  Ensures shell always starts even if theme is missing
+_validate_theme() {
+    local theme_name="$1"
+    [[ -z "$theme_name" ]] && return 1
+    
+    # Check built-in themes directory
+    [[ -f "$ZSH/themes/${theme_name}.zsh-theme" ]] && return 0
+    
+    # Check custom themes directory
+    [[ -f "$ZSH/custom/themes/${theme_name}.zsh-theme" ]] && return 0
+    
+    return 1
+}
+
+## Handle random theme selection
+if [[ "$ZSH_THEME" == "random" ]]; then
+    # Validate each candidate and build list of available themes
+    VALID_CANDIDATES=()
+    for candidate in "${ZSH_THEME_RANDOM_CANDIDATES[@]}"; do
+        if _validate_theme "$candidate"; then
+            VALID_CANDIDATES+=("$candidate")
+        else
+            echo "⚠ Warning: Random theme candidate '${candidate}' not found, skipping."
+        fi
+    done
+    
+    # If no valid candidates, fall back to default
+    if [[ ${#VALID_CANDIDATES[@]} -eq 0 ]]; then
+        echo "⚠ Warning: No valid random theme candidates found. Using fallback '${DEFAULT_ZSH_THEME}'."
+        ZSH_THEME="$DEFAULT_ZSH_THEME"
+    else
+        # Let oh-my-zsh handle random selection from valid candidates
+        ZSH_THEME_RANDOM_CANDIDATES=("${VALID_CANDIDATES[@]}")
+        ZSH_THEME="random"
+    fi
+    
+    unset VALID_CANDIDATES candidate
+
+## Validate specific theme
+elif [[ -n "$ZSH_THEME" ]]; then
+    if ! _validate_theme "$ZSH_THEME"; then
+        echo "⚠ Warning: Theme '${ZSH_THEME}' not found. Falling back to '${DEFAULT_ZSH_THEME}'."
+        ZSH_THEME="$DEFAULT_ZSH_THEME"
+    fi
+elif [[ -z "$ZSH_THEME" ]]; then
+    ## No theme specified, use fallback
+    ZSH_THEME="$DEFAULT_ZSH_THEME"
+fi
+
+## Final safety check: ensure fallback theme exists
+if [[ "$ZSH_THEME" == "$DEFAULT_ZSH_THEME" ]] && ! _validate_theme "$DEFAULT_ZSH_THEME"; then
+    echo "⚠ Error: Fallback theme '${DEFAULT_ZSH_THEME}' not found. Oh-my-zsh installation may be corrupted."
+    ZSH_THEME=""  # Empty theme = oh-my-zsh uses basic prompt
+fi
+
+unset -f _validate_theme
+
+#####################
+# Plugins Configuration
+#####################
 plugins=(
     git
     extract                # Extract any archive with 'extract <file>'
