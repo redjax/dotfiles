@@ -240,6 +240,41 @@ if command -v trivy &>/dev/null; then
     source "$TRIVY_COMPLETION"
 fi
 
+##########
+# Zellij #
+##########
+
+## Generate zellij completion file
+#  Note: Do NOT source it - zsh will autoload it from fpath
+if command -v zellij &>/dev/null; then
+    ZELLIJ_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_zellij"
+    mkdir -p "$(dirname "$ZELLIJ_COMPLETION")"
+    [[ -f "$ZELLIJ_COMPLETION" ]] || zellij setup --generate-completion zsh > "$ZELLIJ_COMPLETION"
+    
+    ## Add a custom completion function for session names
+    #  This creates a _zellij_sessions function that can be called by the main completion
+    _zellij_sessions() {
+        local -a sessions
+        sessions=(${(f)"$(zellij list-sessions --no-formatting 2>/dev/null | awk '{print $1}')"})
+        _describe 'sessions' sessions
+    }
+    
+    ## Create a wrapper completion function
+    _zellij_wrapper() {
+        ## Check if we're completing after 'attach' or 'a'
+        if (( CURRENT == 3 )) && [[ "${words[2]}" == (attach|a) ]]; then
+            _zellij_sessions
+        else
+            ## Call the original completion
+            _zellij "$@"
+        fi
+    }
+    
+    ## Register our wrapper after a short delay to ensure compinit has run
+    #  This replaces the default completion with our enhanced version
+    compdef _zellij_wrapper zellij
+fi
+
 #########
 # x-cmd #
 #########
