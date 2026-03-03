@@ -275,6 +275,11 @@ if command -v zellij &>/dev/null; then
     compdef _zellij_wrapper zellij
 fi
 
+## Cargo
+if [[ -d "{{ .chezmoi.homeDir }}/.cargo" ]]; then
+  . "{{ .chezmoi.homeDir }}/.cargo/env"
+fi
+
 #########
 # x-cmd #
 #########

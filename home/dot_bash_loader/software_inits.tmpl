@@ -144,3 +144,7 @@ if command -v aqua &>/dev/null || [[ -f "${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME
     export PATH="${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin:$PATH"
 fi
 
+## Cargo
+if [[ -d "{{ .chezmoi.homeDir }}/.cargo" ]]; then
+  . "{{ .chezmoi.homeDir }}/.cargo/env"
+fi
