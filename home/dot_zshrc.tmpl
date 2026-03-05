@@ -305,9 +305,14 @@ bindkey '^[[6~' history-search-forward   # Page Down
 if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
     bindkey '^[[1;5D' backward-word     # CTRL+Left arrow
     bindkey '^[[1;5C' forward-word      # CTRL+Right arrow
-    bindkey '^[OD' backward-word        # CTRL+Left arrow (alternative)
-    bindkey '^[OC' forward-word         # CTRL+Right arrow (alternative)
 fi
+
+## Ensure plain arrow keys move by character (not word)
+#  These handle both normal mode (^[[C/D) and application mode (^[OC/D)
+bindkey '^[[D' backward-char            # Left arrow
+bindkey '^[[C' forward-char             # Right arrow
+bindkey '^[OD' backward-char            # Left arrow (application mode)
+bindkey '^[OC' forward-char             # Right arrow (application mode)
 
 #################
 # Local Configs #
