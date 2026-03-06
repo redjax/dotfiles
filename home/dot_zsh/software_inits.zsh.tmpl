@@ -91,30 +91,16 @@ source_if_exists() {
     [[ -f $1 ]] && source "$1"
 }
 
-## Generate a completion file if it doesn't already exist.
-#  Sets _new_completions=1 so compinit can be re-run at the end of this file.
-#  Usage: generate_completion <output_file> <command ...>
-#  Example: generate_completion "$DOCKER_COMPLETION" docker completion zsh
-generate_completion() {
-    local dest="$1"; shift
-    if [[ ! -f "$dest" ]]; then
-        mkdir -p "$(dirname "$dest")"
-        "$@" > "$dest"
-        _new_completions=1
-    fi
-}
-
-## Track whether any new completion files were generated this session
-_new_completions=0
-
 ## --------------------------------------------------------------------------------------------
 
 ###########
 # Chezmoi #
 ###########
+
+## Completion file is generated in .zshrc before compinit
+## Source it here for any runtime hooks
 CHEZMOI_ZSH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_chezmoi"
 if command -v chezmoi &>/dev/null; then
-    generate_completion "$CHEZMOI_ZSH_COMPLETION" chezmoi completion zsh
     source_if_exists "$CHEZMOI_ZSH_COMPLETION"
 fi
 
@@ -151,30 +137,18 @@ fi
 # Docker / Compose #
 ####################
 
-## https://docs.docker.com/engine/cli/completion/#zsh
-
-if command -v docker &>/dev/null; then
-    DOCKER_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_docker"
-    generate_completion "$DOCKER_COMPLETION" docker completion zsh
-fi
-
-# Docker Compose V2 (docker compose plugin) native zsh completions
-if command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1; then
-    DOCKER_COMPOSE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_docker-compose"
-    generate_completion "$DOCKER_COMPOSE_COMPLETION" docker compose completion zsh
-fi
+## Completion files are generated in .zshrc before compinit
+## No runtime init needed for Docker
 
 ###################
 # Astral uv / uvx #
 ###################
+
+## Completion files are generated in .zshrc before compinit
 UV_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_uv"
 UVX_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_uvx"
 
 if command -v uv &>/dev/null; then
-    ## Use native Zsh completions
-    generate_completion "$UV_COMPLETION" uv generate-shell-completion zsh
-    generate_completion "$UVX_COMPLETION" uvx --generate-shell-completion zsh
-
     source_if_exists "$UV_COMPLETION"
     source_if_exists "$UVX_COMPLETION"
 fi
@@ -250,10 +224,10 @@ if command -v mise &>/dev/null; then
     eval "$(mise activate zsh)"
     
     ## Setup completions only if usage is available
+    ## Completion file is generated in .zshrc before compinit
     if command -v usage &>/dev/null; then
         MISE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_mise"
-        generate_completion "$MISE_COMPLETION" mise completion zsh
-        source "$MISE_COMPLETION"
+        source_if_exists "$MISE_COMPLETION"
     fi
 fi
 
@@ -268,9 +242,10 @@ fi
 #########
 # Trivy #
 #########
+
+## Completion file is generated in .zshrc before compinit
 if command -v trivy &>/dev/null; then
     TRIVY_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_trivy"
-    generate_completion "$TRIVY_COMPLETION" trivy completion zsh
     source_if_exists "$TRIVY_COMPLETION"
 fi
 
@@ -279,10 +254,9 @@ fi
 ##########
 
 ## Generate zellij completion file
-#  Note: Do NOT source it - zsh will autoload it from fpath
+#  Note: Completion file is generated in .zshrc before compinit
 if command -v zellij &>/dev/null; then
     ZELLIJ_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_zellij"
-    generate_completion "$ZELLIJ_COMPLETION" zellij setup --generate-completion zsh
     
     ## Add a custom completion function for session names
     #  This creates a _zellij_sessions function that can be called by the main completion
@@ -323,22 +297,6 @@ source_if_exists "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
 ########
 if command -v syst &>/dev/null; then
   SYST_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_syst"
-  generate_completion "$SYST_COMPLETION" syst completion zsh
   source_if_exists "$SYST_COMPLETION"
 fi
-
-## --------------------------------------------------------------------------------------------
-
-##############################
-# Rebuild compinit if needed #
-##############################
-
-## If any new completion files were generated above, the compinit cache
-#  from .zshrc is stale. Force a full rebuild so completions work
-#  immediately in this session (not just the next one).
-if (( _new_completions )); then
-    autoload -Uz compinit
-    compinit
-fi
-unset _new_completions
 
