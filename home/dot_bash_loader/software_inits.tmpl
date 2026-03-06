@@ -18,6 +18,14 @@ if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   ## This loads nvm bash_completion
   # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
+
+elif [[ -d "{{ .chezmoi.homeDir }}/.config/nvm" ]]; then
+  ## Add nvm to shell
+  export NVM_DIR="{{ .chezmoi.homeDir }}/.config/nvm"
+  ## Load nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  ## This loads nvm bash_completion
+  # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_>
 fi
 
 ## Enable x-cmd if it's installed

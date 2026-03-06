@@ -123,9 +123,12 @@ fi
 ##############################
 # NVM (Node Version Manager) #
 ##############################
-if [[ -d "${HOME}/.nvm" ]]; then
-    export NVM_DIR="${HOME}/.nvm"
+if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
+    export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
     source_if_exists "$NVM_DIR/nvm.sh" || true
+elif [[ -d "{{ .chezmoi.homeDir }}/.config/nvm" ]]; then
+    export NVM_DIR="{{ .chezmoi.homeDir }}/.config/nvm"
+    source_if_exists "$NVM_DIR/nvm.sh"
 fi
 
 ###################
