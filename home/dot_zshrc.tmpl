@@ -150,11 +150,13 @@ fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
     local generated=0
 
     ## Generate a completion file safely.
+    #  Skips if the command isn't installed or the file already exists.
     #  Captures output, checks for #compdef header, writes only if valid.
     #  Usage: _try_gen <dest> <command ...>
     _try_gen() {
         local dest="$1"; shift
         [[ -f "$dest" ]] && return 0
+        command -v "$1" &>/dev/null || return 0
         local out
         out="$("$@" 2>/dev/null)" || return 1
         if [[ "$out" == \#compdef\ * || "$out" == \#compdef$'\n'* ]]; then
