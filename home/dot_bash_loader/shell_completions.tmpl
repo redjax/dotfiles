@@ -44,6 +44,12 @@ if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
   export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
 
   [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+elif [[ -d "{{ .chezmoi.homeDir }}/.config/nvm" ]]; then
+  ## Add nvm to shell
+  export NVM_DIR="{{ .chezmoi.homeDir }}/.config/nvm"
+
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 fi
 
 ## Resticprofile
