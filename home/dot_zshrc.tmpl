@@ -129,6 +129,58 @@ typeset -U path
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
 
+######################################
+# Generate completion files (pre-compinit)
+######################################
+#  These MUST run before compinit so the completion system sees them.
+#  Each block generates the file once; delete the file to regenerate.
+#  If any new file is generated, the zcompdump cache is removed so
+#  compinit does a full rebuild.
+() {
+    local dir="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions"
+    local f
+    local generated=0
+
+    ## Chezmoi
+    f="$dir/_chezmoi"
+    [[ -f "$f" ]] || { command -v chezmoi &>/dev/null && chezmoi completion zsh > "$f" && generated=1 }
+
+    ## Docker
+    f="$dir/_docker"
+    [[ -f "$f" ]] || { command -v docker &>/dev/null && docker completion zsh > "$f" && generated=1 }
+
+    ## Docker Compose V2
+    f="$dir/_docker-compose"
+    [[ -f "$f" ]] || { command -v docker &>/dev/null && docker compose version &>/dev/null 2>&1 && docker compose completion zsh > "$f" && generated=1 }
+
+    ## uv
+    f="$dir/_uv"
+    [[ -f "$f" ]] || { command -v uv &>/dev/null && uv generate-shell-completion zsh > "$f" && generated=1 }
+
+    ## uvx
+    f="$dir/_uvx"
+    [[ -f "$f" ]] || { command -v uvx &>/dev/null && uvx --generate-shell-completion zsh > "$f" && generated=1 }
+
+    ## Mise
+    f="$dir/_mise"
+    [[ -f "$f" ]] || { command -v mise &>/dev/null && command -v usage &>/dev/null && mise completion zsh > "$f" && generated=1 }
+
+    ## Trivy
+    f="$dir/_trivy"
+    [[ -f "$f" ]] || { command -v trivy &>/dev/null && trivy completion zsh > "$f" && generated=1 }
+
+    ## Zellij
+    f="$dir/_zellij"
+    [[ -f "$f" ]] || { command -v zellij &>/dev/null && zellij setup --generate-completion zsh > "$f" && generated=1 }
+
+    ## Syst
+    f="$dir/_syst"
+    [[ -f "$f" ]] || { command -v syst &>/dev/null && syst completion zsh > "$f" && generated=1 }
+
+    ## If anything was generated, invalidate the compinit cache
+    (( generated )) && rm -f "${HOME}"/.zcompdump*
+}
+
 ## Initialize completion system with cache optimization
 #  Only fully recompile once per day, otherwise use cached version
 autoload -Uz compinit
