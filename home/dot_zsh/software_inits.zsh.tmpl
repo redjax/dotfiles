@@ -314,3 +314,16 @@ fi
 # x-cmd #
 #########
 source_if_exists "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
+
+########
+# Syst #
+########
+if command -v syst &>/dev/null; then
+  SYST_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_syst"
+  mkdir -p "$(dirname "$SYST_COMPLETION")"
+  [[ -f "$SYST_COMPLETION" ]] || syst completion zsh > "$SYST_COMPLETION"
+  source "$SYST_COMPLETION"
+fi
+
+
+  
