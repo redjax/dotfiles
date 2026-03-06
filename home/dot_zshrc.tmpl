@@ -59,6 +59,11 @@ setopt NUMERIC_GLOB_SORT
 ## Remove pattern if no matches (prevents "no matches found" error)
 setopt NULL_GLOB
 
+## Prevent completion from eating the trailing space before && || ; |
+#  By default ZLE_REMOVE_SUFFIX_CHARS includes & ; | which causes
+#  "cmd --flag &&" to collapse into "cmd --flag&&"
+ZLE_REMOVE_SUFFIX_CHARS=$' \t\n;'
+
 ## Case-insensitive globbing
 setopt NO_CASE_GLOB
 
