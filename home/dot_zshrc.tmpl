@@ -134,6 +134,51 @@ typeset -U path
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
 
+######################################
+# Generate completion files (pre-compinit)
+######################################
+#  These MUST run before compinit so the completion system sees them.
+#  Each block generates the file once; delete the file to regenerate.
+#  If any new file is generated, the zcompdump cache is removed so
+#  compinit does a full rebuild.
+#
+#  _try_gen validates output starts with #compdef before writing.
+#  If a command outputs help text instead of a completion script,
+#  the file is NOT created (prevents breaking the shell).
+() {
+    local dir="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions"
+    local generated=0
+
+    ## Generate a completion file safely.
+    #  Captures output, checks for #compdef header, writes only if valid.
+    #  Usage: _try_gen <dest> <command ...>
+    _try_gen() {
+        local dest="$1"; shift
+        [[ -f "$dest" ]] && return 0
+        local out
+        out="$("$@" 2>/dev/null)" || return 1
+        if [[ "$out" == \#compdef\ * || "$out" == \#compdef$'\n'* ]]; then
+            printf '%s\n' "$out" > "$dest"
+            generated=1
+        fi
+    }
+
+    _try_gen "$dir/_chezmoi"         chezmoi completion zsh
+    _try_gen "$dir/_docker"          docker completion zsh
+    _try_gen "$dir/_docker-compose"  docker compose completion zsh
+    _try_gen "$dir/_uv"             uv generate-shell-completion zsh
+    _try_gen "$dir/_uvx"            uvx --generate-shell-completion zsh
+    _try_gen "$dir/_mise"           mise completion zsh
+    _try_gen "$dir/_trivy"          trivy completion zsh
+    _try_gen "$dir/_zellij"         zellij setup --generate-completion zsh
+    _try_gen "$dir/_syst"           syst completion zsh
+
+    unset -f _try_gen
+
+    ## If anything was generated, invalidate the compinit cache
+    (( generated )) && rm -f "${HOME}"/.zcompdump*
+}
+
 ## Initialize completion system with cache optimization
 #  Only fully recompile once per day, otherwise use cached version
 autoload -Uz compinit
