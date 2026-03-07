@@ -70,6 +70,19 @@ setopt NO_CASE_GLOB
 ## Set shell to emacs mode
 bindkey -e
 
+## Fix insecure directories before compinit
+() {
+  local dirs=(
+    "{{ .chezmoi.homeDir }}/.local/share/zsh"
+    "{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions"
+  )
+  for dir in "${dirs[@]}"; do
+    mkdir -p "$dir"
+    chmod 755 "$dir"
+    chown jack:jack "$dir" 2>/dev/null || true
+  done
+}
+
 ## Allow editing a command with CTRL+X + e
 autoload -Uz edit-command-line
 zle -N edit-command-line
