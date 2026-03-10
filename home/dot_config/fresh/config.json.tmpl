@@ -1,0 +1,488 @@
+{{- $lineEnding := "lf" -}}
+{{- if eq .chezmoi.os "windows" -}}
+{{- $lineEnding = "crlf" -}}
+{{- end -}}
+{
+  "active_keybinding_map": "vscode",
+  "theme": "high-contrast",
+  "languages": {
+    "bash": {
+      "auto_close": false,
+      "auto_indent": true,
+      "auto_surround": true,
+      "comment_prefix": "##",
+      "extensions": [
+        "sh",
+        "bash",
+        "zsh"
+      ],
+      "filenames": [
+        ".bash_aliases",
+        ".bash_logout",
+        ".bash_profile",
+        ".bashrc",
+        ".env",
+        ".profile",
+        ".zlogin",
+        ".zlogout",
+        ".zprofile",
+        ".zshenv",
+        ".zshrc",
+        "PKGBUILD",
+        "APKBUILD"
+      ],
+      "format_on_save": true,
+      "grammar": "bash",
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "tab_size": 0,
+      "use_tabs": false
+    },
+    "c": {
+      "extensions": [
+        "c",
+        "h"
+      ],
+      "grammar": "c",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "clang-format",
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "cpp": {
+      "extensions": [
+        "cpp",
+        "cc",
+        "cxx",
+        "hpp",
+        "hh",
+        "hxx"
+      ],
+      "grammar": "cpp",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "clang-format",
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "csharp": {
+      "extensions": [
+        "cs"
+      ],
+      "grammar": "c_sharp",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "dockerfile": {
+      "auto_close": false,
+      "auto_indent": true,
+      "auto_surround": true,
+      "comment_prefix": "##",
+      "extensions": [
+        "dockerfile"
+      ],
+      "filenames": [
+        "Dockerfile",
+        "Containerfile"
+      ],
+      "format_on_save": false,
+      "grammar": "dockerfile",
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "tab_size": 0,
+      "use_tabs": false
+    },
+    "git-commit": {
+      "filenames": [
+        "COMMIT_EDITMSG",
+        "MERGE_MSG",
+        "SQUASH_MSG",
+        "TAG_EDITMSG"
+      ],
+      "grammar": "Git Commit Message",
+      "comment_prefix": "#",
+      "auto_indent": false,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "git-rebase": {
+      "filenames": [
+        "git-rebase-todo"
+      ],
+      "grammar": "Git Rebase Todo",
+      "comment_prefix": "#",
+      "auto_indent": false,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "gitattributes": {
+      "extensions": [
+        "gitattributes"
+      ],
+      "filenames": [
+        ".gitattributes"
+      ],
+      "grammar": "Git Attributes",
+      "comment_prefix": "#",
+      "auto_indent": false,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "gitconfig": {
+      "extensions": [
+        "gitconfig"
+      ],
+      "filenames": [
+        ".gitconfig",
+        ".gitmodules"
+      ],
+      "grammar": "Git Config",
+      "comment_prefix": "#",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "gitignore": {
+      "extensions": [
+        "gitignore"
+      ],
+      "filenames": [
+        ".gitignore",
+        ".dockerignore",
+        ".npmignore",
+        ".hgignore"
+      ],
+      "grammar": "Gitignore",
+      "comment_prefix": "#",
+      "auto_indent": false,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "go": {
+      "auto_close": false,
+      "auto_indent": true,
+      "auto_surround": false,
+      "comment_prefix": "//",
+      "extensions": [
+        "go"
+      ],
+      "format_on_save": false,
+      "formatter": {
+        "command": "gofmt",
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "grammar": "go",
+      "highlighter": "auto",
+      "show_whitespace_tabs": false,
+      "tab_size": 8,
+      "use_tabs": true
+    },
+    "java": {
+      "extensions": [
+        "java"
+      ],
+      "grammar": "java",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "javascript": {
+      "extensions": [
+        "js",
+        "jsx",
+        "mjs"
+      ],
+      "grammar": "javascript",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "prettier",
+        "args": [
+          "--stdin-filepath",
+          "$FILE"
+        ],
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "json": {
+      "extensions": [
+        "json",
+        "jsonc"
+      ],
+      "grammar": "json",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "prettier",
+        "args": [
+          "--stdin-filepath",
+          "$FILE"
+        ],
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "latex": {
+      "extensions": [
+        "tex",
+        "latex",
+        "ltx",
+        "sty",
+        "cls",
+        "bib"
+      ],
+      "grammar": "latex",
+      "comment_prefix": "%",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "makefile": {
+      "extensions": [
+        "mk"
+      ],
+      "filenames": [
+        "Makefile",
+        "makefile",
+        "GNUmakefile"
+      ],
+      "grammar": "make",
+      "comment_prefix": "#",
+      "auto_indent": false,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": true,
+      "tab_size": 8,
+      "format_on_save": false
+    },
+    "markdown": {
+      "extensions": [
+        "md",
+        "markdown"
+      ],
+      "filenames": [
+        "README"
+      ],
+      "grammar": "markdown",
+      "auto_indent": false,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "odin": {
+      "extensions": [
+        "odin"
+      ],
+      "grammar": "odin",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": false,
+      "use_tabs": true,
+      "tab_size": 8,
+      "format_on_save": false
+    },
+    "python": {
+      "extensions": [
+        "py",
+        "pyi"
+      ],
+      "grammar": "python",
+      "comment_prefix": "#",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "ruff",
+        "args": [
+          "format",
+          "--stdin-filename",
+          "$FILE"
+        ],
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "rust": {
+      "extensions": [
+        "rs"
+      ],
+      "grammar": "rust",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "rustfmt",
+        "args": [
+          "--edition",
+          "2021"
+        ],
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "templ": {
+      "extensions": [
+        "templ"
+      ],
+      "grammar": "go",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "toml": {
+      "extensions": [
+        "toml"
+      ],
+      "filenames": [
+        "Cargo.lock"
+      ],
+      "grammar": "toml",
+      "comment_prefix": "#",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "typescript": {
+      "extensions": [
+        "ts",
+        "tsx",
+        "mts"
+      ],
+      "grammar": "typescript",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "prettier",
+        "args": [
+          "--stdin-filepath",
+          "$FILE"
+        ],
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "typst": {
+      "extensions": [
+        "typ"
+      ],
+      "grammar": "Typst",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    },
+    "yaml": {
+      "extensions": [
+        "yml",
+        "yaml"
+      ],
+      "grammar": "yaml",
+      "comment_prefix": "#",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "formatter": {
+        "command": "prettier",
+        "args": [
+          "--stdin-filepath",
+          "$FILE"
+        ],
+        "stdin": true,
+        "timeout_ms": 10000
+      },
+      "format_on_save": false
+    },
+    "zig": {
+      "extensions": [
+        "zig",
+        "zon"
+      ],
+      "grammar": "zig",
+      "comment_prefix": "//",
+      "auto_indent": true,
+      "highlighter": "auto",
+      "show_whitespace_tabs": true,
+      "use_tabs": false,
+      "format_on_save": false
+    }
+  },
+  "editor": {
+    "cursor_style": "blinking_bar",
+    "tab_size": 2,
+    "trim_trailing_whitespace_on_save": true,
+    "whitespace_spaces_trailing": true,
+    "accept_suggestion_on_enter": "smart",
+    "diagnostics_inline_text": true,
+    "show_horizontal_scrollbar": true,
+    "whitespace_spaces_leading": true,
+    "ensure_final_newline_on_save": true
+  },
+  "file_explorer": {
+    "show_gitignored": true,
+    "show_hidden": true
+  },
+  "file_browser": {
+    "show_hidden": true
+  },
+  "default_line_ending": "{{ $lineEnding }}"
+}
