@@ -7,9 +7,11 @@ alias mkdir='mkdir -pv'
 alias getchmod="stat --format '%a'"
 
 ## ls
-alias ls="ls"
-alias ll='ls -lah --color=auto'
-alias l='ls -CF --color=auto'
+#  Enable color printing on 'ls', which applies
+#  to the other aliases too
+alias ls="ls -CF --color=auto"
+alias ll="ls -lah"
+alias l="ls"
 
 ## grep
 alias grep='grep --color=auto'
