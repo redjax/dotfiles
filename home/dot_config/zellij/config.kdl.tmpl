@@ -3,6 +3,10 @@ keybinds {
     normal {
         // uncomment this and adjust key if using copy_on_select=false
         // bind "Alt c" { Copy; }
+
+        // Enable 'locked' mode. Zellij will pass all keybinds, requiring
+        // you to press CTRL+G to enter "zellij mode."
+        bind "Ctrl g" { SwitchToMode "Locked"; }
     }
     locked {
         bind "Ctrl g" { SwitchToMode "Normal"; }
@@ -334,7 +338,7 @@ theme "ayu_dark"
 // Choose the mode that zellij uses when starting up.
 // Default: normal
 //
-// default_mode "locked"
+default_mode "locked"
 
 // Toggle enabling the mouse mode.
 // On certain configurations, or terminals this could
