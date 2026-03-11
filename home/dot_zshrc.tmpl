@@ -191,13 +191,13 @@ fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
     unset -f _try_gen
 
     ## If anything was generated, invalidate the compinit cache
-    (( generated )) && rm -f "${HOME}"/.zcompdump*
+    (( generated )) && rm -f "{{ .chezmoi.homeDir }}"/.zcompdump*
 }
 
 ## Initialize completion system with cache optimization
 #  Only fully recompile once per day, otherwise use cached version
 autoload -Uz compinit
-if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
+if [[ -n {{ .chezmoi.homeDir }}/.zcompdump(#qN.mh+24) ]]; then
     compinit
 else
     compinit -C
@@ -386,11 +386,11 @@ bindkey '^[OC' forward-char             # Right arrow (application mode)
 ## Source shared local overrides from .bashrc.local
 #  This allows sharing common environment variables, aliases, and PATH
 #  additions between bash and zsh without duplication
-[[ -f "${HOME}/.bashrc.local" ]] && source "${HOME}/.bashrc.local" || true
+[[ -f "{{ .chezmoi.homeDir }}/.bashrc.local" ]] && source "{{ .chezmoi.homeDir }}/.bashrc.local" || true
 
 ## Source zsh-specific local overrides
 #  Use this for zsh-only features like prompts, plugins, key bindings, etc.
-[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local" || true
+[[ -f "{{ .chezmoi.homeDir }}/.zshrc.local" ]] && source "{{ .chezmoi.homeDir }}/.zshrc.local" || true
 
 ## -------------------------------------------------------------------------------
 

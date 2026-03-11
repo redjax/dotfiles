@@ -128,8 +128,8 @@ fi
 
 ## Source ~/.bashrc.local if it exists
 # echo ".bashrc.local exists: $([ -f {{ .chezmoi.homeDir }}/.bashrc.local ])"
-if [[ -f "${HOME}/.bashrc.local" ]]; then
+if [[ -f "{{ .chezmoi.homeDir }}/.bashrc.local" ]]; then
     # echo "Sourcing ~/.bashrc.local"
-  . "${HOME}/.bashrc.local"
+  . "{{ .chezmoi.homeDir }}/.bashrc.local"
 fi
 
