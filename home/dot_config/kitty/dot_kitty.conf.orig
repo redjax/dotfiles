@@ -1796,7 +1796,7 @@
 #: environment variables are expanded recursively, for example::
 
 #:     env VAR1=a
-#:     env VAR2=${HOME}/${VAR1}/b
+#:     env VAR2={{ .chezmoi.homeDir }}/${VAR1}/b
 
 #: The value of VAR2 will be <path to home directory>/a/b.
 
