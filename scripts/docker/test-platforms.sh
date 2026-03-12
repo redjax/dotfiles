@@ -81,3 +81,62 @@ echo "|   https://github.com/$GITHUB_USERNAME/dotfiles"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 sleep 1
+
+for img in "${IMAGES[@]}"; do
+  echo
+  echo "[*] Testing image: $img"
+  echo
+
+  TEST_DIR=$(mktemp -d -p /tmp chezmoi-test-XXXXXXXX)
+
+  ## Create Dockerfile on the fly based on image
+  cat > "$TEST_DIR/Dockerfile" << EOF
+  FROM $img
+
+  ## Install curl & getent equivalents
+  RUN if command -v apt-get >/dev/null 2>&1; then \
+        apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*; \
+      elif command -v apk >/dev/null 2>&1; then \
+        apk add --no-cache curl shadow busybox-extras; \
+      elif command -v dnf >/dev/null 2>&1; then \
+        dnf install -y curl shadow-utils && dnf clean all; \
+      elif command -v yum >/dev/null 2>&1; then \
+        yum install -y curl shadow-utils && yum clean all; \
+      elif command -v pacman >/dev/null 2>&1; then \
+        pacman -Sy --noconfirm curl && pacman -Scc --noconfirm; \
+      else \
+        echo "Unsupported package manager" && exit 1; \
+      fi
+
+  ## Create dummy user for getent
+  RUN useradd -m -u 1000 $HOST_USER || true
+
+  ## Install chezmoi
+  RUN sh -c "\$(curl -fsLS get.chezmoi.io)" -- init $GITHUB_USERNAME
+
+  ENV HOME=/root \
+      USER=$HOST_USER \
+      CHEZMOI_USERNAME=$HOST_USER
+
+  CMD ["chezmoi", "apply", "--dry-run"]
+EOF
+
+  if docker build -t "chezmoi-test-$img" "$TEST_DIR" && \
+     docker run --rm "chezmoi-test-$img"; then
+    echo
+    echo "[SUCCESS] $img : PASS"
+  else
+    echo
+    echo "[FAILURE] $img : FAILED"
+  fi
+
+  echo
+  
+  docker rmi "chezmoi-test-$img" &>/dev/null || true
+  rm -rf "$TEST_DIR" &>/dev/null
+
+  echo "----------------------------------------------------------------------------------"
+  echo
+done
+
+echo "All platform tests complete"
