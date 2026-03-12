@@ -67,3 +67,17 @@ if [[ -z "${HOST_USER}" ]]; then
   done
 
 fi
+
+echo
+echo "[ Chezmoi container render ]"
+echo "| Test dotfile rendering in differet Docker containers."
+echo "|"
+echo "| Values:"
+echo "|   - GITHUB_USERNAME: ${GITHUB_USERNAME:-<unset>}"
+echo "|   - HOST_USER      : ${HOST_USER:-<unset>}"
+echo "|"
+echo "| Chezmoi will search for dotfiles at:"
+echo "|   https://github.com/$GITHUB_USERNAME/dotfiles"
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+sleep 1
