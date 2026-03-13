@@ -62,7 +62,12 @@ theme = "Thayer Bright"
 #
 # Example:
 # working-dir = "/Users/raphael/Documents/"
+#
+# Note: working-dir only takes effect when use-fork is disabled.
+# On Linux/macOS with use-fork = true, the shell inherits the parent's CWD.
+{{- if eq .chezmoi.os "windows" }}
 working-dir = "{{ .chezmoi.homeDir }}"
+{{- end }}
 
 # Environment variables
 #
@@ -77,9 +82,9 @@ working-dir = "{{ .chezmoi.homeDir }}"
 #
 # Example:
 # use-fork = false
-{{ if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
 use-fork = true
-{{ end }}
+{{- end }}
 
 # Confirm before exiting Rio
 # Default is `true`
@@ -143,7 +148,11 @@ mode = "windowed"
 opacity = 1.0
 blur = false
 decorations = "enabled"
+{{- if eq .chezmoi.os "darwin" }}
 colorspace = "display-p3"
+{{- else }}
+colorspace = "srgb"
+{{- end }}
 
 # Renderer
 #
@@ -367,6 +376,7 @@ clickable = true
 program = {{ if gt (len (output "where" "pwsh")) 0 }}"pwsh"{{ else }}"powershell"{{ end }}
 {{- else }}
 program = "/bin/zsh"
+args = ["--login"]
 {{- end }}
 
 # Colors
