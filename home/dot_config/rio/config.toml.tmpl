@@ -363,15 +363,9 @@ clickable = true
 # program = "/opt/homebrew/bin/tmux"
 # args = ["new-session", "-c", "/var/www"]
 [shell]
-{{ if eq .chezmoi.os "windows" -}}
-  {{- if gt (len (output "where" "pwsh")) 0 -}}
-program = "pwsh"
-  {{- else -}}
-program = "powershell"
-  {{- end -}}
-{{- else if eq .chezmoi.os "darwin" -}}
-program = "/bin/zsh"
-{{- else -}}
+{{- if eq .chezmoi.os "windows" }}
+program = {{ if gt (len (output "where" "pwsh")) 0 }}"pwsh"{{ else }}"powershell"{{ end }}
+{{- else }}
 program = "/bin/zsh"
 {{- end }}
 
