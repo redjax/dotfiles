@@ -428,15 +428,6 @@ keys = [
 # # Linux overwrite
 # linux.shell.program = "tmux"
 # linux.shell.args = ["new-session", "-c", "/var/www"]
-{{- if eq .chezmoi.os "windows" -}}
-[platform]
-## Windows overrides
-  {{- if gt (len (output "where" "pwsh")) 0 -}}
-program = "pwsh"
-  {{- else -}}
-program = "powershell"
-  {{- end -}}
-{{- end -}}
 
 # Log level
 #
