@@ -22,6 +22,12 @@
 # theme = "dracula"
 theme = "Thayer Bright"
 
+# Adaptive theme switches automatically between light and dark
+# based on the OS appearance setting.
+# [adaptive-theme]
+# light = "ayu_light"
+# dark = "Thayer Bright"
+
 # Padding-x
 #
 # define x axis padding (default is 0)
@@ -62,7 +68,12 @@ theme = "Thayer Bright"
 #
 # Example:
 # working-dir = "/Users/raphael/Documents/"
+#
+# Note: working-dir only takes effect when use-fork is disabled.
+# On Linux/macOS with use-fork = true, the shell inherits the parent's CWD.
+{{- if eq .chezmoi.os "windows" }}
 working-dir = "{{ .chezmoi.homeDir }}"
+{{- end }}
 
 # Environment variables
 #
@@ -77,9 +88,9 @@ working-dir = "{{ .chezmoi.homeDir }}"
 #
 # Example:
 # use-fork = false
-{{ if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
+{{- if or (eq .chezmoi.os "linux") (eq .chezmoi.os "darwin") }}
 use-fork = true
-{{ end }}
+{{- end }}
 
 # Confirm before exiting Rio
 # Default is `true`
@@ -143,7 +154,11 @@ mode = "windowed"
 opacity = 1.0
 blur = false
 decorations = "enabled"
+{{- if eq .chezmoi.os "darwin" }}
 colorspace = "display-p3"
+{{- else }}
+colorspace = "srgb"
+{{- end }}
 
 # Renderer
 #
@@ -189,6 +204,7 @@ filters = []
 #
 # Example:
 # [keyboard]
+[keyboard]
 use-kitty-keyboard-protocol = false
 disable-ctlseqs-alt = false
 ime-cursor-positioning = true
@@ -362,16 +378,11 @@ clickable = true
 # program = "/opt/homebrew/bin/tmux"
 # args = ["new-session", "-c", "/var/www"]
 [shell]
-{{ if eq .chezmoi.os "windows" -}}
-  {{- if gt (len (output "where" "pwsh")) 0 -}}
-program = "pwsh"
-  {{- else -}}
-program = "powershell"
-  {{- end -}}
-{{- else if eq .chezmoi.os "darwin" -}}
+{{- if eq .chezmoi.os "windows" }}
+program = {{ if gt (len (output "where" "pwsh")) 0 }}"pwsh"{{ else }}"powershell"{{ end }}
+{{- else }}
 program = "/bin/zsh"
-{{- else -}}
-program = "/bin/zsh"
+args = ["--login"]
 {{- end }}
 
 # Colors
@@ -433,15 +444,6 @@ keys = [
 # # Linux overwrite
 # linux.shell.program = "tmux"
 # linux.shell.args = ["new-session", "-c", "/var/www"]
-{{- if eq .chezmoi.os "windows" -}}
-[platform]
-## Windows overrides
-  {{- if gt (len (output "where" "pwsh")) 0 -}}
-program = "pwsh"
-  {{- else -}}
-program = "powershell"
-  {{- end -}}
-{{- end -}}
 
 # Log level
 #
