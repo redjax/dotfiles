@@ -233,6 +233,16 @@ export XDG_CONFIG_HOME="{{ .chezmoi.homeDir }}/.config"
 ## Default file creation permissions
 umask 022
 
+## For Rio terminal, test if Rio's terminfo is available,
+#  revert to xterm-256color if not.
+#  Terminfo can be installed with:
+#    curl -o rio.terminfo https://raw.githubusercontent.com/raphamorim/rio/main/misc/rio.terminfo && \
+#      tic -xe xterm-rio,rio rio.terminfo && \
+#      rm rio.terminfo
+if ! infocmp rio >/dev/null 2>&1; then
+  export TERM=xterm-256color
+fi
+
 ## Set TERM value. Ensure terminal supports colors first
 if [[ "$TERM" == xterm* || "$TERM" == *-256color || "$TERM" == "xterm-kitty" ]]; then
     COLOR_PROMPT=1
