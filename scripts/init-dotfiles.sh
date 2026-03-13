@@ -72,11 +72,11 @@ case $yn in
 [Yy])
     echo "Running chezmoi apply"
     if [[ "$VERBOSE" == true ]]; then
-        if ! chezmoi apply --verbose 2>&1; then
+        if ! chezmoi apply --verbose >&2; then
             echo "[ERROR] Failed applying dotfiles with chezmoi" >&2
         fi
     else
-        if ! chezmoi apply 2>&1; then
+        if ! chezmoi apply >&2; then
             echo "[ERROR] Failed applying dotfiles with chezmoi" >&2
         fi
     fi
