@@ -84,8 +84,15 @@ jobs:
 
       - name: Download chezmoi binary
         run: |
-          CHEZMOI_VERSION=$(curl -s https://api.github.com/repos/twpayne/chezmoi/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+          CHEZMOI_VERSION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/twpayne/chezmoi/releases/latest | \
+            jq -r '.tag_name')
           echo "Latest chezmoi version: $CHEZMOI_VERSION"
+          
+          if [ -z "$CHEZMOI_VERSION" ] || [ "$CHEZMOI_VERSION" = "null" ]; then
+            echo "Error: Failed to fetch chezmoi version"
+            exit 1
+          fi
           
           CHEZMOI_OS="${{ matrix.os }}"
           CHEZMOI_ARCH="${{ matrix.arch }}"
