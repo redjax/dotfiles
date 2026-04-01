@@ -3,7 +3,7 @@
 ##
 
 ## Disable system keyboard and use a helper script
-set-clipboard off
+set -s set-clipboard off
 
 ## Use helper script for clipboard
 set -s copy-command "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard copy"
@@ -25,6 +25,21 @@ set -g mouse on
 ##
 # Keybinds
 ##
+
+## Prefix key
+#  Default: C-b (CTRL+b)
+#  Uncomment the 'unbind C-b' line below, then the following lines that set
+#  the prefix option and bind the key
+# unbind C-b
+# set-option -g prefix C-a
+# bind-key C-a send-prefix
+
+## Switch between windows
+bind C-p previous-window
+bind C-n next-window
+
+## Reload tmux config with C-R
+bind R source-file '{{ .chezmoi.homeDir }}/.tmux.conf'
 
 ## Vi copy-mode bindings that yank to system clipboard
 bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel \
