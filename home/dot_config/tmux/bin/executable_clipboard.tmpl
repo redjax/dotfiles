@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+
+case "$1" in
+  copy)
+    if command -v wl-copy >/dev/null 2>&1; then
+      exec wl-copy --type=string
+    elif command -v xclip >/dev/null 2>&1; then
+      exec xclip -f -selection clipboard
+    elif command -v xsel >/dev/null 2>&1; then
+      exec xsel --clipboard --input
+    elif [ -n "$WSL_DISTRO_NAME" ]; then
+      exec base64 | clip.exe
+    else
+      if [ -n "$TMUX" ] && [ "$(tmux show-option -gqv set-clipboard)" = "on" ]; then
+        cat
+      else
+        cat >/dev/null
+      fi
+    fi
+    ;;
+  paste)
+    if command -v wl-paste >/dev/null 2>&1; then
+      exec wl-paste -n
+    elif command -v xclip >/dev/null 2>&1; then
+      exec xclip -o -selection clipboard
+    elif command -v xsel >/dev/null 2>&1; then
+      exec xsel --clipboard --output
+    else
+      echo "[WARNING] No clipboard tool found"
+      exit 1
+    fi
+    ;;
+  *)
+    echo "usage: clipboard (copy|paste)"
+    exit 1
+    ;;
+esac
+

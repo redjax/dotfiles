@@ -1,0 +1,28 @@
+##
+# Clipboard
+##
+
+## Disable system keyboard and use a helper script
+set-clipboard off
+
+## Use helper script for clipboard
+set -s copy-command "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard copy"
+
+## Use clipboard helper for paste from system
+bind-key p run-shell -b "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard paste | tmux load-buffer - ; tmux paste-buffer"
+
+##
+# Terminal
+##
+
+##
+# Mouse
+##
+
+## Enable mouse for selection
+set -g mouse on
+
+##
+# Keybinds
+##
+
