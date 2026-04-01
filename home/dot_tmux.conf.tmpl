@@ -26,3 +26,17 @@ set -g mouse on
 # Keybinds
 ##
 
+## Vi copy-mode bindings that yank to system clipboard
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel \
+  "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard copy"
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel \
+  "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard copy"
+
+## Vi‑style paste from tmux buffer
+bind-key -T copy-mode-vi p paste-buffer
+
+## Mouse drag in copy mode also yanks to system clipboard
+bind-key -T copy-mode-vi MouseDragEnd1Pane \
+  send-keys -X copy-selection-and-cancel \; \
+  run-shell -b "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard copy"
+
