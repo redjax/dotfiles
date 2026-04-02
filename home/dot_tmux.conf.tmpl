@@ -96,3 +96,13 @@ bind-key -T copy-mode-vi MouseDragEnd1Pane \
 ##
 
 if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf ]' 'source-file {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf'
+
+## -----------------------------------------------------------------------------------------------------------------------------------
+
+##
+# Plugins
+#
+# Keep this at the very bottom
+##
+
+if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/plugin_manager.conf ]' 'source-file {{ .chezmoi.homeDir }}/.config/tmux/plugin_manager.conf'
