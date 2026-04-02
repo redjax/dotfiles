@@ -91,3 +91,8 @@ bind-key -T copy-mode-vi MouseDragEnd1Pane \
   send-keys -X copy-selection-and-cancel \; \
   run-shell -b "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard copy"
 
+##
+# Status bar
+##
+
+if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf ]' 'source-file {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf'
