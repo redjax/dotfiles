@@ -15,12 +15,48 @@ bind-key p run-shell -b "{{ .chezmoi.homeDir }}/.config/tmux/bin/clipboard paste
 # Terminal
 ##
 
+## Set how longtmux waits for the first keypress of a repeating key, i.e. holding `j`, before it stops repeating
+set -g repeat-time 1000
+## Make tmux wait 1ms before treating ESC as a command prefix
+set -s escape-time 1
+
+## Set scrollback in shell history
+set -g history-limit 50000
+
+## Fix pane resizing when window size is changed
+setw -g aggressive-resize on
+
+## Exit tmux when there are no more sessions
+set -s exit-empty on
+
+## Enable terminal colors over SSH
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",xterm-256color*:Tc,screen-256color*:Tc,tmux-256color*:Tc"
+
+## Enable xterm-keys to accurately handle HOME and END keypresses
+set -g xterm-keys on
+
+## Read user's shell
+{{ $userVar := (env "USER") -}}
+{{- $userShell := (index (splitList ":" (output "getent" "passwd" $userVar)) 6 | trim) -}}
+{{- if eq $userShell "/usr/bin/zsh" -}}
+set -g default-shell /usr/bin/zsh
+{{- else -}}
+set -g default-shell /bin/bash
+{{- end }}
+
+## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
+# set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
+
 ##
 # Mouse
 ##
 
 ## Enable mouse for selection
 set -g mouse on
+
+## Enable mouse scrolling
+bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e; send-keys =M'"
 
 ##
 # Keybinds
