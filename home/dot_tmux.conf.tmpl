@@ -97,12 +97,31 @@ bind-key -T copy-mode-vi MouseDragEnd1Pane \
 
 if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf ]' 'source-file {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf'
 
-#  LEAVE EVERYTHING BELOW THIS LINE AT THE BOTTOM OF THE FILE
-## -----------------------------------------------------------------------------------------------------------------------------------
-
 ###########
 # Plugins #
 ###########
 
-## Load plugin list first if present
-source-file {{ .chezmoi.homeDir }}/.config/tmux/plugins.conf
+## Tmux Resurrect/Continuum
+#  https://github.com/tmux-plugins/tmux-resurrect
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+#  https://github.com/tmux-plugins/tmux-continuum
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+## Tmux menus
+#  https://github.com/jaclu/tmux-menus
+set -g @plugin 'jaclu/tmux-menus'
+# set -g @menus_trigger 'x'
+set -g @menus_location_x 'C'
+set -g @menus_location_y 'C'
+
+#  LEAVE EVERYTHING BELOW THIS LINE AT THE BOTTOM OF THE FILE
+## -----------------------------------------------------------------------------------------------------------------------------------
+
+## Set path to tmux plugins
+setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
+
+## Automatically install tpm if it's not present
+if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
+  "run-shell 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm'"
+
+run "{{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm"
