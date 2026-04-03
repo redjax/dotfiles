@@ -1,38 +1,84 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-case "$1" in
-  copy)
-    if command -v wl-copy >/dev/null 2>&1; then
-      exec wl-copy --type=string
-    elif command -v xclip >/dev/null 2>&1; then
-      exec xclip -f -selection clipboard
-    elif command -v xsel >/dev/null 2>&1; then
-      exec xsel --clipboard --input
-    elif [ -n "$WSL_DISTRO_NAME" ]; then
-      exec base64 | clip.exe
-    else
-      if [ -n "$TMUX" ] && [ "$(tmux show-option -gqv set-clipboard)" = "on" ]; then
-        cat
-      else
-        cat >/dev/null
-      fi
+##
+# Clipboard wrapper for tmux.
+#
+# Usage: clipboard copy|paste
+# Automatically chooses Wayland, X11, or SSH (OSC 52)
+##
+
+mode="$1"
+
+## Copy to local clipboard over SSH using OSC 52
+copy_to_osc52() {
+    data=$(cat)
+    
+    ## Encode to base64 and send OSC 52 escape sequence
+    printf "%s" "$data" | base64 | tr -d '\n' \
+        | awk '{printf "\033]52;c;%s\a", $0}'
+}
+
+## Detect if running over SSH
+is_ssh() {
+    [ -n "$SSH_CONNECTION" ]
+}
+
+if [ "$mode" = "copy" ]; then
+
+    ## Use OSC 52 if on SSH without a GUI display
+    if is_ssh && [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+        copy_to_osc52
+        exit 0
     fi
-    ;;
-  paste)
-    if command -v wl-paste >/dev/null 2>&1; then
-      exec wl-paste -n
-    elif command -v xclip >/dev/null 2>&1; then
-      exec xclip -o -selection clipboard
-    elif command -v xsel >/dev/null 2>&1; then
-      exec xsel --clipboard --output
+
+    ## Wayland GUI
+    if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-copy &>/dev/null; then
+        cat | wl-copy
+
+    ## X11 GUI
+    elif [ -n "$DISPLAY" ]; then
+        if command -v xclip &>/dev/null; then
+            cat | xclip -selection clipboard
+        elif command -v xsel &>/dev/null; then
+            cat | xsel --clipboard --input
+        else
+            echo "[WARNING] No X11 clipboard tool found" >&2
+            exit 1
+        fi
+
     else
-      echo "[WARNING] No clipboard tool found"
-      exit 1
+        echo "[WARNING] No supported display detected (X11 or Wayland)" >&2
+        exit 1
     fi
-    ;;
-  *)
-    echo "usage: clipboard (copy|paste)"
+
+elif [ "$mode" = "paste" ]; then
+
+    ## Wayland GUI
+    if [ -n "$WAYLAND_DISPLAY" ] && command -v wl-paste &>/dev/null; then
+        wl-paste
+
+    ## X11 GUI
+    elif [ -n "$DISPLAY" ]; then
+        if command -v xclip &>/dev/null; then
+            xclip -selection clipboard -o
+        elif command -v xsel &>/dev/null; then
+            xsel --clipboard --output
+        else
+            echo "[WARNING] No X11 clipboard tool found" >&2
+            exit 1
+        fi
+
+    ## Pasting over SSH doesn't work, OSC 52 is copy only
+    elif is_ssh; then
+        echo "[WARNING] tmux cannot paste over SSH; use your OS clipboard with CTRL+SHIFT+V or middle mouse-click" >&2
+        exit 1
+
+    else
+        echo "[WARNING] No supported display detected (X11 or Wayland)" >&2
+        exit 1
+    fi
+
+else
+    echo "[USAGE] $0 copy|paste" >&2
     exit 1
-    ;;
-esac
-
+fi
