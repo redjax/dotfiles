@@ -161,6 +161,12 @@ set -g @plugin '2kabhishek/tmux2k'
 set -g @tmux2k-theme 'monokai'
 ## true=show icons only, no backgrounds
 set -g @tmux2k-icons-only true
+## set refresh rate
+set -g @tmux2k-refresh-rate 5
+
+## Set bar icons
+set -g @tmux2k-left-plugins "session git cwd"
+set -g @tmux2k-right-plugins "time cpu ram network uptime"
 
 ## Powerline
 #  https://github.com/erikw/tmux-powerline
