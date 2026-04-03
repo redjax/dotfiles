@@ -120,8 +120,10 @@ set -g @menus_location_y 'C'
 ## Set path to tmux plugins
 setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
 
-## Automatically install tpm if it's not present
-if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
-  "run-shell 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm'"
+## Automatically install tpm if it's not present.
+#  You can also install tpm manually with:
+#    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
+#   "run-shell 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm'"
 
 run "{{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm"
