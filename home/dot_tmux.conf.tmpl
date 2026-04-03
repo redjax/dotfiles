@@ -115,6 +115,27 @@ set -g @plugin 'jaclu/tmux-menus'
 set -g @menus_location_x 'C'
 set -g @menus_location_y 'C'
 
+## Smooth scrolling
+#  https://github.com/azorng/tmux-smooth-scroll
+set -g @plugin 'azorng/tmux-smooth-scroll'
+
+## Speed: 0-1000 | lower = faster
+set -g @smooth-scroll-speed "100"
+
+## Easing mode: linear|sine|quad
+set -g @smooth-scroll-easing "sine"
+
+## Scroll line distance
+set -g @smooth-scroll-normal "3"
+set -g @smooth-scroll-halfpage ""  # Default: pane_height / 2
+set -g @smooth-scroll-fullpage ""  # Default: pane_height
+
+## Enable on mouse wheel scroll
+set -g @smooth-scroll-mouse "true"
+
+## Auto-exit copy mode when scrolling past the bottom
+set -g @smooth-scroll-exit-copy-mode-at-bottom "false"
+
 ####################
 # Plugins - Themes #
 ####################
