@@ -10,3 +10,16 @@ set -g @plugin 'jaclu/tmux-menus'
 # set -g @menus_trigger 'x'
 set -g @menus_location_x 'C'
 set -g @menus_location_y 'C'
+
+#  LEAVE EVERYTHING BELOW THIS LINE AT THE BOTTOM OF THE FILE
+## ---------------------------------------------------------------------------------------------------------------------
+
+## Set path to tmux plugins
+setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
+
+## Automatically install tpm if it's not present
+if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
+  "run-shell 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm'"
+
+## Initialize tpm
+run '{{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm'

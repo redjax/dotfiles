@@ -97,24 +97,12 @@ bind-key -T copy-mode-vi MouseDragEnd1Pane \
 
 if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf ]' 'source-file {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf'
 
+#  LEAVE EVERYTHING BELOW THIS LINE AT THE BOTTOM OF THE FILE
 ## -----------------------------------------------------------------------------------------------------------------------------------
 
-##
-# Plugins
-#
-# Keep this at the very bottom
-##
+###########
+# Plugins #
+###########
 
-## Set path to tmux plugins
-setenv -g TMUX_PLUGIN_MANAGER_PATH "$HOME/.tmux/plugins/"
-
-## Source plugins
-if "test -f {{ .chezmoi.homeDir }}/.config/tmux/plugins.conf" \
-  "source-file {{ .chezmoi.homeDir }}/.config/tmux/plugins.conf"
-
-## Install tpm if it's not already present
-if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
-       "run 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm && {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/bin/install_plugins'"
-
-## Initialize tpm & plugins
-run -b '{{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm'
+## Load plugin list first if present
+source-file {{ .chezmoi.homeDir }}/.config/tmux/plugins.conf
