@@ -1,19 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
 PARENT_DIR="$(dirname "$SCRIPT_PATH")"
 
 ## Source functions from other scripts
-. "${PARENT_DIR}/install_tpm.sh"
-. "${PARENT_DIR}/install_xclip.sh"
-. "${PARENT_DIR}/install_fzf.sh"
-. "${PARENT_DIR}/install_lazygit.sh"
-
+. "${PARENT_DIR}/install-tpm.sh"
+. "${PARENT_DIR}/install-xclip.sh"
+. "${PARENT_DIR}/install-fzf.sh"
+. "${PARENT_DIR}/install-lazygit.sh"
+. "${PARENT_DIR}/install-wl-clipboard.sh"
 . "${PARENT_DIR}/get_distro.sh"
+
 LINUX_DISTRO=$(get_distro_id)
 
 echo "--[ Installing tmux dependencies"
 install_xclip
+install_wlclipboard
 install_fzf
 install_lazygit
 

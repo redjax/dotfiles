@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## Ripped off from https://github.com/ryanoasis/nerd-fonts?tab=readme-ov-file#option-7-install-script
 

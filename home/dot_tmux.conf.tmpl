@@ -1,0 +1,187 @@
+#############
+# Clipboard #
+#############
+
+## Enable clipboard integration
+set -s set-clipboard on
+
+## Vi copy-mode bindings that yank to system clipboard
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel \
+  "~/.config/tmux/bin/clipboard copy"
+
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel \
+  "~/.config/tmux/bin/clipboard copy"
+
+############
+# Terminal #
+############
+
+## Set how longtmux waits for the first keypress of a repeating key, i.e. holding `j`, before it stops repeating
+set -g repeat-time 1000
+## Make tmux wait 1ms before treating ESC as a command prefix
+set -s escape-time 1
+
+## Set scrollback in shell history
+set -g history-limit 50000
+
+## Fix pane resizing when window size is changed
+setw -g aggressive-resize on
+
+## Exit tmux when there are no more sessions
+set -s exit-empty on
+
+## Enable terminal colors over SSH
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",xterm-256color*:Tc,screen-256color*:Tc,tmux-256color*:Tc"
+
+## Enable xterm-keys to accurately handle HOME and END keypresses
+set -g xterm-keys on
+
+## Read user's shell
+{{ $userVar := (env "USER") -}}
+{{- $userShell := (index (splitList ":" (output "getent" "passwd" $userVar)) 6 | trim) -}}
+{{- if eq $userShell "/usr/bin/zsh" -}}
+set -g default-shell /usr/bin/zsh
+{{- else -}}
+set -g default-shell /bin/bash
+{{- end }}
+
+## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
+# set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
+
+#########
+# Mouse #
+#########
+
+## Enable mouse for selection
+set -g mouse on
+
+## Enable mouse scrolling
+bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e; send-keys =M'"
+
+############
+# Keybinds #
+############
+
+## Prefix key
+#  Default: C-b (CTRL+b)
+#  Uncomment the 'unbind C-b' line below, then the following lines that set
+#  the prefix option and bind the key
+# unbind C-b
+# set-option -g prefix C-a
+# bind-key C-a send-prefix
+
+## Switch between windows
+bind C-p previous-window
+bind C-n next-window
+
+## Reload tmux config with C-R
+bind R source-file '{{ .chezmoi.homeDir }}/.tmux.conf'
+
+##############
+# Status bar #
+##############
+
+if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf ]' 'source-file {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf'
+
+###########
+# Plugins #
+###########
+
+## Tmux Resurrect/Continuum
+#  https://github.com/tmux-plugins/tmux-resurrect
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+#  https://github.com/tmux-plugins/tmux-continuum
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+## Mode indicator
+#  https://github.com/MunifTanjim/tmux-mode-indicator
+set -g @plugin 'MunifTanjim/tmux-mode-indicator'
+
+## Suspend
+#  https://github.com/MunifTanjim/tmux-suspend
+set -g @plugin 'MunifTanjim/tmux-suspend'
+## Default: 'F12'
+set -g @suspend_key 'F12'
+
+## Tea
+#  https://github.com/2kabhishek/tmux-tea
+set -g @plugin '2kabhishek/tmux-tea'
+
+## Tmux menus
+#  https://github.com/jaclu/tmux-menus
+set -g @plugin 'jaclu/tmux-menus'
+# set -g @menus_trigger 'x'
+set -g @menus_location_x 'C'
+set -g @menus_location_y 'C'
+
+## Smooth scrolling
+#  https://github.com/azorng/tmux-smooth-scroll
+set -g @plugin 'azorng/tmux-smooth-scroll'
+
+## Speed: 0-1000 | lower = faster
+set -g @smooth-scroll-speed "100"
+
+## Easing mode: linear|sine|quad
+set -g @smooth-scroll-easing "sine"
+
+## Scroll line distance
+set -g @smooth-scroll-normal "3"
+set -g @smooth-scroll-halfpage ""  # Default: pane_height / 2
+set -g @smooth-scroll-fullpage ""  # Default: pane_height
+
+## Enable on mouse wheel scroll
+set -g @smooth-scroll-mouse "true"
+
+## Auto-exit copy mode when scrolling past the bottom
+set -g @smooth-scroll-exit-copy-mode-at-bottom "false"
+
+## Simple git status
+#  https://github.com/kristijanhusak/tmux-simple-git-status
+set -g @plugin 'kristijanhusak/tmux-simple-git-status'
+
+## Tmux filter (search for text in buffer)
+#  https://github.com/MaximilianGaedig/tmux-filter
+# set -g @plugin 'MaximilianGaedig/tmux-filter'
+
+####################
+# Plugins - Themes #
+####################
+
+## Oaisis theme
+# set -g @plugin 'uhs-robert/tmux-oasis'
+## Default: "lagoon_dark"
+#  All styles: https://github.com/uhs-robert/tmux-oasis?tab=readme-ov-file#view-all-theme-styles
+# set -g @oasis_flavor "lagoon_dark"
+
+## tmux2k
+#  https://github.com/2kabhishek/tmux2k
+set -g @plugin '2kabhishek/tmux2k'
+## Themes: https://github.com/2KAbhishek/tmux2k#-available-themes
+set -g @tmux2k-theme 'monokai'
+## true=show icons only, no backgrounds
+set -g @tmux2k-icons-only true
+
+## Powerline
+#  https://github.com/erikw/tmux-powerline
+#
+#  Before using, make sure to generate a config with:
+#    ~/.config/tmux/plugins/tmux-powerline/generate_config.sh
+#    mv ~/.config/tmux-powerline/config.sh.default ~/.config/tmux-powerline/config.sh
+#    $EDITOR ~/.config/tmux-powerline/config.sh
+# set -g @plugin 'erikw/tmux-powerline'
+
+## -----------------------------------------------------------------------------------------------------------------------------------
+#  LEAVE EVERYTHING BELOW THIS LINE AT THE BOTTOM OF THE FILE
+## -----------------------------------------------------------------------------------------------------------------------------------
+
+## Set path to tmux plugins
+setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
+
+## Automatically install tpm if it's not present.
+#  You can also install tpm manually with:
+#    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
+#   "run-shell 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm'"
+
+run "{{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm"

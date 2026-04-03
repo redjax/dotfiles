@@ -1,0 +1,13 @@
+set -g status-left-length 40
+set -g status-right-length 60
+
+set -g status-style fg=colour245,bg=colour234
+set -g window-status-style fg=colour245,bg=colour234
+set -g window-status-format " #I:#W "
+set -g window-status-current-style fg=colour234,bg=colour250,bold
+set -g window-status-current-format " #I:#W "
+
+set -g status-left "#[fg=colour250,bg=colour234] #S (i=#I) "
+set -g status-right "#[fg=colour245,bg=colour234] %y-%m-%d %H:%M #H #{tmux_mode_indicator} "
+## With uptime
+# set -g status-right "#[fg=colour245,bg=colour234] %y-%m-%d %H:%M #H (up: #(uptime | cut -d',' -f1)) #{tmux_mode_indicator} "
