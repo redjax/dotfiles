@@ -73,6 +73,9 @@ set -g default-shell /bin/bash
 ## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
 # set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
 
+## On tmux >3.2, allow apps running in tmux to receive and process certainn terminal sequences directly
+set -g allow-passthrough on
+
 ###########
 # Display #
 ###########
