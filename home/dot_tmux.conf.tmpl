@@ -33,9 +33,9 @@ setw -g aggressive-resize on
 ## Exit tmux when there are no more sessions
 set -s exit-empty on
 
-## Enable terminal colors over SSH
+## Advertise tmux-256color and enable true color in xterm-256color terminals
 set -g default-terminal "tmux-256color"
-set -ga terminal-overrides ",xterm-256color*:Tc,screen-256color*:Tc,tmux-256color*:Tc"
+set -ga terminal-overrides ",xterm-256color:Tc"
 
 ## Enable xterm-keys to accurately handle HOME and END keypresses
 set -g xterm-keys on
