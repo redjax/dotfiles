@@ -107,9 +107,9 @@ bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft=
 #  Default: C-b (CTRL+b)
 #  Uncomment the 'unbind C-b' line below, then the following lines that set
 #  the prefix option and bind the key
-# unbind C-b
-# set-option -g prefix C-a
-# bind-key C-a send-prefix
+unbind C-b
+set-option -g prefix C-a
+bind-key C-a send-prefix
 
 ## Switch between windows
 bind C-p previous-window
