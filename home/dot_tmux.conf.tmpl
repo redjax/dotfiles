@@ -61,6 +61,11 @@ set -ga terminal-overrides ",xterm-256color:Tc"
 ## Enable xterm-keys to accurately handle HOME and END keypresses
 set -g xterm-keys on
 
+## Fix Windows Terminal/WSL sending wrong HOME/END codes (Find/Select instead of Home/End)
+#  Remap Home/End keys to send correct escape sequences that Neovim expects
+bind-key -n Home send-keys Escape "[H"
+bind-key -n End send-keys Escape "[F"
+
 ## Read user's shell
 {{ $userVar := (env "USER") -}}
 {{- $userShell := (index (splitList ":" (output "getent" "passwd" $userVar)) 6 | trim) -}}
