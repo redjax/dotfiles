@@ -52,6 +52,32 @@ set -g default-shell /bin/bash
 ## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
 # set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
 
+###########
+# Display #
+###########
+
+## Rename window to reflect current program
+setw -g automatic-rename on
+
+## Renumber windows when a window is closed
+set -g renumber-windows on
+
+## Set terminal title
+set -g set-titles on
+
+## Slightly longer pane indicators display time
+set -g display-panes-time 800 
+## Slightly longer status messages display time
+set -g display-time 1000
+
+## Redraw status line evert N seconds
+set -g status-interval 10
+
+## Watch background windows for output/activity & notify
+set -g monitor-activity on
+## Disable on-screen flash/message tmux shows on notify
+set -g visual-activity off
+
 #########
 # Mouse #
 #########
