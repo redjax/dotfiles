@@ -78,6 +78,17 @@ set -g monitor-activity on
 ## Disable on-screen flash/message tmux shows on notify
 set -g visual-activity off
 
+###########
+# Buffers #
+###########
+
+## List paste buffers
+bind b list-buffers
+## Paste from top paste buffer
+bind p paste-buffer -p
+## Choose which buffer to paste from
+bind P choose-buffer
+
 #########
 # Mouse #
 #########
