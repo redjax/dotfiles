@@ -21,6 +21,9 @@ set -g repeat-time 600
 ## Make tmux wait 1ms before treating ESC as a command prefix
 set -s escape-time 1
 
+## Pass focus-in/focus-out events to application, i.e. when Neovim is running in Tmux
+set -s focus-events on
+
 ## Set scrollback in shell history
 set -g history-limit 50000
 
