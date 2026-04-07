@@ -38,9 +38,12 @@ if -b '[ -c /dev/clipboard ]' 'bind y run -b "\"\$TMUX_PROGRAM\" \${TMUX_SOCKET:
 ############
 
 ## Set how longtmux waits for the first keypress of a repeating key, i.e. holding `j`, before it stops repeating
-set -g repeat-time 1000
+set -g repeat-time 600
 ## Make tmux wait 1ms before treating ESC as a command prefix
 set -s escape-time 1
+
+## Pass focus-in/focus-out events to application, i.e. when Neovim is running in Tmux
+set -s focus-events on
 
 ## Set scrollback in shell history
 set -g history-limit 50000
@@ -51,9 +54,9 @@ setw -g aggressive-resize on
 ## Exit tmux when there are no more sessions
 set -s exit-empty on
 
-## Enable terminal colors over SSH
+## Advertise tmux-256color and enable true color in xterm-256color terminals
 set -g default-terminal "tmux-256color"
-set -ga terminal-overrides ",xterm-256color*:Tc,screen-256color*:Tc,tmux-256color*:Tc"
+set -ga terminal-overrides ",xterm-256color:Tc"
 
 ## Enable xterm-keys to accurately handle HOME and END keypresses
 set -g xterm-keys on
@@ -69,6 +72,46 @@ set -g default-shell /bin/bash
 
 ## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
 # set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
+
+## On tmux >3.2, allow apps running in tmux to receive and process certainn terminal sequences directly
+set -g allow-passthrough on
+
+###########
+# Display #
+###########
+
+## Rename window to reflect current program
+setw -g automatic-rename on
+
+## Renumber windows when a window is closed
+set -g renumber-windows on
+
+## Set terminal title
+set -g set-titles on
+
+## Slightly longer pane indicators display time
+set -g display-panes-time 800 
+## Slightly longer status messages display time
+set -g display-time 1000
+
+## Redraw status line evert N seconds
+set -g status-interval 10
+
+## Watch background windows for output/activity & notify
+set -g monitor-activity on
+## Disable on-screen flash/message tmux shows on notify
+set -g visual-activity off
+
+###########
+# Buffers #
+###########
+
+## List paste buffers
+bind b list-buffers
+## Paste from top paste buffer
+bind p paste-buffer -p
+## Choose which buffer to paste from
+bind P choose-buffer
 
 #########
 # Mouse #
@@ -88,9 +131,9 @@ bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft=
 #  Default: C-b (CTRL+b)
 #  Uncomment the 'unbind C-b' line below, then the following lines that set
 #  the prefix option and bind the key
-# unbind C-b
-# set-option -g prefix C-a
-# bind-key C-a send-prefix
+unbind C-b
+set-option -g prefix C-a
+bind-key C-a send-prefix
 
 ## Switch between windows
 bind C-p previous-window
