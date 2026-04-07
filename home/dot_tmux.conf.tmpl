@@ -17,7 +17,7 @@ bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel \
 ############
 
 ## Set how longtmux waits for the first keypress of a repeating key, i.e. holding `j`, before it stops repeating
-set -g repeat-time 1000
+set -g repeat-time 600
 ## Make tmux wait 1ms before treating ESC as a command prefix
 set -s escape-time 1
 
