@@ -187,11 +187,16 @@ if-shell '[ -f {{ .chezmoi.homeDir }}/.config/tmux/statusbar.conf ]' 'source-fil
 # Plugins #
 ###########
 
-## Tmux Resurrect/Continuum
+## Tmux Resurrect
 #  https://github.com/tmux-plugins/tmux-resurrect
 set -g @plugin 'tmux-plugins/tmux-resurrect'
-#  https://github.com/tmux-plugins/tmux-continuum
+
+## Tmux Continuum https://github.com/tmux-plugins/tmux-continuum
 set -g @plugin 'tmux-plugins/tmux-continuum'
+#  Restore last session when tmux is started
+set -g @continuum-boot 'on'
+#  Terminal window to fullscreen
+set -g @continuum-boot-options 'fullscreen'
 
 ## Mode indicator
 #  https://github.com/MunifTanjim/tmux-mode-indicator
