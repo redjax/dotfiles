@@ -10,6 +10,10 @@
   </a>
 </p> -->
 
+<div align="center">
+  <img alt="dotfiles logo" src=".assets/img/github-header-banner.png" height="300">
+</div>
+
 <!-- Git badges -->
 <p align="center">
   <a href="https://github.com/redjax/dotfiles/tree/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb">
