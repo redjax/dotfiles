@@ -153,6 +153,10 @@ bind n next-window
 ## Reload tmux config with C-R
 bind R source-file '{{ .chezmoi.homeDir }}/.tmux.conf'
 
+## Change split keybinds to | for vertical and _ for horizontal
+# bind-key | split-window -h -c "#{pane_current_path}"
+# bind-key _ split-window -v -c "#{pane_current_path}"
+
 ##############
 # Status bar #
 ##############
