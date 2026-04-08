@@ -2,9 +2,9 @@ name: Trufflehog
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main, dev]
-    types: [opened, synchronize, reopened]
+#   pull_request:
+#     branches: [main, dev]
+#     types: [opened, synchronize, reopened]
 
 jobs:
   trufflehog-source:
