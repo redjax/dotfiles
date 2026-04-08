@@ -139,6 +139,7 @@ bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft=
 unbind C-b
 set-option -g prefix C-a
 bind-key C-a send-prefix
+bind ? list-keys
 
 ## Switch between windows
 bind C-p previous-window
