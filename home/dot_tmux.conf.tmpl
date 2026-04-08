@@ -128,11 +128,10 @@ set -g mouse on
 ## Enable mouse scrolling
 bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e; send-keys =M'"
 
-############
-# Keybinds #
-############
+############## 
+# Prefix key #
+##############
 
-## Prefix key
 #  Default: C-b (CTRL+b)
 #  Uncomment the 'unbind C-b' line below, then the following lines that set
 #  the prefix option and bind the key
@@ -140,6 +139,10 @@ unbind C-b
 set-option -g prefix C-a
 bind-key C-a send-prefix
 bind ? list-keys
+
+############
+# Keybinds #
+############
 
 ## Switch between windows
 bind C-p previous-window
