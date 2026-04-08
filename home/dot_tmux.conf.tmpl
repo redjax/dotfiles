@@ -157,6 +157,12 @@ bind R source-file '{{ .chezmoi.homeDir }}/.tmux.conf'
 # bind-key | split-window -h -c "#{pane_current_path}"
 # bind-key _ split-window -v -c "#{pane_current_path}"
 
+## Vim-style pane movement
+bind-key -r h select-pane -L
+bind-key -r j select-pane -D
+bind-key -r l select-pane -R
+bind-key -r k select-pane -U
+
 ##############
 # Status bar #
 ##############
