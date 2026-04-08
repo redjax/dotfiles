@@ -29,15 +29,11 @@
   <!-- ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/redjax/dotfiles/tests.yml) -->
 </p>
 
-My dotfiles, currently managed by [chezmoi](https://www.chezmoi.io), which simplifies managing Linux/Mac dotfiles across multiple machines.
-
-> [!TIP]
-> This is a continuation of a dotfiles repository I originally hosted on Gitlab, [starting in 2016](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb). The original code is retained in [an archive branch](https://github.com/redjax/dotfiles/tree/archive/2025-06-24).
-
-Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`. Chezmoi uses conventions like `dot_config`, which becomes `.config/`, and `executable_some-script-name.sh` to create a script named `some-script-name.sh` with `chmod +x` permissions.
+---
 
 ## Table of Contents <!-- omit in toc -->
 
+- [Overview](#overview)
 - [Quick Start](#quick-start)
   - [init-dotfiles.sh Quickstart script](#init-dotfilessh-quickstart-script)
   - [Quick Start Instructions](#quick-start-instructions)
@@ -45,6 +41,17 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
   - [Synchronizing Changes](#synchronizing-changes)
   - [Cheat-Sheet](#cheat-sheet)
 - [Links](#links)
+
+## Overview
+
+My dotfiles, managed by [chezmoi](https://www.chezmoi.io/).
+
+At some point in 2016, I started putting scripts and configurations in a git repository ([first commit (2016)](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb)). Since then, this repository has been completely overhauled multiple times. When I start over, I create an archive of the `main` branch, delete everything, and start over.
+
+| Archive Branch                                                                     | Date Created | Note                                                |
+| ---------------------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
+| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020. |
+| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-06-24) | 06/24/2025   | Archive of my original dotfiles repository.         |
 
 ## Quick Start
 
@@ -54,6 +61,8 @@ Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`.
 > If you do make manual changes (either out of habit, or installing a program/running an Ansible script that edits a file managed by `chezmoi`), you can run `chezmoi merge $FILE` and manually merge those changes into the `chezmoi` template/file.
 >
 > Any time you make changes to your `chezmoi` repository, you should also [synchronize the changes](#synchronizing-changes).
+>
+> Files in the [`home/` directory](./home/) will be rendered with `chezmoi apply`. Chezmoi uses conventions like `dot_config`, which becomes `.config/`, and `executable_some-script-name.sh` to create a script named `some-script-name.sh` with `chmod +x` permissions.
 
 ### init-dotfiles.sh Quickstart script
 
@@ -63,7 +72,7 @@ If you are comfortable cURLing this script and executing it, you can run:
 bash <(curl -fsLS https://raw.githubusercontent.com/redjax/dotfiles/main/scripts/init-dotfiles.sh)
 ```
 
-Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x init-dotfiles.sh && ./init-dotfiles.sh`. 
+Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x init-dotfiles.sh && ./init-dotfiles.sh`.
 
 ```shell
 #!/usr/bin/env bash
