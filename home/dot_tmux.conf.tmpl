@@ -305,4 +305,6 @@ setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
 # if "test ! -d {{ .chezmoi.homeDir }}/.tmux/plugins/tpm" \
 #   "run-shell 'git clone https://github.com/tmux-plugins/tpm {{ .chezmoi.homeDir }}/.tmux/plugins/tpm'"
 
-run "{{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm"
+## Only load tpm if it's installed
+if-shell 'test -f {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm' \
+  'run {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm'
