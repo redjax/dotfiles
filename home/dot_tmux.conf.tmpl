@@ -138,15 +138,17 @@ bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft=
 unbind C-b
 set-option -g prefix C-a
 bind-key C-a send-prefix
-bind ? list-keys
 
 ############
 # Keybinds #
 ############
 
+## Show tmux keybinds cheatsheet
+bind ? list-keys
+
 ## Switch between windows
-bind C-p previous-window
-bind C-n next-window
+bind p previous-window
+bind n next-window
 
 ## Reload tmux config with C-R
 bind R source-file '{{ .chezmoi.homeDir }}/.tmux.conf'
