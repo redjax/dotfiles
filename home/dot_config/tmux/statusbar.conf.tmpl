@@ -22,15 +22,12 @@ set -g window-status-current-format "#[fg=white,bg=blue] Window: #W #[default]"
 set -g status-left-length 40
 set -g status-right-length 80
 
-## Left section
 set -g status-style fg=colour245,bg=colour234
 set -g window-status-style fg=colour245,bg=colour234
 set -g window-status-format " #I:#W "
 
-## Center section
 set -g window-status-current-style fg=colour234,bg=colour250,bold
 set -g window-status-current-format " #I:#W "
 
-## Right section
-set -g status-left "#[fg=colour250,bg=colour234] [s:#S] [p:#P] "
+set -g status-left "#[fg=colour250,bg=colour234] #S | [p:#P] "
 set -g status-right "#[fg=colour245,bg=colour234] #{user}@#H#{?session_many_attached, [+],} | %y-%m-%d %H:%M #{tmux_mode_indicator} #{?client_prefix,#[reverse] [*] #[noreverse],}"
