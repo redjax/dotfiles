@@ -78,8 +78,10 @@ set -g default-shell /bin/bash
 ## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
 # set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
 
-## On tmux >3.2, allow apps running in tmux to receive and process certainn terminal sequences directly
-set -g allow-passthrough on
+## On tmux >3.2, allow apps running in tmux to receive and process certain
+#  terminal sequences directly
+if-shell 'tmux -V | grep -Eq "tmux 3\.[3-9]|tmux 4\."' \
+  'set -g allow-passthrough on'
 
 ## Open new windows in the current path
 bind c new-window -c "#{pane_current_path}"
@@ -90,9 +92,6 @@ bind c new-window -c "#{pane_current_path}"
 
 ## Rename window to reflect current program
 setw -g automatic-rename on
-
-## Renumber windows when a window is closed
-set -g renumber-windows on
 
 ## Set terminal title
 set -g set-titles on
