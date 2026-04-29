@@ -578,3 +578,4 @@ desc = "Chmod on selected files"
 on = "<C-d>"
 run = "plugin diff"
 desc = "Diff the selected with the hovered file"
+
