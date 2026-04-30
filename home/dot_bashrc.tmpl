@@ -121,7 +121,13 @@ fi
 ## Opening neovim in tmux when connected via SSH crashes the tmux server,
 #  unless the TMUX env var is set to something (anything).
 #  https://github.com/tmux/tmux/issues/3983#issuecomment-2224545592
-export TMUX=1
+# if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]]; then
+#   export TMUX=1
+# fi
+
+if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ] && [[ $TERM == *sixel* || $TERM == termix* ]]; then
+  export TMUX=1
+fi
 
 ## Source ~/.local/bin/env if it exists
 [ ! -f "{{ .chezmoi.homeDir }}/.local/bin/env" ] || . "{{ .chezmoi.homeDir }}/.local/bin/env"
