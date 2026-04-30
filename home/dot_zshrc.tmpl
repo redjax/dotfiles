@@ -280,6 +280,11 @@ if [[ -d /usr/local/man ]]; then
     export MANPATH="/usr/local/man:$MANPATH"
 fi
 
+## Opening neovim in tmux when connected via SSH crashes the tmux server,
+#  unless the TMUX env var is set to something (anything).
+#  https://github.com/tmux/tmux/issues/3983#issuecomment-2224545592
+export TMUX=1
+
 ##################
 # Prompt Options #
 ##################
@@ -408,3 +413,4 @@ bindkey '^[OC' forward-char             # Right arrow (application mode)
 ## Performance profiling results (must also uncomment zmodload at top)
 #  Uncomment the line below to see profiling results on shell startup
 # zprof
+
