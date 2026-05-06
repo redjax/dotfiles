@@ -46,6 +46,8 @@
 ## Disable terminal bell
 bell-features = no-audio, no-system
 
+scrollback-limit = 10000
+
 ##########
 # Window #
 ##########
@@ -60,3 +62,21 @@ window-padding-y = 0
 ########
 # Font #
 ########
+
+## Set multiple font families for Ghotty to fallback through
+font-family = Iosevka
+font-family = FireCode Nerd Font Monos
+font-family = DejaVu Sans Mono
+font-family = Liberation Mono
+
+font-size = 13
+
+##########
+# Cursor #
+##########
+
+## Options: bar (default), block, underline, block_hollow
+cursor-style = block
+cursor-style-blink = true
+## Disable cursor overrides from shell
+shell-integration-features = no-cursor
