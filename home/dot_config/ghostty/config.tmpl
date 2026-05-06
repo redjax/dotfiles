@@ -53,6 +53,9 @@ auto-update = download
 ## Options: stable (default), tip (pre-release versions)
 auto-update-channel = stable
 
+## Options: context-menu (default), paste, copy, copy-or-paste, ignore
+right-click-action = copy-or-paste
+
 ##########
 # Window #
 ##########
@@ -73,6 +76,20 @@ window-inherit-working-directory = true
 
 ## Options: always, auto (default), never
 window-show-tab-bar = auto
+
+#############
+# Clipboard #
+#############
+
+## Options: ask (default), allow, deny
+clipboard-read = ask
+clipboard-write = ask
+
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
+clipboard-paste-bracketed-safe = true
+
+copy-on-select = false
 
 ########
 # Font #
