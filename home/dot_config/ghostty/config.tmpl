@@ -1,0 +1,129 @@
+# This is the configuration file for Ghostty.
+#
+# Run `ghostty +show-config --default --docs` to view a list of
+# all available config options and their default values.
+#
+# Additionally, each config option is also explained in detail
+# on Ghostty's website, at https://ghostty.org/docs/config.
+#
+# Ghostty can reload the configuration while running by using the menu
+# options or the bound key (default: Command + Shift + comma on macOS and
+# Control + Shift + comma on other platforms). Not all config options can be
+# reloaded while running; some only apply to new windows and others may require
+# a full restart to take effect.
+
+# Config syntax crash course
+# ==========================
+# # The config file consists of simple key-value pairs,
+# # separated by equals signs.
+# font-family = Iosevka
+# window-padding-x = 2
+#
+# # Spacing around the equals sign does not matter.
+# # All of these are identical:
+# key=value
+# key= value
+# key =value
+# key = value
+#
+# # Any line beginning with a # is a comment. It's not possible to put
+# # a comment after a config option, since it would be interpreted as a
+# # part of the value. For example, this will have a value of "#123abc":
+# background = #123abc
+#
+# # Empty values are used to reset config keys to default.
+# key =
+#
+# # Some config options have unique syntaxes for their value,
+# # which is explained in the docs for that config option.
+# # Just for example:
+# resize-overlay-duration = 4s 200ms
+
+#########
+# Theme #
+#########
+
+## Available themes: https://iterm2colorschemes.com
+#  Ghostty `theme` docs: https://ghostty.org/docs/config/reference#theme
+#  Set a separate light/dark theme with: `theme = dark:Dark Theme Name,light:Light Theme Name`
+#
+#  If themes are missing from your install, clone them from https://github.com/mbadolato/iTerm2-Color-Schemes/
+#    into ~/.config/ghostty/themes
+# 
+#  List all themes with previews by running: ghostty +list-themes
+
+theme = dark:Vibrant Ink,light:Terminal Basic
+
+####################
+# General Behavior #
+####################
+
+## Disable terminal bell
+bell-features = no-audio, no-system
+
+scrollback-limit = 10000
+
+## Options: off (default), check, download
+auto-update = download
+## Options: stable (default), tip (pre-release versions)
+auto-update-channel = stable
+
+## Options: context-menu (default), paste, copy, copy-or-paste, ignore
+right-click-action = copy-or-paste
+
+##########
+# Window #
+##########
+
+## Set initial window size (default: 78x26)
+window-width = 112
+window-height = 22
+
+window-padding-x = 8
+window-padding-y = 0
+
+link-url = true
+
+## Enable/disable inheriting pwd in new windows/tabs/splits
+window-inherit-working-directory = true
+# tab-inherit-working-directory = true
+# split-inherit-working-directory
+
+## Options: always, auto (default), never
+window-show-tab-bar = auto
+
+#############
+# Clipboard #
+#############
+
+## Options: ask (default), allow, deny
+clipboard-read = ask
+clipboard-write = ask
+
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
+clipboard-paste-bracketed-safe = true
+
+copy-on-select = false
+
+########
+# Font #
+########
+
+## Set multiple font families for Ghotty to fallback through
+font-family = Iosevka
+font-family = FireCode Nerd Font Monos
+font-family = DejaVu Sans Mono
+font-family = Liberation Mono
+
+font-size = 13
+
+##########
+# Cursor #
+##########
+
+## Options: bar (default), block, underline, block_hollow
+cursor-style = block
+cursor-style-blink = true
+## Disable cursor overrides from shell
+shell-integration-features = no-cursor
