@@ -287,8 +287,8 @@ fi
 #   export TMUX=1
 # fi
 
-if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ] && [[ $TERM == *sixel* || $TERM == termix* ]]; then
-  export TMUX=1
+if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]]; then
+  export TERM="xterm-256color"
 fi
 
 ##################
