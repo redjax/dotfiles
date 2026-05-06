@@ -280,17 +280,6 @@ if [[ -d /usr/local/man ]]; then
     export MANPATH="/usr/local/man:$MANPATH"
 fi
 
-## Opening neovim in tmux when connected via SSH crashes the tmux server,
-#  unless the TMUX env var is set to something (anything).
-#  https://github.com/tmux/tmux/issues/3983#issuecomment-2224545592
-# if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]]; then
-#   export TMUX=1
-# fi
-
-if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]]; then
-  export TERM="xterm-256color"
-fi
-
 ##################
 # Prompt Options #
 ##################
