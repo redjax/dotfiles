@@ -2,9 +2,9 @@ name: Trufflehog
 
 on:
   workflow_dispatch:
-#   pull_request:
-#     branches: [main, dev]
-#     types: [opened, synchronize, reopened]
+    #   pull_request:
+    #     branches: [main, dev]
+    #     types: [opened, synchronize, reopened]
 
 jobs:
   trufflehog-source:
@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Trufflehog needs full history
 
@@ -25,7 +25,7 @@ jobs:
 
       - name: Upload Trufflehog results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trufflehog-source-results
           path: |
@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install chezmoi
         run: |
@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload rendered scan results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trufflehog-rendered-results
           path: /tmp/trufflehog-rendered.json
@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload rendered files on findings
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: chezmoi-rendered-files
           path: /tmp/chezmoi-rendered/
@@ -118,7 +118,7 @@ jobs:
   trufflehog-summary:
     name: Trufflehog Summary
     runs-on: ubuntu-latest
-    needs: [trufflehog-source, trufflehog-rendered]
+    needs: [ trufflehog-source, trufflehog-rendered ]
     if: always()
 
     steps:
