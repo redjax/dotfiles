@@ -322,10 +322,22 @@ fi
 ###########
 # Kubectl #
 ###########
-
-KUBECTL_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_kubectl"
-
 if command -v kubectl &>/dev/null; then
-    source_completion "$KUBECTL_COMPLETION"
+  KUBECTL_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_kubectl"
+  source_completion "$KUBECTL_COMPLETION"
+fi
+
+#######
+# k0s #
+#######
+if command -v k0s &>/dev/null; then
+  K0S_ZSH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_k0s"
+
+  if [[ ! -f "$K0S_ZSH_COMPLETION" ]]; then
+    mkdir -p "$(dirname "$K0S_ZSH_COMPLETION")"
+    k0s completion zsh > "$K0S_ZSH_COMPLETION"
+  fi
+
+  source_completion "$K0S_ZSH_COMPLETION"
 fi
 
