@@ -241,7 +241,7 @@ fi
 if command -v mise &>/dev/null; then
     ## Activate mise (required for mise-installed tools to work)
     eval "$(mise activate zsh)"
-    
+
     ## Setup completions only if usage is available
     ## Completion file is generated in .zshrc before compinit
     if command -v usage &>/dev/null; then
@@ -255,7 +255,7 @@ fi
 ###############################
 if command -v atuin &>/dev/null; then
     source_if_exists "{{ .chezmoi.homeDir }}/.atuin/bin/env"
-    eval "$(atuin init zsh)" 
+    eval "$(atuin init zsh)"
 fi
 
 #########
@@ -276,7 +276,7 @@ fi
 #  Note: Completion file is generated in .zshrc before compinit
 if command -v zellij &>/dev/null; then
     ZELLIJ_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_zellij"
-    
+
     ## Add a custom completion function for session names
     #  This creates a _zellij_sessions function that can be called by the main completion
     _zellij_sessions() {
@@ -284,7 +284,7 @@ if command -v zellij &>/dev/null; then
         sessions=(${(f)"$(zellij list-sessions --no-formatting 2>/dev/null | awk '{print $1}')"})
         _describe 'sessions' sessions
     }
-    
+
     ## Create a wrapper completion function
     _zellij_wrapper() {
         ## Check if we're completing after 'attach' or 'a'
@@ -295,7 +295,7 @@ if command -v zellij &>/dev/null; then
             _zellij "$@"
         fi
     }
-    
+
     ## Register our wrapper after a short delay to ensure compinit has run
     #  This replaces the default completion with our enhanced version
     compdef _zellij_wrapper zellij
@@ -318,3 +318,14 @@ if command -v syst &>/dev/null; then
   SYST_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_syst"
   source_completion "$SYST_COMPLETION"
 fi
+
+###########
+# Kubectl #
+###########
+
+KUBECTL_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_kubectl"
+
+if command -v kubectl &>/dev/null; then
+    source_completion "$KUBECTL_COMPLETION"
+fi
+
