@@ -157,3 +157,8 @@ if [[ -d "{{ .chezmoi.homeDir }}/.cargo" ]]; then
   . "{{ .chezmoi.homeDir }}/.cargo/env"
 fi
 
+## Kubectl
+if command -v kubectl &>/dev/null; then
+  source <(kubectl completion bash)
+fi
+
