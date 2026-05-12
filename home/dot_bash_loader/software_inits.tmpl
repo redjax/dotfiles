@@ -162,3 +162,15 @@ if command -v kubectl &>/dev/null; then
   source <(kubectl completion bash)
 fi
 
+## K0s
+if command -v k0s &>/dev/null; then
+  K0S_BASH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/bash-completion/completions/k0s"
+
+  if [[ ! -f "$K0S_BASH_COMPLETION" ]]; then
+    mkdir -p "$(dirname "$K0S_BASH_COMPLETION")"
+    k0s completion bash > "$K0S_BASH_COMPLETION"
+  fi
+
+  source "$K0S_BASH_COMPLETION"
+fi
+
