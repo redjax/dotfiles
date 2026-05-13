@@ -14,7 +14,7 @@
 # ## Vi copy-mode bindings that yank to system clipboard
 # bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel \
 #   "~/.config/tmux/bin/clipboard copy"
-# 
+#
 # bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel \
 #   "~/.config/tmux/bin/clipboard copy"
 ##
@@ -82,7 +82,7 @@ set -g default-shell /bin/bash
 set -as terminal-features ',*:hyperlinks'
 
 ## On tmux >3.2, allow apps running in tmux to receive and process certainn terminal sequences directly
-set -g allow-passthrough on
+set -gq allow-passthrough on
 
 ## Open new windows in the current path
 bind c new-window -c "#{pane_current_path}"
@@ -101,7 +101,7 @@ set -g renumber-windows on
 set -g set-titles on
 
 ## Slightly longer pane indicators display time
-set -g display-panes-time 800 
+set -g display-panes-time 800
 ## Slightly longer status messages display time
 set -g display-time 1000
 
@@ -138,7 +138,7 @@ set -g mouse on
 ## Enable mouse scrolling
 bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e; send-keys =M'"
 
-############## 
+##############
 # Prefix key #
 ##############
 
@@ -311,3 +311,4 @@ setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
 ## Only load tpm if it's installed
 if-shell 'test -f {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm' \
   'run {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm'
+
