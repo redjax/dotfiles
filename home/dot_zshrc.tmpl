@@ -243,6 +243,11 @@ if ! infocmp rio >/dev/null 2>&1; then
   export TERM=xterm-256color
 fi
 
+## For ghostty, override term value
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+  export TERM=xterm-256color
+fi
+
 ## Set TERM value. Ensure terminal supports colors first
 if [[ "$TERM" == xterm* || "$TERM" == *-256color || "$TERM" == "xterm-kitty" ]]; then
     COLOR_PROMPT=1
@@ -408,4 +413,3 @@ bindkey '^[OC' forward-char             # Right arrow (application mode)
 ## Performance profiling results (must also uncomment zmodload at top)
 #  Uncomment the line below to see profiling results on shell startup
 # zprof
-
