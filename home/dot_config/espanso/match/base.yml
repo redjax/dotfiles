@@ -45,4 +45,8 @@ matches:
   - trigger: ":setstring"
     replace: "set -euo pipefail"
 
+  # Insert THIS_DIR var in scripts
+  - trigger: ":thisdir"
+    replace: '"THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"'
+
   # And much more! For more information, visit the docs: https://espanso.org/docs/
