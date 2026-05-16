@@ -81,8 +81,10 @@ set -g default-shell /bin/bash
 ## Enable hyperlink clicking
 set -as terminal-features ',*:hyperlinks'
 
-## On tmux >3.2, allow apps running in tmux to receive and process certainn terminal sequences directly
-set -gq allow-passthrough on
+## On tmux >3.2, allow apps running in tmux to receive and process certain
+#  terminal sequences directly
+if-shell 'tmux -V | grep -Eq "tmux 3\.[3-9]|tmux 4\."' \
+  'set -g allow-passthrough on'
 
 ## Open new windows in the current path
 bind c new-window -c "#{pane_current_path}"
@@ -311,4 +313,3 @@ setenv -g TMUX_PLUGIN_MANAGER_PATH "{{ .chezmoi.homeDir }}/.tmux/plugins/"
 ## Only load tpm if it's installed
 if-shell 'test -f {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm' \
   'run {{ .chezmoi.homeDir }}/.tmux/plugins/tpm/tpm'
-
