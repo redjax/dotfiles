@@ -42,7 +42,7 @@ matches:
     replace: "#!/usr/bin/env bash"
 
   # Insert set -euo pipefail
-  - trigger: ":setstring"
+  - trigger: ":bashopts"
     replace: "set -euo pipefail"
 
   # Insert THIS_DIR var in scripts
