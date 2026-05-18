@@ -77,21 +77,23 @@ map a :push %mkdir<space>
 cmd trash ${{
     set -f
     mkdir -p ~/.trash
-    mv -t ~/.trash -- $fx
+    for f in $fx; do
+        mv -- "$f" ~/.trash/
+    done
 }}
 
-# define a custom 'delete' command
-# cmd delete ${{
-#     set -f
-#     printf "$fx\n"
-#     printf "delete? [y/N] "
-#     read ans
-#     [ "$ans" = "y" ] && rm -rf $fx
-# }}
+# delete file (permanent)
+cmd delete ${{
+    set -f
+    printf "%s\n" $fx
+    printf "Permanently delete? [y/N] "
+    read ans
+    [ "$ans" = "y" ] && rm -rf -- $fx
+}}
 
-# use '<delete>' key for either 'trash' or 'delete' command
-# map <delete> trash
-# map <delete> delete
+# d for 'safe' delete with trash command, D for permanent delete
+map d trash
+map D delete
 
 ## CTRL+F fzf searching
 cmd fzf_jump ${{
