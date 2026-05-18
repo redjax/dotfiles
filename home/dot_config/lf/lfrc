@@ -63,7 +63,7 @@ cmd open &{{
 }}
 
 # mkdir command. See wiki if you want it to select created dir
-map a :push %mkdir<space>
+# map a :push %mkdir<space>
 
 # define a custom 'rename' command without prompt for overwrite
 # cmd rename %[ -e "$1" ] && printf "file exists" || mv "$f" "$1"
@@ -94,6 +94,28 @@ cmd delete ${{
 # d for 'safe' delete with trash command, D for permanent delete
 map d trash
 map D delete
+
+# create file or directory. If path ends with /, it will be a dir, otherwise a file
+cmd create ${{
+    set -f
+
+    input="$1"
+
+    [ -z "$input" ] && exit 0
+
+    case "$input" in
+        */)
+            mkdir -p -- "${input%/}"
+            ;;
+        *)
+            mkdir -p -- "$(dirname -- "$input")"
+            : > "$input"
+            ;;
+    esac
+}}
+
+# bind create cmd to 'a' key
+map a push :create<space>
 
 ## CTRL+F fzf searching
 cmd fzf_jump ${{
