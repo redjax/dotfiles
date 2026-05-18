@@ -93,6 +93,20 @@ cmd trash ${{
 # map <delete> trash
 # map <delete> delete
 
+## CTRL+F fzf searching
+cmd fzf_jump ${{
+    set -f
+
+    target="$(find . -type f 2>/dev/null | fzf --reverse --preview 'bat --style=numbers --color=always {} 2>/dev/null || cat {}' || true)"
+
+    case "$target" in
+        "") : ;;  # do nothing on escape
+        *) lf -remote "send $id select \"$target\"" ;;
+    esac
+}}
+
+map <c-f> fzf_jump
+
 # extract the current file with the right command
 # (xkcd link: https://xkcd.com/1168/)
 cmd extract ${{
