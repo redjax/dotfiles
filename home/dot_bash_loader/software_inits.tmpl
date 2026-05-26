@@ -18,6 +18,14 @@ if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   ## This loads nvm bash_completion
   # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_completion
+
+elif [[ -d "{{ .chezmoi.homeDir }}/.config/nvm" ]]; then
+  ## Add nvm to shell
+  export NVM_DIR="{{ .chezmoi.homeDir }}/.config/nvm"
+  ## Load nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  ## This loads nvm bash_completion
+  # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  ## This loads nvm bash_>
 fi
 
 ## Enable x-cmd if it's installed
@@ -32,27 +40,26 @@ if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 fi
 
-## Add Go to PATH
-if [[ -d "{{ .chezmoi.homeDir }}/.go" ]]; then
-  export GOROOT="{{ .chezmoi.homeDir }}/.go"
-  export GOPATH="{{ .chezmoi.homeDir }}/go"
-  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
-elif [[ -d /usr/local/go ]]; then
-  export GOROOT="/usr/local/go"
-  export GOPATH="{{ .chezmoi.homeDir }}/go"
-  export PATH="$PATH:$GOROOT/bin:$GOPATH/bin"
+## Go
+
+## GOPATH for your user
+export GOPATH="{{ .chezmoi.homeDir }}/go"
+
+## Set GOROOT
+if [ -d "/usr/local/go" ]; then
+    export GOROOT="/usr/local/go"
 fi
 
-## Add gobins to path
-if [[ -d /opt/gobins ]]; then
-  export PATH="$PATH:/opt/gobins"
-fi
-if [[ -d "{{ .chezmoi.homeDir }}/gobins" ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
-fi
-if [[ -d "{{ .chezmoi.homeDir }}/.gobins" ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
-fi
+## Add Go binaries to PATH
+export PATH="$GOROOT/bin:$GOPATH/bin:$PATH"
+
+## Disable Go toolchain auto-downloads
+export GOTOOLCHAIN=local
+
+## Add optional gobins directories
+[[ -d /opt/gobins ]] && export PATH="$PATH:/opt/gobins"
+[[ -d "{{ .chezmoi.homeDir }}/gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/gobins"
+[[ -d "{{ .chezmoi.homeDir }}/.gobins" ]] && export PATH="$PATH:{{ .chezmoi.homeDir }}/.gobins"
 
 ## Add chezmoi to PATH
 if [[ -f {{ .chezmoi.homeDir }}/.local/bin/chezmoi ]]; then
@@ -80,11 +87,11 @@ fi
 
 ## Yazi
 if command -v yazi &>/dev/null; then
-  alias y="yazi "
+  alias yz="yazi "
 fi
 
 ## GoEnv
-if [[ -d "{{ .chezmoi.homeDir}}/.goenv" ]]; then
+if [[ -d "{{ .chezmoi.homeDir }}/.goenv" ]]; then
   export GOENV_ROOT="{{ .chezmoi.homeDir }}/.goenv"
   export PATH="$GOENV_ROOT/bin:$PATH"
 
@@ -104,5 +111,66 @@ fi
 ## Mise
 if command -v mise &>/dev/null; then
   eval "$(/usr/local/bin/mise activate bash)"
+fi
+
+## IntelliShell
+if [[ -d "{{ .chezmoi.homeDir }}/.local/share/intelli-shell" ]]; then
+  export INTELLI_HOME="{{ .chezmoi.homeDir }}/.local/share/intelli-shell"
+  # export INTELLI_SEARCH_HOTKEY=\\C-@
+  # export INTELLI_VARIABLE_HOTKEY=\\C-l
+  # export INTELLI_BOOKMARK_HOTKEY=\\C-b
+  # export INTELLI_FIX_HOTKEY=\\C-x
+  # export INTELLI_SKIP_ESC_BIND=0
+
+  # alias is="intelli-shell"
+
+  export PATH="$INTELLI_HOME/bin:$PATH"
+
+  eval "$(intelli-shell init bash)"
+fi
+
+## Atuin
+if [[ -d "{{ .chezmoi.homeDir }}/.atuin" ]]; then
+  export PATH="{{ .chezmoi.homeDir }}/.atuin/bin:$PATH"
+
+  if command -v atuin &>/dev/null; then
+    . "$HOME/.atuin/bin/env"
+
+    [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+    eval "$(atuin init bash)"
+  fi
+fi
+
+## k0s
+if command -v k0s &>/dev/null; then
+  alias k="sudo k0s"
+  alias kc="sudo k0s kubectl"
+fi
+
+## Aqua (github.com/aquaproj/aqua)
+if command -v aqua &>/dev/null || [[ -f "${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin/aqua" ]]; then
+    export PATH="${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin:$PATH"
+fi
+
+## Cargo
+if [[ -d "{{ .chezmoi.homeDir }}/.cargo" ]]; then
+  . "{{ .chezmoi.homeDir }}/.cargo/env"
+fi
+
+## Kubectl
+if command -v kubectl &>/dev/null; then
+  source <(kubectl completion bash)
+fi
+
+## K0s
+if command -v k0s &>/dev/null; then
+  K0S_BASH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/bash-completion/completions/k0s"
+
+  if [[ ! -f "$K0S_BASH_COMPLETION" ]]; then
+    mkdir -p "$(dirname "$K0S_BASH_COMPLETION")"
+    k0s completion bash > "$K0S_BASH_COMPLETION"
+  fi
+
+  source "$K0S_BASH_COMPLETION"
 fi
 

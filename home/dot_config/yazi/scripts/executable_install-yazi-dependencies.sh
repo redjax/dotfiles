@@ -43,18 +43,16 @@ fi
 install_mac() {
     # Install Homebrew if missing
     if ! command -v brew &>/dev/null; then
-        echo "Homebrew not found, installing..."
+        echo "Homebrew not found, installing"
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    echo "Updating Homebrew..."
+    echo "Updating Homebrew"
     brew update
 
-    echo "Installing dependencies on macOS via Homebrew..."
-    brew install ffmpeg jq poppler fd ripgrep fzf zoxide resvg imagemagick xclip || true
-    # 7-Zip on macOS via brew is "p7zip"
-    brew install p7zip || true
-
+    echo "Installing dependencies on macOS via Homebrew"
+    brew install ffmpeg jq poppler fd ripgrep fzf zoxide imagemagick bat ffmpegthumbnailer hexyl p7zip || true
+    
     # Nerd Fonts via Homebrew Cask Fonts
     brew tap homebrew/cask-fonts
     # Install a popular nerd font; user can customize this if needed
@@ -65,11 +63,17 @@ install_mac() {
 
 install_debian() {
     sudo apt-get update
-    sudo apt-get install -y ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide rsync imagemagick xclip p7zip-full unzip curl fontconfig || true
+    sudo apt-get install -y ffmpeg bat jq poppler-utils fd-find ripgrep fzf rsync imagemagick xclip p7zip-full unzip curl fontconfig ffmpegthumbnailer hexyl || true
+    
+    # Install zoxide (may need manual installation on older Ubuntu)
+    if ! command -v zoxide &>/dev/null; then
+        echo "Installing zoxide"
+        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || true
+    fi
 
     # Nerd Fonts installer script
     if ! fc-list | grep -qi nerd; then
-        echo "Installing Nerd Fonts on Debian via manual script..."
+        echo "Installing Nerd Fonts on Debian via manual script"
         curl -fsSL https://raw.githubusercontent.com/monoira/nefoin/main/install.sh | bash -s -- "FiraCode"
         fc-cache -fv
     fi
@@ -78,11 +82,11 @@ install_debian() {
 }
 
 install_fedora() {
-    sudo dnf install -y ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide rsync ImageMagick xclip p7zip-full unzip curl fontconfig || true
+    sudo dnf install -y ffmpeg jq poppler-utils fd-find ripgrep fzf zoxide rsync ImageMagick xclip p7zip p7zip-plugins unzip curl fontconfig bat ffmpegthumbnailer hexyl || true
 
     # Nerd Fonts manual installation as Fedora doesn't package Nerd Fonts
     fc-list | grep -qi nerd || {
-        echo "Installing Nerd Fonts on Fedora via manual script..."
+        echo "Installing Nerd Fonts on Fedora via manual script"
         curl -fsSL https://raw.githubusercontent.com/monoira/nefoin/main/install.sh | bash -s -- "FiraCode"
         fc-cache -fv
     }
@@ -91,7 +95,7 @@ install_fedora() {
 }
 
 install_arch() {
-    sudo pacman -Sy --noconfirm ffmpeg jq poppler fd ripgrep fzf zoxide imagemagick xclip p7zip unzip curl fontconfig || true
+    sudo pacman -Sy --noconfirm ffmpeg jq poppler fd ripgrep fzf zoxide imagemagick xclip p7zip unzip curl fontconfig bat ffmpegthumbnailer hexyl || true
     # Nerd Fonts user install via GitHub or community repo
     fc-list | grep -qi nerd || {
         echo "Please install nerd-fonts manually from AUR or using a helper like paru/yay."
@@ -101,10 +105,22 @@ install_arch() {
 }
 
 install_opensuse() {
-    sudo zypper install -y ffmpeg jq poppler-tools fd ripgrep fzf zoxide ImageMagick xclip p7zip unzip curl fontconfig || true
+    sudo zypper install -y jq poppler-tools fd ripgrep fzf ImageMagick xclip p7zip unzip curl fontconfig || true
+    
+    # ffmpeg may need Packman repo on openSUSE
+    sudo zypper install -y ffmpeg || echo "Note: ffmpeg might require Packman repository"
+    
+    # bat and zoxide may not be in default repos
+    sudo zypper install -y bat hexyl || echo "Note: bat/hexyl may need to be installed manually"
+    
+    # Install zoxide manually if not available
+    if ! command -v zoxide &>/dev/null; then
+        echo "Installing zoxide"
+        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash || true
+    fi
 
     if ! fc-list | grep -qi nerd; then
-        echo "Installing Nerd Fonts on openSUSE via manual script..."
+        echo "Installing Nerd Fonts on openSUSE via manual script"
         curl -fsSL https://raw.githubusercontent.com/monoira/nefoin/main/install.sh | bash -s -- "FiraCode"
         fc-cache -fv
     fi

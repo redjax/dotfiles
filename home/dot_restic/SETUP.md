@@ -4,7 +4,7 @@ My checklist for setting up restic, rclone, and resticprofile. Check the [Comman
 
 ## Guide
 
-Run `. ~/.restic/scripts/install_restic.sh`
+Run the [`scripts/install_restic.sh` script](./scripts/executable_install_restic.sh)
 	- Answer `y` for `rclone` and `resticprofile` install
 - Copy the default profile to `~/profiles.yaml`:
 	- `cp ~/.restic/resticprofile/profiles/default.yaml ~/profiles.yaml`
@@ -16,14 +16,12 @@ Run `. ~/.restic/scripts/install_restic.sh`
 	- Change the default `repository:` if you want to use a different path.
 		- Note this path must exist ahead of time, create with `sudo mkdir -p /opt/restic/repo`.
 	- Set the default key to `/home/$USER/.restic/passwords/main`
-		- After initializing a repository, add your `user` key with `resticprofile -c ~/profiles.yaml` key add --new-password-file ~/.restic/passwords/user`
+- Initialize a repository: `resticprofile -c profiles.yaml init`
+	- Add your `user` key with `resticprofile -c ~/profiles.yaml key add --new-password-file ~/.restic/passwords/user`
 		- Then, update individual backup jobs/profiles to use this key, leaving the default as the `main` key.
 		- You should delete the main key file as soon as possible and only create it temporarily to set up a new profile.
-	- Create an ignore/excludes file at `~/.restic/ignores/<hostname>`
-		- Add the path to the default `backup:  exclude-file:` line
-- Initialize the repository/ies with `resticprofile -c ~/profiles.yaml init`
-- Add the user key with `resticprofile -c ~/profiles.yaml key add --new-password-file ~/.restic/passwords/user`
-	- Delete the `main` key after adding the 'user' key.
+- Create an ignore/excludes file at `~/.restic/ignores/<hostname>`
+  - Add the path to the default `backup:  exclude-file:` line
 - Create the first backup with (use `sudo` if you need root access to any of the paths in the backup):
 	- `resticprofile -c ~/profiles.yaml -n full-backup backup`
 - Install the resticprofile schedules with:
@@ -140,7 +138,7 @@ sudo mkdir -pv /path/to/restic/repo && sudo chown -R $USER:$USER /path/to/restic
 - Set the path to your 'main' key in 'password-file:'
     - i.e. `password-file: "/home/$USER/.restic/passwords/main"`
 
-- Create a host-specific ignores file with: 
+- Create a host-specific ignores file with:
 ```shell
 touch ~/.restic/ignores/$(hostname)
 ```
@@ -148,7 +146,7 @@ touch ~/.restic/ignores/$(hostname)
 - You can add host-specific ignores to this file and use it in one of the `exclude-file:` options
 
 - Initialize the repositories with:
-  
+
 ```shell
 resticprofile -c ~/profiles.yaml init
 ```
@@ -159,7 +157,7 @@ resticprofile -c ~/profiles.yaml init
 resticprofile -c ~/profiles.yaml key add --new-password-file ~/.restic/passwords/user
 ```
 
-- You can now delete the 'main' key: 
+- You can now delete the 'main' key:
 
 ```shell
 rm ~/.restic/passwords/main
