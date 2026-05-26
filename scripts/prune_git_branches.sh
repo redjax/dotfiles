@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if ! command -v git -v >/dev/null 2>&1; then
     echo "git is not installed"

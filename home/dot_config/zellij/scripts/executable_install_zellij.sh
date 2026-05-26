@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function get_distro_id() {
     if [[ -f /etc/os-release ]]; then

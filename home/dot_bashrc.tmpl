@@ -51,7 +51,7 @@ fi
 
 ## Fancy prompt with color support
 case "$TERM" in
-    xterm-color|*-256color*) color_prompt=yes;;
+    xterm-color|*-256color*|xterm-kitty) color_prompt=yes;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -118,6 +118,17 @@ if ! shopt -oq posix; then
   fi
 fi
 
+## Opening neovim in tmux when connected via SSH crashes the tmux server,
+#  unless the TMUX env var is set to something (anything).
+#  https://github.com/tmux/tmux/issues/3983#issuecomment-2224545592
+# if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]]; then
+#   export TMUX=1
+# fi
+
+if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ] && [[ $TERM == *sixel* || $TERM == termix* ]]; then
+  export TMUX=1
+fi
+
 ## Source ~/.local/bin/env if it exists
 [ ! -f "{{ .chezmoi.homeDir }}/.local/bin/env" ] || . "{{ .chezmoi.homeDir }}/.local/bin/env"
 
@@ -128,8 +139,8 @@ fi
 
 ## Source ~/.bashrc.local if it exists
 # echo ".bashrc.local exists: $([ -f {{ .chezmoi.homeDir }}/.bashrc.local ])"
-if [[ -f "${HOME}/.bashrc.local" ]]; then
+if [[ -f "{{ .chezmoi.homeDir }}/.bashrc.local" ]]; then
     # echo "Sourcing ~/.bashrc.local"
-  . "${HOME}/.bashrc.local"
+  . "{{ .chezmoi.homeDir }}/.bashrc.local"
 fi
 
