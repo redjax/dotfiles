@@ -7,6 +7,31 @@
 
 set -euo pipefail
 
+THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RESTIC_ROOT="$(realpath -m "${THIS_DIR}/../..")"
+SCRIPTS_DIR="${RESTIC_ROOT}/scripts"
+
+## Check if input is a valid IP address
+function validate_ip() {
+    local ip="$1"
+    local stat=1
+    local regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
+    
+    if [[ "$ip" =~ $regex ]]; then
+        IFS='.' read -ra ip <<< "$ip"
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
+## Check if input is a valid TCP/UDP port
+function validate_tcpip_port() {
+    local port="$1"
+    local -i port_num="10#${port}" 2>/dev/null || return 1
+    (( port_num >= 1 && port_num <= 65535 ))
+}
+
 function detect_distro() {
     if [[ -f /etc/os-release ]]; then
         . /etc/os-release
@@ -25,6 +50,79 @@ function install_rclone_linux() {
     fi
     echo "rclone installed successfully."
     return 0
+}
+
+function install_backrest_linux() {
+    local INSTALL_SCRIPT="${SCRIPTS_DIR}/apps/backrest/install-backrest.sh"
+    local bind_addr="127.0.0.1"
+    local port="9898"
+    local allow_remote="false"
+
+    if [[ ! -f "${INSTALL_SCRIPT}" ]]; then
+      echo "[ERROR] Could not find Backrest install script at path: ${INSTALL_SCRIPT}"
+      return 1
+    fi
+
+    echo "Installing Backrest webUI for Restic."
+    echo ""
+
+    echo "Backrest requires some options. Please answer the prompts below, or press Enter to sksip & use the default."
+    echo ""
+
+    ## Set bind address
+    while true; do
+        read -r -p "[-] Set bind address (default: ${bind_addr}): " input
+        echo ""
+        if [[ -z "$input" ]]; then
+            bind_addr="127.0.0.1"
+            break
+        elif validate_ip "$input"; then
+            bind_addr="$input"
+            break
+        else
+            echo "[ERROR] Invalid IP address. Enter valid IPv4 (e.g., 127.0.0.1 or 0.0.0.0)."
+        fi
+    done
+
+    ## Set port
+    while true; do
+        read -r -p "[-] Set webUI port (default: ${port:-9898}): " input
+        echo ""
+        if [[ -z "$input" ]]; then
+            port="9898"
+            break
+        elif validate_port "$input"; then
+            port="$input"
+            break
+        else
+            echo "Invalid port. Enter number between 1-65535."
+        fi
+    done
+
+    ## Set allow remote access
+    while true; do
+        read -r -n 1 -p "[-] Allow remote access? (y/n, default: n): " input
+        echo ""
+        case "${input,,}" in
+            y|yes) allow_remote="true"; break ;;
+            n|no|"") allow_remote="false"; break ;;
+            *) echo "Enter y/n or Enter for default." ;;
+        esac
+    done
+
+    echo ""
+    if [[ "$allow_remote" ]]; then
+        "${INSTALL_SCRIPT} -b ${bind_addr} -p ${port} --allow-remote-access"
+    else
+        "${INSTALL_SCRIPT} -b ${bind_addr} -p ${port}"
+    fi
+
+    echo ""
+
+    if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed installing Backrest."
+        return $?
+    fi
 }
 
 function install_resticprofile_linux() {
@@ -168,10 +266,12 @@ function main() {
     local RCLONE_INSTALLED="false"
     local AUTORESTIC_INSTALLED="false"
     local RESTICPROFILE_INSTALLED="false"
+    local BACKREST_INSTALLED="false"
     local INSTALL_RESTIC="false"
     local INSTALL_RCLONE="false"
     local INSTALL_AUTORESTIC="false"
     local INSTALL_RESTICPROFILE="false"
+    local INSTALL_BACKREST="false"
 
     ## Check restic is installed
     if command -v restic &>/dev/null; then
@@ -214,6 +314,17 @@ function main() {
         fi
     fi
 
+    ## Check backrest is installed
+    if command -v backrest &>/dev/null; then
+        echo "Backrest is already installed."
+        BACKREST_INSTALLED="true"
+    else
+        read -rp "Do you want to install backrest? [y/N]: " reply
+        if [[ "$reply" =~ ^[Yy]$ ]]; then
+            INSTALL_BACKREST="true"
+        fi
+    fi
+
     ## Detect OS and install accordingly
     case "$OS" in
         Linux)
@@ -239,6 +350,13 @@ function main() {
                     echo "Failed to install autorestic."
                     return 1
                 fi
+            fi
+
+            if [[ "$INSTALL_BACKREST" == "true" ]] && "$BACKREST_INSTALLED" == "false" ]]; then
+                install_backrest_linux
+                if [[ $? -ne 0 ]]; then
+                    echo "Failed to install backrest."
+                    return 1
             fi
 
             if [[ "$INSTALL_RESTICPROFILE" == "true" && "$RESTICPROFILE_INSTALLED" == "false" ]]; then
