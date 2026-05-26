@@ -341,3 +341,7 @@ if command -v k0s &>/dev/null; then
   source_completion "$K0S_ZSH_COMPLETION"
 fi
 
+## Jiu-jitsu (jj)
+if command -v jj &>/dev/null; then
+  source <(jj util completion zsh)
+fi
