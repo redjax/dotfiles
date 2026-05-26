@@ -8,11 +8,18 @@
 # Log out and back in to apply                               #
 #                                                            #
 # Sources software inits & shell completions                 #
-# from .zsh/software_inits.zssh if the file exists.          #
+# from .zsh/software_inits.zsh if the file exists.           #
 #                                                            #
 # Sources Oh-My-Zsh configuration if Oh-My-Zsh is installed. #
 #                                                            #
+# Run `zsh -f` to run ZSH with no config/customizations.     #
 #============================================================#
+
+## Performance profiling (uncomment both lines to enable)
+#  Uncomment the line below AND the 'zprof' line at the bottom of this file
+#  Then run: time zsh -i -c exit
+#  Or just start a new shell and see the profile results
+# zmodload zsh/zprof
 
 #################
 # Shell Options #
@@ -34,6 +41,48 @@ setopt PUSHD_IGNORE_DUPS
 ## Prevent zsh from printing the directory stack after each change
 setopt PUSHD_SILENT
 
+## Advanced pattern matching (use #, ~, ^ for globbing)
+setopt EXTENDED_GLOB
+
+## Include dotfiles in * globs without explicit .*
+setopt GLOB_DOTS
+
+## Allow # comments in interactive shell
+setopt INTERACTIVE_COMMENTS
+
+## cd to variable values (e.g., x=/tmp; cd x)
+setopt CDABLE_VARS
+
+## Sort numeric filenames numerically (file1 file2 file10, not file1 file10 file2)
+setopt NUMERIC_GLOB_SORT
+
+## Remove pattern if no matches (prevents "no matches found" error)
+setopt NULL_GLOB
+
+## Prevent completion from eating the trailing space before && || ; |
+#  By default ZLE_REMOVE_SUFFIX_CHARS includes & ; | which causes
+#  "cmd --flag &&" to collapse into "cmd --flag&&"
+ZLE_REMOVE_SUFFIX_CHARS=$' \t\n;'
+
+## Case-insensitive globbing
+setopt NO_CASE_GLOB
+
+## Set shell to emacs mode
+bindkey -e
+
+## Fix insecure directories before compinit
+() {
+  local dirs=(
+    "{{ .chezmoi.homeDir }}/.local/share/zsh"
+    "{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions"
+  )
+  for dir in "${dirs[@]}"; do
+    mkdir -p "$dir"
+    chmod 755 "$dir"
+    chown jack:jack "$dir" 2>/dev/null || true
+  done
+}
+
 ## Allow editing a command with CTRL+X + e
 autoload -Uz edit-command-line
 zle -N edit-command-line
@@ -48,16 +97,34 @@ bindkey '^Xe' edit-command-line
 # bindkey -M vicmd '^Xe' edit-command-line
 # bindkey -M viins '^Xe' edit-command-line
 
+## Load useful zsh functions
+autoload -U zmv     # Advanced rename: zmv '(*).txt' '$1.md'
+autoload -U zcalc   # Calculator: zcalc
+
 ###################
 # History Options #
 ###################
 
-## Limit occurence of individual commands to 1 in the history.
-#  Only limits repeat instances of the same command in a row.
-setopt HIST_IGNORE_DUPS
+## Remove ALL duplicate entries in history (not just consecutive)
+setopt HIST_IGNORE_ALL_DUPS
+
+## Don't show duplicates when searching history
+setopt HIST_FIND_NO_DUPS
+
+## Don't save duplicates to history file
+setopt HIST_SAVE_NO_DUPS
 
 ## If a command starts with a space, it will not be stored in history.
 setopt HIST_IGNORE_SPACE
+
+## Save timestamps and duration for each command (like bash HISTTIMEFORMAT)
+setopt EXTENDED_HISTORY
+
+## Remove superfluous blanks from history entries
+setopt HIST_REDUCE_BLANKS
+
+## Show history expansion before running it (e.g., !! shows command first)
+setopt HIST_VERIFY
 
 ## Share shell history between all open shells.
 setopt SHARE_HISTORY
@@ -66,8 +133,8 @@ setopt SHARE_HISTORY
 setopt APPEND_HISTORY
 
 HISTFILE="{{ .chezmoi.homeDir }}/.zsh_history"
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=50000
+SAVEHIST=50000
 
 ################
 # PATH Options #
@@ -79,12 +146,82 @@ typeset -U path
 ## Add user-controlled site-functions dir for zsh completions
 mkdir -p ~/.local/share/zsh/site-functions
 fpath=({{ .chezmoi.homeDir }}/.local/share/zsh/site-functions $fpath)
+
+######################################
+# Generate completion files (pre-compinit)
+######################################
+#  These MUST run before compinit so the completion system sees them.
+#  Each block generates the file once; delete the file to regenerate.
+#  If any new file is generated, the zcompdump cache is removed so
+#  compinit does a full rebuild.
+#
+#  _try_gen validates output starts with #compdef before writing.
+#  If a command outputs help text instead of a completion script,
+#  the file is NOT created (prevents breaking the shell).
+() {
+    local dir="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions"
+    local generated=0
+
+    ## Generate a completion file safely.
+    #  Skips if the command isn't installed or the file already exists.
+    #  Captures output, checks for #compdef header, writes only if valid.
+    #  Usage: _try_gen <dest> <command ...>
+    _try_gen() {
+        local dest="$1"; shift
+        [[ -f "$dest" ]] && return 0
+        command -v "$1" &>/dev/null || return 0
+        local out
+        out="$("$@" 2>/dev/null)" || return 1
+        if [[ "$out" == \#compdef\ * || "$out" == \#compdef$'\n'* ]]; then
+            printf '%s\n' "$out" > "$dest"
+            generated=1
+        fi
+    }
+
+    _try_gen "$dir/_chezmoi"         chezmoi completion zsh
+    _try_gen "$dir/_docker"          docker completion zsh
+    _try_gen "$dir/_docker-compose"  docker compose completion zsh
+    _try_gen "$dir/_uv"             uv generate-shell-completion zsh
+    _try_gen "$dir/_uvx"            uvx --generate-shell-completion zsh
+    _try_gen "$dir/_mise"           mise completion zsh
+    _try_gen "$dir/_trivy"          trivy completion zsh
+    _try_gen "$dir/_zellij"         zellij setup --generate-completion zsh
+    _try_gen "$dir/_syst"           syst completion zsh
+
+    unset -f _try_gen
+
+    ## If anything was generated, invalidate the compinit cache
+    (( generated )) && rm -f "{{ .chezmoi.homeDir }}"/.zcompdump*
+}
+
+## Initialize completion system with cache optimization
+#  Only fully recompile once per day, otherwise use cached version
 autoload -Uz compinit
-compinit
+if [[ -n {{ .chezmoi.homeDir }}/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
+
+## Completion system styling
+zstyle ':completion:*' menu select                              # Visual menu for completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'      # Case-insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"        # Colored completion (uses LS_COLORS)
+zstyle ':completion:*' group-name ''                            # Group completions by category
+zstyle ':completion:*:descriptions' format '%B%d%b'            # Bold category descriptions
+zstyle ':completion:*:warnings' format '%F{red}No matches%f'   # Red warning for no matches
+
+## Additional completion enhancements
+zstyle ':completion:*' rehash true                              # Auto-find new executables in PATH
+zstyle ':completion:*' accept-exact '*(N)'                      # Speed up by accepting exact matches
+zstyle ':completion:*' use-cache on                             # Use completion cache
+zstyle ':completion:*' cache-path ~/.zsh/cache                  # Cache location
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'  # Colored kill completion
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'   # Better kill menu
 
 ## Enable Bash completions in Zsh
-# autoload -U +X bashcompinit
-# bashcompinit
+autoload -U +X bashcompinit
+bashcompinit
 
 #######################
 # Environment Options #
@@ -95,6 +232,21 @@ export XDG_CONFIG_HOME="{{ .chezmoi.homeDir }}/.config"
 
 ## Default file creation permissions
 umask 022
+
+## For Rio terminal, test if Rio's terminfo is available,
+#  revert to xterm-256color if not.
+#  Terminfo can be installed with:
+#    curl -o rio.terminfo https://raw.githubusercontent.com/raphamorim/rio/main/misc/rio.terminfo && \
+#      tic -xe xterm-rio,rio rio.terminfo && \
+#      rm rio.terminfo
+if ! infocmp rio >/dev/null 2>&1; then
+  export TERM=xterm-256color
+fi
+
+## For ghostty, override term value
+if [[ "$TERM_PROGRAM" == "ghostty" ]]; then
+  export TERM=xterm-256color
+fi
 
 ## Set TERM value. Ensure terminal supports colors first
 if [[ "$TERM" == xterm* || "$TERM" == *-256color || "$TERM" == "xterm-kitty" ]]; then
@@ -122,6 +274,7 @@ done
 
 export PAGER=less
 export LESS=-R
+export GIT_PAGER=
 
 ## Locale
 export LANG="en_US.UTF-8"
@@ -176,48 +329,20 @@ precmd() {
 }
 
 ## Reset exit status at shell start
-add-zsh-hook precmd reset_status
 reset_status() { (( $? == 0 )) || true }
+add-zsh-hook precmd reset_status
 
 setopt PROMPT_SUBST
 
-## Basic, simple prompt
-# PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
+## Custom prompt (disabled if Oh-My-Zsh sets a theme)
+#  This will be overridden by Oh-My-Zsh if a theme is configured
+if [[ -z "$ZSH_THEME" ]] || [[ "$ZSH_THEME" == "" ]]; then
+    ## Prompt with git branch, failure indicator, execution time
+    PROMPT='[%1v]%(?..%F{red} X %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
+fi
 
-## Prompt with git branch, failure indicator, execution time
-PROMPT='[%1v]%(?..%F{red} ✗ %?%f) %F{green}%n@%m%f:%F{blue}%~%f %F{yellow}${vcs_info_msg_0_}%f%# '
-
-###########
-# Aliases #
-###########
-
-alias reload='exec zsh'
-alias mkdir='mkdir -pv'
-alias getchmod="stat --format '%a'"
-
-## ls
-alias ll='ls -lah'
-alias l='ls -CF'
-
-## grep
-alias grep='grep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias egrep='egrep --color=auto'
-
-## Neovim
-alias nvimi="nvim --headless '+Lazy sync +qa'"
-alias nvimu="nvim --headless '+Lazy update +qa'"
-alias snvim="sudo -E nvim"
-
-## Lazygit
-alias lg='lazygit'
-
-## Terraform
-alias tf='terraform'
-alias tg='terragrunt'
-
-## Misc
-alias myip='curl -s http://ipecho.net/plain; echo'
+## Source aliases
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/aliases.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/aliases.zsh" || true
 
 ##################
 # Software inits #
@@ -230,7 +355,7 @@ if [[ -f "{{ .chezmoi.homeDir }}/.zsh/oh-my-zsh.zsh" ]] && [[ -f "{{ .chezmoi.ho
 fi
 
 ## Source ~/.zsh/software_inits.zsh if it exists
-[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh"
+[[ -f "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" ]] && source "{{ .chezmoi.homeDir }}/.zsh/software_inits.zsh" || true
 
 ##########
 # Keymap #
@@ -244,3 +369,47 @@ bindkey '^[[3~' delete-char         # Delete key
 ## CTRL+Backspace deletes a whole word
 bindkey '^H' backward-kill-word   # Some terminals send ^H
 bindkey '^[^?' backward-kill-word # Some terminals send ESC + DEL
+
+## Home and End keys
+bindkey '^[[H' beginning-of-line    # Home key
+bindkey '^[[F' end-of-line          # End key
+bindkey '^[[1~' beginning-of-line   # Home key (alternative)
+bindkey '^[[4~' end-of-line         # End key (alternative)
+
+## Page Up / Page Down for history search
+bindkey '^[[5~' history-search-backward  # Page Up
+bindkey '^[[6~' history-search-forward   # Page Down
+
+## CTRL+Arrow keys for word navigation
+#  Only enabled when NOT inside a multiplexer (Zellij, tmux, etc.)
+#  This prevents conflicts with multiplexer keybindings
+if [[ -z "$ZELLIJ" ]] && [[ -z "$TMUX" ]]; then
+    bindkey '^[[1;5D' backward-word     # CTRL+Left arrow
+    bindkey '^[[1;5C' forward-word      # CTRL+Right arrow
+fi
+
+## Ensure plain arrow keys move by character (not word)
+#  These handle both normal mode (^[[C/D) and application mode (^[OC/D)
+bindkey '^[[D' backward-char            # Left arrow
+bindkey '^[[C' forward-char             # Right arrow
+bindkey '^[OD' backward-char            # Left arrow (application mode)
+bindkey '^[OC' forward-char             # Right arrow (application mode)
+
+#################
+# Local Configs #
+#################
+
+## Source shared local overrides from .bashrc.local
+#  This allows sharing common environment variables, aliases, and PATH
+#  additions between bash and zsh without duplication
+[[ -f "{{ .chezmoi.homeDir }}/.bashrc.local" ]] && source "{{ .chezmoi.homeDir }}/.bashrc.local" || true
+
+## Source zsh-specific local overrides
+#  Use this for zsh-only features like prompts, plugins, key bindings, etc.
+[[ -f "{{ .chezmoi.homeDir }}/.zshrc.local" ]] && source "{{ .chezmoi.homeDir }}/.zshrc.local" || true
+
+## -------------------------------------------------------------------------------
+
+## Performance profiling results (must also uncomment zmodload at top)
+#  Uncomment the line below to see profiling results on shell startup
+# zprof

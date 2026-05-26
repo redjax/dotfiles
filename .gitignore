@@ -2,3 +2,5 @@
 dot_config/tmux/plugins/
 
 install.sh
+
+dist/

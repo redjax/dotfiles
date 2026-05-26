@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ##
 # Run a cleanup/purge of Restic snapshots,

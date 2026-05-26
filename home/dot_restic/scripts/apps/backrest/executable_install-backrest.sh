@@ -24,6 +24,19 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Script usage/help menu
+function usage() {
+  echo ""
+  echo "Usage: ${0} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -b, --bind-address <address>  Host address to bind Backrest service to. Default: 127.0.0.1"
+  echo "  -p, --port <port>             Port to bind Backrest webUI on. Default: 9898"
+  echo "  --allow-remote                When passed to script, allow access from outside the localhost."
+  echo "  -h, --help                    Show this help menu & exit."
+  echo ""
+}
+
 # Validate IP or hostname loosely (allow localhost or IPs)
 validate_host() {
     local host=$1
@@ -48,8 +61,11 @@ while [[ $# -gt 0 ]]; do
     -b|--bind-address)
       if [ -z "${2:-}" ]; then
         echo "ERROR: --bind-address requires an argument."
+
+        usage
         exit 1
       fi
+
       validate_host "$2"
       BIND_ADDRESS="$2"
       shift 2
@@ -57,8 +73,11 @@ while [[ $# -gt 0 ]]; do
     -p|--port)
       if [ -z "${2:-}" ]; then
         echo "ERROR: --port requires an argument."
+
+        usage
         exit 1
       fi
+
       validate_port "$2"
       PORT="$2"
       shift 2
@@ -67,8 +86,14 @@ while [[ $# -gt 0 ]]; do
       ALLOW_REMOTE="true"
       shift
       ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
     *)
       echo "Unknown parameter passed: $1"
+
+      usage
       exit 1
       ;;
   esac
