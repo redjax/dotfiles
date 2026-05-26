@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## Detect if flatpak is installed
 if command -v flatpak &>/dev/null; then

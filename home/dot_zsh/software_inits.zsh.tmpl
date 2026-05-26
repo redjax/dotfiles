@@ -1,84 +1,344 @@
-## Enable bash compatibility for completion scripts
-autoload -U +X bashcompinit && bashcompinit
+###############################################################
+#              Software Initialization & Completions          #
+###############################################################
+#                                                             #
+# This file is sourced by .zshrc and contains initialization  #
+# code for various CLI tools and their completions.           #
+#                                                             #
+# Managing Auto-Added Configuration                           #
+# --------------------------------------------                #
+# Many installers automatically add lines to ~/.zshrc:        #
+#   - NVM, pyenv, cargo, conda, etc.                          #
+#                                                             #
+# When this happens:                                          #
+#   - Check ~/.zshrc for new additions (usually at the end)   #
+#   - CUT the added lines from ~/.zshrc                       #
+#   - PASTE them into the appropriate section below           #
+#   - Wrap them in a conditional check (see examples)         #
+#   - Run: chezmoi add ~/.zsh/software_inits.zsh              #
+#   - Run: chezmoi apply                                      #
+#                                                             #
+# Example: If rust installer adds to .zshrc:                  #
+#   [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"    #
+#                                                             #
+# Move it here as:                                            #
+#   if [[ -f "$HOME/.cargo/env" ]]; then                      #
+#       source "$HOME/.cargo/env"                             #
+#   fi                                                        #
+#                                                             #
+# Template Variables:                                         #
+#   - {{ .chezmoi.homeDir }} = Your home directory            #
+#   - Use this for portable paths across machines             #
+###############################################################
 
-# ----------------------------------------------
+# Template for new tools:
+#
+# ##############
+# # Tool Name #
+# ##############
+#
+# ## Brief description
+# #  Install command or URL
+# #  Note if installer adds to .zshrc automatically
+# if command -v toolname &>/dev/null; then
+#     eval "$(toolname init zsh)"
+#     # OR
+#     source_if_exists "$HOME/.toolname/init.zsh"
+#     # OR
+#     export TOOLNAME_VAR="value"
+#     path_add "$HOME/.toolname/bin"
+# fi
+#
 
-## Pyenv
-if command -v pyenv > /dev/null 2>&1; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/.pyenv/bin"
+## Examples of tools that commonly auto-add to .zshrc:
+#
+## HOMEBREW (on Linux):
+#    Adds: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#    Move here wrapped in:
+#      if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+#        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+#      fi
+#
+## NVM:
+#    Adds: export NVM_DIR="$HOME/.nvm"
+#          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#    Move here wrapped in:
+#      if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
+#          export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
+#          source_if_exists "$NVM_DIR/nvm.sh"
+#          source_if_exists "$NVM_DIR/bash_completion"
+#      fi
+#
 
-  eval "$(pyenv init -)"
-  eval "$(pyenv virtualenv-init -)"
+## --------------------------------------------------------------------------------------------
+
+####################
+# Helper Functions #
+####################
+
+## Add a directory to PATH if it exists and isn't already in PATH
+path_add() {
+    [[ -d $1 ]] || return
+    case ":$PATH:" in
+        *":$1:"*) return ;;  # Already in PATH
+        *) PATH="$PATH:$1" ;;
+    esac
+}
+
+## Source a file if it exists
+source_if_exists() {
+    [[ -f $1 ]] && source "$1"
+}
+
+## Source a zsh completion file only if it exists and is valid
+#  Checks for #compdef header to avoid sourcing garbage (e.g. help text)
+source_completion() {
+    [[ -f $1 ]] || return 0
+    local first
+    read -r first < "$1"
+    [[ "$first" == \#compdef\ * ]] && source "$1"
+}
+
+## --------------------------------------------------------------------------------------------
+
+###########
+# Chezmoi #
+###########
+
+## Completion file is generated in .zshrc before compinit
+## Source it here for any runtime hooks
+CHEZMOI_ZSH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_chezmoi"
+if command -v chezmoi &>/dev/null; then
+    source_completion "$CHEZMOI_ZSH_COMPLETION"
 fi
 
-## NVM
-if command -v nvm > /dev/null 2>&1; then
-  export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
+##########
+# Direnv #
+##########
 
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if command -v direnv >&/dev/null; then
+    eval "$(direnv hook zsh)"
 fi
 
-## Astral uv
-if command -v uv > /dev/null 2>&1; then
-    eval "$(uv generate-shell-completion bash)"
-    eval "$(uvx --generate-shell-completion bash)"
+#########
+# Pyenv #
+#########
+if command -v pyenv &>/dev/null; then
+    path_add "{{ .chezmoi.homeDir }}/.pyenv/bin"
+
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
 fi
 
-## Enable x-cmd if it's installed
-[ ! -f "{{ .chezmoi.homeDir }}/.x-cmd.root/X" ] || . "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
+##############################
+# NVM (Node Version Manager) #
+##############################
+if [[ -d "{{ .chezmoi.homeDir }}/.nvm" ]]; then
+    export NVM_DIR="{{ .chezmoi.homeDir }}/.nvm"
+    source_if_exists "$NVM_DIR/nvm.sh" || true
+elif [[ -d "{{ .chezmoi.homeDir }}/.config/nvm" ]]; then
+    export NVM_DIR="{{ .chezmoi.homeDir }}/.config/nvm"
+    source_if_exists "$NVM_DIR/nvm.sh"
+fi
 
-## Homebrew
-if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+####################
+# Docker / Compose #
+####################
+
+## Completion files are generated in .zshrc before compinit
+## Source them here so completions work regardless of compinit cache state
+DOCKER_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_docker"
+DOCKER_COMPOSE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_docker-compose"
+
+if command -v docker &>/dev/null; then
+    source_completion "$DOCKER_COMPLETION"
+
+    if docker compose version &>/dev/null 2>&1; then
+        source_completion "$DOCKER_COMPOSE_COMPLETION"
+    fi
+fi
+
+###################
+# Astral uv / uvx #
+###################
+
+## Completion files are generated in .zshrc before compinit
+UV_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_uv"
+UVX_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_uvx"
+
+if command -v uv &>/dev/null; then
+    source_completion "$UV_COMPLETION"
+    source_completion "$UVX_COMPLETION"
+fi
+
+########################
+# Homebrew / Linuxbrew #
+########################
+if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-    # Disable Homebrew analytics
+    ## Disable telemetry
     export HOMEBREW_NO_ANALYTICS=1
 
-    export PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+    path_add "/home/linuxbrew/.linuxbrew/bin"
 fi
 
-## Add Go to PATH
-if [[ -d /usr/local/go ]]; then
-  export PATH="$PATH:/usr/local/go/bin"
+###############
+# Go Language #
+###############
+path_add "/usr/local/go/bin"
+path_add "/opt/gobins"
 
-  if [[ -d /opt/gobins ]]; then
-    export PATH="$PATH:/opt/gobins"
-  fi
+#################
+# Intelli-shell #
+#################
+
+INTELLI_HOME="{{ .chezmoi.homeDir }}/.local/share/intelli-shell"
+if [[ -d "$INTELLI_HOME" ]]; then
+    export INTELLI_HOME
+
+    # Optional hotkeys (uncomment if you want to customize)
+    # export INTELLI_SEARCH_HOTKEY="\\C-@"
+    # export INTELLI_VARIABLE_HOTKEY="\\C-l"
+    # export INTELLI_BOOKMARK_HOTKEY="\\C-b"
+    # export INTELLI_FIX_HOTKEY="\\C-x"
+    # export INTELLI_SKIP_ESC_BIND=0
+
+    # Optional alias
+    # alias is="intelli-shell"
+
+    # Add to PATH using helper function
+    path_add "$INTELLI_HOME/bin"
+
+    # Run IntelliShell zsh init
+    eval "$(intelli-shell init zsh)"
 fi
 
-## Add chezmoi to PATH
-if [[ -f {{ .chezmoi.homeDir }}/.local/bin/chezmoi ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/.local/bin"
-fi
-# This is chezmoi's default path
-if [[ -f {{ .chezmoi.homeDir }}/bin/chezmoi ]]; then
-  export PATH="$PATH:{{ .chezmoi.homeDir }}/bin"
-fi
-
-## Dotnet
+####################
+# Dotnet CLI tools #
+####################
 if [[ -d "{{ .chezmoi.homeDir }}/.dotnet" ]]; then
-  export DOTNET_TOOLS="{{ .chezmoi.homeDir }}/.dotnet/tools"
-  export PATH="$PATH:$DOTNET_TOOLS"
+    export DOTNET_TOOLS="{{ .chezmoi.homeDir }}/.dotnet/tools"
+    path_add "$DOTNET_TOOLS"
 fi
 
-## Terraform
+#########################
+# Terraform completions #
+#########################
 if command -v terraform &>/dev/null; then
-  autoload -U +X bashcompinit && bashcompinit
-  complete -o nospace -C "$(command -v terraform)" terraform
+    complete -o nospace -C "$(command -v terraform)" terraform
 fi
 
-## Mise
+########################
+# Mise CLI activation #
+########################
+
+## Mise completions require the 'usage' program https://usage.jdx.dev
+#  You can install this with:
+#    mise use -g usage
+
 if command -v mise &>/dev/null; then
-  mkdir -p /usr/local/share/zsh/site-functions &>/dev/null
-  mise completion zsh  > /usr/local/share/zsh/site-functions/_mise
+    ## Activate mise (required for mise-installed tools to work)
+    eval "$(mise activate zsh)"
+
+    ## Setup completions only if usage is available
+    ## Completion file is generated in .zshrc before compinit
+    if command -v usage &>/dev/null; then
+        MISE_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_mise"
+        source_completion "$MISE_COMPLETION"
+    fi
 fi
 
-## Atuin
+###############################
+# Atuin shell history tracker #
+###############################
 if command -v atuin &>/dev/null; then
-  . "$HOME/.atuin/bin/env"
+    source_if_exists "{{ .chezmoi.homeDir }}/.atuin/bin/env"
+    eval "$(atuin init zsh)"
+fi
 
-  eval "$(atuin init zsh)"
+#########
+# Trivy #
+#########
+
+## Completion file is generated in .zshrc before compinit
+if command -v trivy &>/dev/null; then
+    TRIVY_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_trivy"
+    source_completion "$TRIVY_COMPLETION"
+fi
+
+##########
+# Zellij #
+##########
+
+## Generate zellij completion file
+#  Note: Completion file is generated in .zshrc before compinit
+if command -v zellij &>/dev/null; then
+    ZELLIJ_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_zellij"
+
+    ## Add a custom completion function for session names
+    #  This creates a _zellij_sessions function that can be called by the main completion
+    _zellij_sessions() {
+        local -a sessions
+        sessions=(${(f)"$(zellij list-sessions --no-formatting 2>/dev/null | awk '{print $1}')"})
+        _describe 'sessions' sessions
+    }
+
+    ## Create a wrapper completion function
+    _zellij_wrapper() {
+        ## Check if we're completing after 'attach' or 'a'
+        if (( CURRENT == 3 )) && [[ "${words[2]}" == (attach|a) ]]; then
+            _zellij_sessions
+        else
+            ## Call the original completion
+            _zellij "$@"
+        fi
+    }
+
+    ## Register our wrapper after a short delay to ensure compinit has run
+    #  This replaces the default completion with our enhanced version
+    compdef _zellij_wrapper zellij
+fi
+
+## Cargo
+if [[ -d "{{ .chezmoi.homeDir }}/.cargo" ]]; then
+  . "{{ .chezmoi.homeDir }}/.cargo/env"
+fi
+
+#########
+# x-cmd #
+#########
+source_if_exists "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
+
+########
+# Syst #
+########
+if command -v syst &>/dev/null; then
+  SYST_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_syst"
+  source_completion "$SYST_COMPLETION"
+fi
+
+###########
+# Kubectl #
+###########
+if command -v kubectl &>/dev/null; then
+  KUBECTL_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_kubectl"
+  source_completion "$KUBECTL_COMPLETION"
+fi
+
+#######
+# k0s #
+#######
+if command -v k0s &>/dev/null; then
+  K0S_ZSH_COMPLETION="{{ .chezmoi.homeDir }}/.local/share/zsh/site-functions/_k0s"
+
+  if [[ ! -f "$K0S_ZSH_COMPLETION" ]]; then
+    mkdir -p "$(dirname "$K0S_ZSH_COMPLETION")"
+    k0s completion zsh > "$K0S_ZSH_COMPLETION"
+  fi
+
+  source_completion "$K0S_ZSH_COMPLETION"
 fi
 
 ## Jiu-jitsu (jj)

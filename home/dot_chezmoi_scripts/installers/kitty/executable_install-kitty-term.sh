@@ -2,10 +2,10 @@
 set -uo pipefail
 
 INSTALLER_URL="https://sw.kovidgoyal.net/kitty/installer.sh"
-KITTY_APP_DIR="${HOME}/.local/kitty.app"
-PATH_LINK_DIR="${HOME}/.local/bin"
-APPS_DIR="${HOME}/.local/share/applications"
-CONFIG_DIR="${HOME}/.config"
+KITTY_APP_DIR="{{ .chezmoi.homeDir }}/.local/kitty.app"
+PATH_LINK_DIR="{{ .chezmoi.homeDir }}/.local/bin"
+APPS_DIR="{{ .chezmoi.homeDir }}/.local/share/applications"
+CONFIG_DIR="{{ .chezmoi.homeDir }}/.config"
 
 mkdir -p "${PATH_LINK_DIR}" "${APPS_DIR}" "${CONFIG_DIR}"
 
