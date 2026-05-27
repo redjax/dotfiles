@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 ##
 # Script to detect OS and install restic accordingly.
 ##
@@ -16,9 +15,9 @@ function validate_ip() {
     local ip="$1"
     local stat=1
     local regex='^([0-9]{1,3}\.){3}[0-9]{1,3}$'
-    
+
     if [[ "$ip" =~ $regex ]]; then
-        IFS='.' read -ra ip <<< "$ip"
+        IFS='.' read -ra ip <<<"$ip"
         [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
         stat=$?
     fi
@@ -29,7 +28,7 @@ function validate_ip() {
 function validate_tcpip_port() {
     local port="$1"
     local -i port_num="10#${port}" 2>/dev/null || return 1
-    (( port_num >= 1 && port_num <= 65535 ))
+    ((port_num >= 1 && port_num <= 65535))
 }
 
 function detect_distro() {
@@ -59,8 +58,8 @@ function install_backrest_linux() {
     local allow_remote="false"
 
     if [[ ! -f "${INSTALL_SCRIPT}" ]]; then
-      echo "[ERROR] Could not find Backrest install script at path: ${INSTALL_SCRIPT}"
-      return 1
+        echo "[ERROR] Could not find Backrest install script at path: ${INSTALL_SCRIPT}"
+        return 1
     fi
 
     echo "Installing Backrest webUI for Restic."
@@ -104,9 +103,15 @@ function install_backrest_linux() {
         read -r -n 1 -p "[-] Allow remote access? (y/n, default: n): " input
         echo ""
         case "${input,,}" in
-            y|yes) allow_remote="true"; break ;;
-            n|no|"") allow_remote="false"; break ;;
-            *) echo "Enter y/n or Enter for default." ;;
+        y | yes)
+            allow_remote="true"
+            break
+            ;;
+        n | no | "")
+            allow_remote="false"
+            break
+            ;;
+        *) echo "Enter y/n or Enter for default." ;;
         esac
     done
 
@@ -278,7 +283,7 @@ function main() {
         echo "Restic is already installed."
         RESTIC_INSTALLED="true"
     else
-        INSTALL_RESTIC="true"  ## Set this so install runs below in OS case block
+        INSTALL_RESTIC="true" ## Set this so install runs below in OS case block
     fi
 
     ## Check rclone is installed
@@ -327,83 +332,84 @@ function main() {
 
     ## Detect OS and install accordingly
     case "$OS" in
-        Linux)
-            if [[ "$INSTALL_RESTIC" == "true" ]]; then
-                install_restic_linux
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install restic."
-                    return 1
-                fi
+    Linux)
+        if [[ "$INSTALL_RESTIC" == "true" ]]; then
+            install_restic_linux
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install restic."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_RCLONE" == "true" && "$RCLONE_INSTALLED" == "false" ]]; then
-                install_rclone_linux
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install rclone."
-                    return 1
-                fi
+        if [[ "$INSTALL_RCLONE" == "true" && "$RCLONE_INSTALLED" == "false" ]]; then
+            install_rclone_linux
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install rclone."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_AUTORESTIC" == "true" && "$AUTORESTIC_INSTALLED" == "false" ]]; then
-                install_autorestic
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install autorestic."
-                    return 1
-                fi
+        if [[ "$INSTALL_AUTORESTIC" == "true" && "$AUTORESTIC_INSTALLED" == "false" ]]; then
+            install_autorestic
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install autorestic."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_BACKREST" == "true" ]] && "$BACKREST_INSTALLED" == "false" ]]; then
-                install_backrest_linux
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install backrest."
-                    return 1
+        if [[ "$INSTALL_BACKREST" == "true" ]] && "$BACKREST_INSTALLED" == "false" ]]; then
+            install_backrest_linux
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install backrest."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_RESTICPROFILE" == "true" && "$RESTICPROFILE_INSTALLED" == "false" ]]; then
-                install_resticprofile_linux
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install resticprofile."
-                    return 1
-                fi
+        if [[ "$INSTALL_RESTICPROFILE" == "true" && "$RESTICPROFILE_INSTALLED" == "false" ]]; then
+            install_resticprofile_linux
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install resticprofile."
+                return 1
             fi
-            ;;
-        Darwin)
-            if [[ "$INSTALL_RESTIC" == "true" ]]; then
-                install_restic_macos
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install restic."
-                    return 1
-                fi
+        fi
+        ;;
+    Darwin)
+        if [[ "$INSTALL_RESTIC" == "true" ]]; then
+            install_restic_macos
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install restic."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_RCLONE" == "true" && "$RCLONE_INSTALLED" == "false" ]]; then
-                install_rclone_macos
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install rclone."
-                    return 1
-                fi
+        if [[ "$INSTALL_RCLONE" == "true" && "$RCLONE_INSTALLED" == "false" ]]; then
+            install_rclone_macos
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install rclone."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_AUTORESTIC" == "true" && "$AUTORESTIC_INSTALLED" == "false" ]]; then
-                install_autorestic
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install autorestic."
-                    return 1
-                fi
+        if [[ "$INSTALL_AUTORESTIC" == "true" && "$AUTORESTIC_INSTALLED" == "false" ]]; then
+            install_autorestic
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install autorestic."
+                return 1
             fi
+        fi
 
-            if [[ "$INSTALL_RESTICPROFILE" == "true" && "$RESTICPROFILE_INSTALLED" == "false" ]]; then
-                install_resticprofile_macos
-                if [[ $? -ne 0 ]]; then
-                    echo "Failed to install resticprofile."
-                    return 1
-                fi
+        if [[ "$INSTALL_RESTICPROFILE" == "true" && "$RESTICPROFILE_INSTALLED" == "false" ]]; then
+            install_resticprofile_macos
+            if [[ $? -ne 0 ]]; then
+                echo "Failed to install resticprofile."
+                return 1
             fi
-            ;;
-        *)
-            echo "Unsupported operating system: $OS"
-            return 1
-            ;;
+        fi
+        ;;
+    *)
+        echo "Unsupported operating system: $OS"
+        return 1
+        ;;
     esac
 
     echo "Restic installation completed."
