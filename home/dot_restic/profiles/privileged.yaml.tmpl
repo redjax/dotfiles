@@ -89,51 +89,26 @@ default:
 
   no-error-on-warning: true
 
-## Backup /etc/ssh
-etc_ssh:
-  inherit: default
-
-  backup:
-    source: "/etc/ssh"
-    schedule: "weekly"
-    schedule-permission: "system"
-    schedule-priority: "background"
-    schedule-lock-mode: default
-    schedule-lock-wait: 15m30s
-
-  tags:
-    - ssh
-    - privileged
-
-## Backup /etc/cron*
-etc_cron:
+## System / privileged data
+system:
   inherit: default
 
   backup:
     source:
+      - /etc/ssh
       - /etc/cron.d
       - /etc/cron.daily
       - /etc/cron.hourly
       - /etc/cron.monthly
       - /etc/crontab
-    schedule: "daily"
-    schedule-permission: "system"
-    schedule-priority: "background"
+      - /etc/fstab
+
+    schedule: daily
+    schedule-permission: system
+    schedule-priority: background
+    schedule-lock-mode: default
+    schedule-lock-wait: 15m30s
 
   tags:
-    - cron
-    - privileged
-
-## Backup /etc/fstab
-etc_fstab:
-  inherit: default
-
-  backup:
-    source: "/etc/fstab"
-    schedule: "daily"
-    schedule-permission: "system"
-    schedule-priority: "background"
-
-  tags:
-    - fstab
+    - system
     - privileged
