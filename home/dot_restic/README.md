@@ -13,6 +13,7 @@ Restic is [scriptable](https://restic.readthedocs.io/en/latest/075_scripting.htm
 - [Resticprofile](#resticprofile)
   - [Setup](#setup-1)
   - [Usage](#usage)
+    - [Remote backups with Rclone](#remote-backups-with-rclone)
     - [Scheduling](#scheduling)
   - [Example profiles.yaml](#example-profilesyaml)
 - [Links](#links)
@@ -88,6 +89,51 @@ If you ever need to revoke a specific key/password, you can do so with `restic -
   - You can test individual backup profiles by passing `--name <profile_name>`
 - Optionally, you can add [command completion](https://creativeprojects.github.io/resticprofile/installation/shell/index.html) to your shell
   - On Linux, you can install them permanently with `resticprofile generate --bash-completion > /etc/bash_completion.d/resticprofile && chmod +x /etc/bash_completion.d/resticprofile`
+
+#### Remote backups with Rclone
+
+Restic & resticprofile support remote repositories through the `rclone` backend, which allows you to store backups in cloud services like Google Drive, Dropbox, Backblaze-compatible providers, and S3-compatible storage systems.
+
+To use an Rclone-backed repository, you first need to configure an Rclone remote using:
+
+```shell
+rclone config
+```
+
+This will walk you through a series of prompts to set up a new backend, which gets saved to `~/.config/rclone/rclone.conf`.
+
+Once the remote is configured, you can reference it directly in your `resticprofile` configuration:
+
+> [!NOTE]
+> When using `resticprofile`, you need to add this in the profile defined in `~/profiles.yaml`:
+>
+> ```yaml
+> env:
+>   RCLONE_CONFIG: "{{ default \"~/.config/rclone/rclone.conf\" .Env.RCLONE_CONFIG }}"
+
+```yaml
+repository: "rclone:pcloud:restic-backups"
+```
+
+Common patterns:
+
+- SFTP:
+
+  ```yaml
+  repository: "rclone:pcloud:restic-backups"
+  ```
+
+- Backblaze B2:
+
+  ```yaml
+  repository: "rclone:b2:restic-backups"
+  ```
+
+- S3-compatible (Wasabi, MinIO, AWS S3, etc):
+
+```yaml
+repository: "rclone:s3:restic-backups"
+```
 
 #### Scheduling
 
@@ -173,7 +219,7 @@ default:
 
   ## Define backup retention policy
   #  https://creativeprojects.github.io/resticprofile/reference/profile/retention/index.html
-  retention:
+  forget:
     ## Run cleanup after backups
     after-backup: true
     ## Keep n most recent backups
@@ -325,7 +371,7 @@ rclone_backup:
     - userland
   env:
     ## Set path to rclone.conf file. Looks in ~/.config/rclone/rclone.conf by default
-    RCLONE_CONFIG: "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.conf\" }}"
+    RCLONE_CONFIG: "{{ default \"~/.config/rclone/rclone.conf\" .Env.RCLONE_CONFIG }}"
 
 ## Example pcloud backup
 pcloud-backup:
@@ -339,7 +385,7 @@ pcloud-backup:
     - home
     - userland
   env:
-    RCLONE_CONFIG: "{{ .Env.RCLONE_CONFIG | or \"~/.config/rclone/rclone.pcloud.conf\" }}"
+    RCLONE_CONFIG: "{{ default \"~/.config/rclone/rclone.conf\" .Env.RCLONE_CONFIG }}"
 
 ## Example SSH/SFTP backup
 #  You should configure an entry in ~/.ssh/config and copy your keys in advance
@@ -357,7 +403,7 @@ sftp-backup:
     ## Optional SSH config file path or overrides.
     #  Using key-based auth may fail if this is not set.
     #  Specific to UNIX-like OSes (Linux, macOS).
-    SSH_AUTH_SOCK: "{{ .Env.SSH_AUTH_SOCK }}"
+    SSH_AUTH_SOCK: "{{ default \"\" .Env.SSH_AUTH_SOCK }}"
 
 ```
 
