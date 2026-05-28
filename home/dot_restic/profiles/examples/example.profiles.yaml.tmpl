@@ -111,15 +111,15 @@ default:
 
 ## Define backup groups. Run resticprofile with -n <group_name>
 #  to run all of the backups in that group
-groups:
-  basic:
-    - home
+# groups:
+#   basic:
+#     - home
+# 
+#   full_backup:
+#     - home
 
-  full_backup:
-    - home
-
-## Example backup /home/username directory
-home:
+## Backup user data like the home directory or other user-owned paths
+userland:
   ## Inherit from the 'default' profile above
   inherit: default
 
@@ -130,84 +130,96 @@ home:
     ## Set backup source(s)/target(s) (the path/paths to back up)
     source:
       - "/home/username"  # on Windows you can use C:\\Users\\username
+      - "/some/other/user-owned/path"
+
     ## Path(s) to restic exclude patterns file(s)
     exclude-file:
       - "/path/to/resticignore"
       - "/path/to/restic_home_ignore"
+
   ## Set tags on the backup
   tags:
-    - home
     - userland
+
   ## Check repository every 1st day of the month at 3:00
   check:
-    schedule: "*-*-01 03:00"
+    schedule: "*-*-01 03:00"  # or "monthly"
+
+#######################################################################
+# Example remote backups                                              #
+#                                                                     #
+# Note: This pattern is not recommended. Instead, you should schedule #
+# rsync clone jobs, i.e.:                                             #
+#                                                                     #
+# rclone sync /path/to/restic-repo rclone-remote-name:restic-backups  #
+#######################################################################
 
 ## Example backup to Backblaze B2
-b2_example:
-  inherit: default
-  repository: "b2:your-bucket:/restic-backups"
-  ## Override default/global password file option
-  #  Note: you should really use an env var or password-cmd for this
-  password-file: "/path/to/b2_pw"
-  backup:
-    source:
-      - "/some/path/to/backup"
-    exclude-file:
-      - "/path/to/restic_b2ignore"
-  ## It's better to set these in environment variables, or to prefix the command
-  #  with vars, i.e. B2_ACCOUNT_ID="..." B2_APPLICATION_KEY="..." resticprofile --name full_backup backup
-  env:
-    B2_ACCOUNT_ID: "..."
-    B2_APPLICATION_KEY: "..."
-
-    ## To load from the environment, use this template syntax
-    #  https://creativeprojects.github.io/resticprofile/configuration/templates/index.html
-    # B2_ACCOUNT_ID: "{{ default "" (env "B2_ACCOUNT_ID") }}"
-    # B2_APPLICATION_KEY: "{{ default "" (env "B2_APPLICATION_KEY") }}"
+# b2_example:
+#   inherit: default
+#   repository: "b2:your-bucket:/restic-backups"
+#   ## Override default/global password file option
+#   #  Note: you should really use an env var or password-cmd for this
+#   password-file: "/path/to/b2_pw"
+#   backup:
+#     source:
+#       - "/some/path/to/backup"
+#     exclude-file:
+#       - "/path/to/restic_b2ignore"
+#   ## It's better to set these in environment variables, or to prefix the command
+#   #  with vars, i.e. B2_ACCOUNT_ID="..." B2_APPLICATION_KEY="..." resticprofile --name full_backup backup
+#   env:
+#     B2_ACCOUNT_ID: "..."
+#     B2_APPLICATION_KEY: "..."
+# 
+#     ## To load from the environment, use this template syntax
+#     #  https://creativeprojects.github.io/resticprofile/configuration/templates/index.html
+#     # B2_ACCOUNT_ID: "{{ default "" (env "B2_ACCOUNT_ID") }}"
+#     # B2_APPLICATION_KEY: "{{ default "" (env "B2_APPLICATION_KEY") }}"
 
 ## Example rclone backup
-rclone_backup:
-  inherit: default
-  repository: rclone:your-remote:/path/to/restic/repo
-  backup:
-    source:
-      - "/home/username"
-  tags:
-    - rclone
-    - home
-    - userland
-  env:
-    ## Set path to rclone.conf file. Looks in ~/.config/rclone/rclone.conf by default
-    RCLONE_CONFIG: "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
+# rclone_backup:
+#   inherit: default
+#   repository: rclone:your-remote:/path/to/restic/repo
+#   backup:
+#     source:
+#       - "/home/username"
+#   tags:
+#     - rclone
+#     - home
+#     - userland
+#   env:
+#     ## Set path to rclone.conf file. Looks in ~/.config/rclone/rclone.conf by default
+#     RCLONE_CONFIG: "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
 
 ## Example pcloud backup
-pcloud-backup:
-  inherit: default
-  repository: "rclone:pcloud:restic-backups"
-  env:
-    RCLONE_CONFIG: "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
-  backup:
-    source:
-      - "/home/username"
-  tags:
-    - pcloud
-    - home
-    - userland
+# pcloud-backup:
+#   inherit: default
+#   repository: "rclone:pcloud:restic-backups"
+#   env:
+#     RCLONE_CONFIG: "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
+#   backup:
+#     source:
+#       - "/home/username"
+#   tags:
+#     - pcloud
+#     - home
+#     - userland
 
 ## Example SSH/SFTP backup
 #  You should configure an entry in ~/.ssh/config and copy your keys in advance
-sftp-backup:
-  inherit: default
-  ## You can parametrize this, i.e.
-  #  repository: "sftp:username@hostname-or-ip:/path/on/remote/host"
-  repository: "sftp:user@host:/path/to/restic-repo"
-  backup:
-    source:
-      - "/home/username"
-  tags:
-    - sftp
-  env:
-    ## Optional SSH config file path or overrides.
-    #  Using key-based auth may fail if this is not set.
-    #  Specific to UNIX-like OSes (Linux, macOS).
-    SSH_AUTH_SOCK: "{{ default "" (env "SSH_AUTH_SOCK") }}"
+# sftp-backup:
+#   inherit: default
+#   ## You can parametrize this, i.e.
+#   #  repository: "sftp:username@hostname-or-ip:/path/on/remote/host"
+#   repository: "sftp:user@host:/path/to/restic-repo"
+#   backup:
+#     source:
+#       - "/home/username"
+#   tags:
+#     - sftp
+#   env:
+#     ## Optional SSH config file path or overrides.
+#     #  Using key-based auth may fail if this is not set.
+#     #  Specific to UNIX-like OSes (Linux, macOS).
+#     SSH_AUTH_SOCK: "{{ default "" (env "SSH_AUTH_SOCK") }}"

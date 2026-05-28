@@ -3,46 +3,32 @@
 version: "1"
 
 ###
-# This is a basic default profile I use that's kind of a
-# bare-minimum for all of my machines, and the starting point for
-# other profiles.
+# Practical starting point for workstation/homelab backups.
 #
 # To use this profile as-is, copy it to {{ .chezmoi.homeDir }}/profiles.yaml,
 # or pass it with `resticprofile -c /path/to/default.yaml`
 ###
 
-global:
+default:
   default-command: backup
   initialize: true
   priority: low
   min-memory: 100
 
-groups:
-  full-backup:
-    - home
-  
-  userland:
-    - home
-
-default:
-  ## Path must exist. If you don't want to run resticprofile as root,
+  ## Path must exist ahead of time. If you don't want to run resticprofile as root,
   #  make sure it's owned by the user running resticprofile, i.e.
   #  chmod 700 /opt/restic  (if repository is /opt/restic/repo)
   repository: "local:/opt/restic/repo"
   ## Create a password with:
-  #    $> resticprofile generate --random-key $KEY_LENGTH > /path/to/restic.key
-  password-file: ""
-  default-command: snapshots
-  initialize: false
-  priority: low
-  min-memory: 100
-
+  #    $> resticprofile generate --random-key $KEY_LENGTH > /path/to/main.key
+  password-file: "{{ .chezmoi.homeDir }}/.restic/main.key"
+  
   ## Define backup retention policy
   #  https://creativeprojects.github.io/resticprofile/schedules/index.html
   forget:
     keep-last: 2
-    keep-hourly: 24
-    keep-daily: 7
+    keep-hourly: 48
+    keep-daily: 14
     keep-weekly: 4
     keep-tag:
       - forever
@@ -88,31 +74,26 @@ default:
 
   no-error-on-warning: true
 
-## Backup home dir
-home:
+userland:
   inherit: default
   default-command: backup
 
   backup:
     verbose: true
-    source: "{{ .chezmoi.homeDir }}"
-    read-concurrency: 4
-    skip-if-unchanged: true
-    exclude:
-      - ".tmp/"
-      - ".cache/"
+
+    source:
+      - "{{ .chezmoi.homeDir }}"
+      - "/some/user/owned/path"
     exclude-file:
       - "{{ .chezmoi.homeDir }}/.restic/ignores/default"
       - "{{ .chezmoi.homeDir }}/.restic/ignores/home"
-    exclude-cloud-files: true
-    group-by: "tags,host,paths"
-    schedule: "0,6,12,18:00"  # every 6 hours
+
+    schedule: "0,6,12,18:00"
     schedule-permission: "user"
     schedule-priority: "standard"
     schedule-lock-mode: default
+    ## Wait for existing repo operations instead of failing immediately
     schedule-lock-wait: 15m30s
 
   tags:
-    - home
     - userland
-
