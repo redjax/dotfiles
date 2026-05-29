@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://creativeprojects.github.io/resticprofile/jsonschema/config.json
+---
+version: "1"
+
+global:
+  default-command: backup
+  initialize: true
+  priority: low
+  min-memory: 100
+  scheduler: "auto"
+  schedule-defaults:
+    permission: "auto"
+
+## Combine multiple backups into a single 'group'
+groups:
+  full-backup:
+    - userland
+    - system
+    - remote-callisto
+    - remote-pcloud
+
+default:
+  env-file: "{{ .Env.HOME }}/.restic/environments/colossus.env"
+  repository: "local:/mnt/wd_passport_backups/backup/colossus/restic/colossus"
+  ## Create a password with:
+  #    $> resticprofile generate --random-key $KEY_LENGTH > /path/to/restic.key
+  password-file: "{{ .Env.HOME }}/.restic/passwords/main"
+
+  ## Define backup retention policy
+  #  https://creativeprojects.github.io/resticprofile/reference/profile/retention/index.html
+  forget:
+    keep-last: 2
+    keep-hourly: 24
+    keep-daily: 7
+    keep-weekly: 4
+    keep-tag:
+      - forever
+    prune: true
+
+  ## Define pruning policy
+  #  https://creativeprojects.github.io/resticprofile/reference/profile/prune/index.html
+  prune:
+    schedule: "weekly"
+    schedule-permission: "auto"
+
+  ## Backup operation defaults
+  #  https://creativeprojects.github.io/resticprofile/reference/profile/backup/index.html
+  backup:
+    verbose: false
+    one-file-system: false
+    read-concurrency: 4
+    skip-if-unchanged: true
+    exclude:
+      - ".tmp/"
+      - ".cache/"
+    exclude-file:
+      - "{{ .Env.HOME }}/.restic/ignores/default"
+      - "{{ .Env.HOME }}/.restic/ignores/home"
+    exclude-cloud-files: true
+    group-by: "tags,host,paths"
+    schedule: "daily"
+    schedule-permission: "user"
+    schedule-priority: "standard"
+    schedule-lock-mode: default
+    schedule-lock-wait: 15m30s
+
+  ## Checks the repository for errors
+  #  https://creativeprojects.github.io/resticprofile/reference/profile/check/index.html
+  check:
+    schedule: "weekly"
+    schedule-after-network-online: false
+    schedule-ignore-on-battery: false
+    schedule-ignore-on-battery-less-than: 20
+    read-data: true
+    with-cache: false
+
+  ## Cache settings
+  #  https://creativeprojects.github.io/resticprofile/reference/profile/cache/index.html
+  cache:
+    cleanup: true
+    max-age: 30
+    no-size: false
+
+  no-error-on-warning: true
+
+userland:
+  inherit: default
+
+  backup:
+    verbose: true
+    source:
+      - "{{ .Env.HOME }}"
+      - "/mnt/evo_1tb_ssd/architecture"
+      - "/mnt/evo_1tb_ssd/git"
+      - "{{ .Env.HOME }}/Downloads/keep/"
+      - "{{ .Env.HOME }}/.local/share/"
+      - "{{ .Env.HOME }}/.local/share/chezmoi/"
+      - "{{ .Env.HOME }}/.local/share/Enpass/"
+      - "{{ .Env.HOME }}/.local/share/kwalletd/"
+      - "{{ .Env.HOME }}/.local/share/"
+      - "{{ .Env.HOME }}/.local/share/plasma/"
+      - "{{ .Env.HOME }}/.local/share/kde6/"
+      - "{{ .Env.HOME }}/.local/share/kate/"
+      - "{{ .Env.HOME }}/.local/share/konsole"
+      - "/mnt/sandisk_backups/backup/intellishell/"
+      - "{{ .Env.HOME }}/.thunderbird"
+      - "{{ .Env.HOME }}/.var/app/org.mozilla.Thunderbird"
+
+    exclude:
+      - "{{ .Env.HOME }}/.thunderbird/*/ImapMail"
+      - "{{ .Env.HOME }}/.thunderbird/*.cache"
+
+    exclude-file:
+      - "{{ .Env.HOME }}/.restic/ignores/home"
+
+  check:
+    schedule: "weekly"
+
+  tags:
+    - userland
+    - local
+
+system:
+  inherit: default
+
+  backup:
+    verbose: true
+    schedule-permission: "system"
+
+    source:
+      - "/etc/ssh"
+      - "/etc/fstab"
+      - "/etc/cron.d"
+      - "/etc/cron.daily"
+      - "/etc/cron.hourly"
+      - "/etc/cron.weekly"
+      - "/etc/cron.monthly"
+      - "/etc/crontab"
+      - "/var/spool/cron/"
+
+  tags:
+    - system
+    - privileged
+    - local
+
+remote-callisto:
+  inherit: default
+  default-command: backup
+  repository: "sftp:callisto:/mnt/data/backup/restic/colossus"
+  password-file: "{{ .Env.HOME }}/.restic/passwords/scripts"
+
+  backup:
+    source:
+      - "/mnt/wd_passport_backups/backup/colossus/restic/colossus"
+
+    schedule-permission: "system"
+
+  tags:
+    - userland
+    - remote
+    - ssh
+
+remote-pcloud:
+  inherit: default
+  default-command: backup
+  repository: "rclone:pcloud:backup/restic/colossus"
+  password-file: "{{ .Env.HOME }}/.restic/passwords/scripts"
+
+  env:
+    RCLONE_CONFIG: "{{ .Env.HOME }}/.config/rclone/rclone.conf"
+
+  backup:
+    source: "{{ .Env.HOME }}"
+    exclude-file:
+      - "{{ .Env.HOME }}/.restic/ignores/home"
+
+    schedule-permission: "system"
+
+  tags:
+    - userland
+    - remote
+    - rclone
+    - pcloud
