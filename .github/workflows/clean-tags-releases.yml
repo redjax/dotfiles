@@ -1,0 +1,69 @@
+---
+############################################
+# Workflow to clean old git tags/releases. #
+############################################
+
+name: Clean Tags
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Cleanup mode
+        required: true
+        type: choice
+        options:
+          - keep-latest
+          - older-than
+
+      keep_latest:
+        description: Number of newest releases to keep
+        required: false
+        default: "10"
+        type: string
+
+      older_than:
+        description: Delete releases older than YYYY-MM-DD
+        required: false
+        type: string
+
+      dry_run:
+        description: Preview deletions only
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq gh
+
+      - name: Execute cleanup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x scripts/git/rm-old-github-tags.sh
+
+          ARGS=""
+
+          if [[ "${{ github.event.inputs.mode }}" == "keep-latest" ]]; then
+            ARGS="--keep-latest ${{ github.event.inputs.keep_latest }}"
+          else
+            ARGS="--older-than ${{ github.event.inputs.older_than }}"
+          fi
+
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          ./scripts/git/rm-old-github-tags.sh $ARGS
