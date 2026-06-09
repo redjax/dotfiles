@@ -27,13 +27,13 @@ default:
       - ".vim/"
       - ".cache/"
       - ".vscode-server/"
-    run-after:
-      - >
-        curl -s -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}"
-        -H "User-Agent: redjax/resticprofile"
-        -F "title=Restic Backup SUCCESS"
-        -F "message=Backup completed successfully on $(hostname) at $(date)"
-        -F "priority=5"
+    # run-after:
+    #   - >
+    #     curl -s -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}"
+    #     -H "User-Agent: redjax/resticprofile"
+    #     -F "title=Restic Backup SUCCESS"
+    #     -F "message=Backup completed successfully on $(hostname) at $(date)"
+    #     -F "priority=5"
     run-after-fail:
       - >
         curl -s -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}"
