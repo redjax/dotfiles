@@ -158,8 +158,28 @@ function install_restic_linux() {
     # Remove leading 'v' if present for URL construction
     RESTIC_VERSION_CLEAN=${RESTIC_VERSION#v}
 
-    # Construct download URL
-    URL="https://github.com/restic/restic/releases/download/${RESTIC_VERSION}/restic_${RESTIC_VERSION_CLEAN}_linux_amd64.bz2"
+    # Detect CPU architecture
+    ARCH=$(uname -m)
+    case "$ARCH" in
+        x86_64)
+            ARCH_STRING="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH_STRING="arm64"
+            ;;
+        armv7l)
+            ARCH_STRING="arm"
+            ;;
+        *)
+            echo "Unsupported architecture: $ARCH"
+            return 1
+            ;;
+    esac
+
+    echo "Detected architecture: $ARCH ($ARCH_STRING)"
+
+    # Construct download URL with correct architecture
+    URL="https://github.com/restic/restic/releases/download/${RESTIC_VERSION}/restic_${RESTIC_VERSION_CLEAN}_linux_${ARCH_STRING}.bz2"
 
     # Create temporary directory
     TMPDIR=$(mktemp -d)
