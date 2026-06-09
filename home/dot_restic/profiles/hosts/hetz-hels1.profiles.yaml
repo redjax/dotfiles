@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://creativeprojects.github.io/resticprofile/jsonschema/config.json
+---
+version: "1"
+
+global:
+  default-command: backup
+  initialize: true
+  priority: low
+
+default:
+  env-file: "/home/jack/.restic/environments/hetz-hels1.env"
+  repository: "${RESTIC_REPOSITORY}"
+  password-file: "/home/jack/.restic/passwords/main"
+
+  backup:
+    verbose: false
+    one-file-system: true
+    source:
+      - "/home/jack"
+      - "/var/lib/docker/volumes"
+    exclude:
+      - ".cache/"
+      - ".tmp/"
+      - ".local/share/nvim/"
+      - ".local/share/nvim*/"
+      - ".npm/"
+      - ".vim/"
+      - ".cache/"
+      - ".vscode-server/"
+    run-after:
+      - >
+        curl -s -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}"
+        -H "User-Agent: redjax/resticprofile"
+        -F "title=Restic Backup SUCCESS"
+        -F "message=Backup completed successfully on $(hostname) at $(date)"
+        -F "priority=5"
+    run-after-fail:
+      - >
+        curl -s -X POST "${GOTIFY_URL}/message?token=${GOTIFY_TOKEN}"
+        -H "User-Agent: redjax/resticprofile"
+        -F "title=Restic Backup FAILED"
+        -F "message=Backup FAILED on $(hostname) at $(date)"
+        -F "priority=9"
+
+  forget:
+    keep-daily: 7
+    keep-weekly: 4
+    keep-monthly: 6
+    prune: true
+
+  check:
+    schedule: "weekly"
+
+  cache:
+    cleanup: true
+
+  no-error-on-warning: true
+
