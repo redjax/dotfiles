@@ -11,7 +11,7 @@ version: "1"
 
 default:
   default-command: backup
-  initialize: true
+  initialize: false
   priority: low
   min-memory: 100
 
@@ -54,6 +54,10 @@ default:
       - "{{ .chezmoi.homeDir }}/.restic/ignores/default"
     exclude-cloud-files: true
     group-by: "tags,host,paths"
+    ## Wait for existing repo operations instead of failing immediately
+    schedule-lock-wait: 15m30s
+    schedule-lock-mode: default
+    schedule-priority: "standard"
 
   ## Checks the repository for errors
   #  https://creativeprojects.github.io/resticprofile/reference/profile/check/index.html
@@ -74,6 +78,7 @@ default:
 
   no-error-on-warning: true
 
+## Userland backup, for dirs/files user has permission to access without sudo
 userland:
   inherit: default
   default-command: backup
@@ -90,10 +95,34 @@ userland:
 
     schedule: "0,6,12,18:00"
     schedule-permission: "user"
-    schedule-priority: "standard"
-    schedule-lock-mode: default
-    ## Wait for existing repo operations instead of failing immediately
-    schedule-lock-wait: 15m30s
 
   tags:
     - userland
+
+## Privileged backup, for dirs/files that require sudo to access
+system:
+  inherit: default
+  default-command: backup
+
+  backup:
+    verbose: true
+
+    source:
+      - "/etc/fstab"
+      - "/etc/cron.d/"
+      - "/etc/cron.daily"
+      - "/etc/cron.hourly"
+      - "/etc/cron.monthly"
+      - "/etc/cron.weekly"
+      - "/etc/cron.yearly/"
+      - "/etc/ssh/sshd_config"
+      - "/var/spool/cron/crontabs/"  # Debian
+      - "/var/spool/cron/"  # RedHat
+
+    schedule: "daily"
+    schedule-permission: "system"
+
+  tags:
+    - system
+    - privileged
+
