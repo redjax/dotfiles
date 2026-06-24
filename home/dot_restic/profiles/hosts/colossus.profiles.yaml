@@ -103,6 +103,7 @@ userland:
       - "{{ .Env.HOME }}/.local/share/kate/"
       - "{{ .Env.HOME }}/.local/share/konsole"
       - "/mnt/sandisk_backups/backup/intellishell/"
+      - "/mnt/evo_1tb_ssd/keepass"
       - "{{ .Env.HOME }}/.thunderbird"
       - "{{ .Env.HOME }}/.var/app/org.mozilla.Thunderbird"
 
