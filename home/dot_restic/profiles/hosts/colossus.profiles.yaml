@@ -59,7 +59,7 @@ default:
     exclude-cloud-files: true
     group-by: "tags,host,paths"
     schedule: "daily"
-    schedule-permission: "user"
+    schedule-permission: "auto"
     schedule-priority: "standard"
     schedule-lock-mode: default
     schedule-lock-wait: 15m30s
