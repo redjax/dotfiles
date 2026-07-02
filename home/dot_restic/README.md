@@ -407,6 +407,24 @@ sftp-backup:
 
 ```
 
+## Backrest
+
+Run the [`install-backrest.sh` script](./scripts/apps/backrest/executable_install-backrest.sh) to install or update Backrest.
+
+By default, the webUI is available at `http://127.0.0.1:9898` and is only accessible from the localhost. The configuration is stored in `$HOME/.config/backrest` (or sometimes `/root/.config/backrest`), and the service runs as the current user. This is fine for backing up user-owned files exclusively, but if Backrest needs sudo/root permissions for a backup, i.e. for a path owned by a user other than the user running the Backrest service, you will need to modify the systemd service definition.
+
+Edit `/etc/systemd/system/backrest.service`. In the `[Service]` section, set `User=root` and comment out the `Group=` line.
+
+If you want the webUI to be available on a different port, or available outside of the localhost, change the `Environment="BACKREST_PORT"` line. By default it is:
+
+```service
+Environment="BACKREST_PORT=127.0.0.1:9898"`
+```
+
+If you use `0.0.0.0`, Backrest will be available on all interfaces. You can lock it to a specific address, i.e. a Wireguard VPN, by using the IP address for that connection.
+
+To serve the port on something other than `9898`, change the `:9898` to the port you want to use.
+
 ## Links
 
 - [Restic home](https://restic.net)
