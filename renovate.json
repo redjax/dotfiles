@@ -10,8 +10,7 @@
             "description": "Automerge minor and patch updates",
             "matchUpdateTypes": [
                 "minor",
-                "patch",
-                "pin"
+                "patch"
             ],
             "automerge": true
         }
