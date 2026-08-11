@@ -18,14 +18,14 @@ jobs:
           fetch-depth: 0 # Trufflehog needs full history
 
       - name: Run Trufflehog scan on source
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@43b8e371aa24a89de3ea57bde0769273b5d2b0fb # main
         with:
           extra_args: --results=verified,unknown --json
         continue-on-error: true
 
       - name: Upload Trufflehog results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: trufflehog-source-results
           path: |
@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload rendered scan results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: trufflehog-rendered-results
           path: /tmp/trufflehog-rendered.json
@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload rendered files on findings
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: chezmoi-rendered-files
           path: /tmp/chezmoi-rendered/
