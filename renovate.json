@@ -1,0 +1,19 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:best-practices",
+        ":dependencyDashboard"
+    ],
+    "separateMinorPatch": true,
+    "packageRules": [
+        {
+            "description": "Automerge minor and patch updates",
+            "matchUpdateTypes": [
+                "minor",
+                "patch",
+                "pin"
+            ],
+            "automerge": true
+        }
+    ]
+}

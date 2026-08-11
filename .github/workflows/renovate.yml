@@ -6,6 +6,10 @@
 name: Run Renovate
 
 on:
+  ## Temporary test trigger
+  push:
+    branches:
+      - feat/renovate
   schedule:
     - cron: "0 3 * * *"
     - cron: "0 9 * * *"
