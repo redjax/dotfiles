@@ -1,4 +1,4 @@
-"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+#:schema https://yazi-rs.github.io/schemas/keymap.json
 
 # Launch shell keybindings for windows & linux
 [[mgr.prepend_keymap]]
