@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v resticprofile >&/dev/null; then
+  echo "[ERROR] resticprofile is not installed" >&2
+  exit 1
+fi
+
+PROFILES_YML="{{ .chezmoi.homeDir }}/profiles.yaml"
+
+function usage() {
+  cat <<EOF
+Usage:
+  ${0} [OPTIONS]
+
+Options:
+  -h, --help    Show this help menu
+  -c, --config  Path to a profiles.yaml file (default: \$HOME/profiles.yaml)
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -h,--help)
+    usage
+    exit 0
+    ;;
+  -c,--config)
+    PROFILES_YML="$2"
+    shift 2
+    ;;
+  *)
+    echo "[ERROR] Invalid arg: $1" >&2
+    usage
+    exit 1
+    ;;
+  esac
+done
+
+if [[ -z "${PROFILES_YML}" ]]; then
+  echo "[ERROR] Missing --config file path" >&2
+  usage
+  exit 1
+fi
+
+if [[ ! -f "${PROFILES_YML}" ]]; then
+  echo "[ERROR] Could not find profiles.yaml file at path: ${PROFILES_YML}" >&2
+  exit 1
+fi
+
+echo "Unscheduling all resticprofile backups"
+resticprofile -c "${PROFILES_YML}" unschedule --all

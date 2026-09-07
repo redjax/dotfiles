@@ -43,72 +43,114 @@ cleanup = false
 max-age = 30
 no-size = false
 
-[groups]
-basic = ["home"]
-full_backup = ["home"]
 
-[home]
+
+##
+# User data (workstation / home directory)
+##
+[userland]
 inherit = "default"
 
-[home.backup]
+[userland.backup]
 verbose = true
-source = ["/home/username"]
-exclude-file = ["/path/to/resticignore", "/path/to/restic_home_ignore"]
+source = ["/home/username", "/some/user/owned/path"]
+exclude-file = ["/path/to/resticignore", "/path/to/restic_userland_ignore"]
 
-[home.tags]
-tags = ["home", "userland"]
+read-concurrency = 4
+skip-if-unchanged = true
 
-[home.check]
-schedule = "*-*-01 03:00"
+schedule = "0,6,12,18:00"
+schedule-permission = "user"
+schedule-priority = "standard"
+schedule-lock-mode = "default"
+schedule-lock-wait = "15m30s"
 
-[b2_example]
+[userland.tags]
+tags = ["userland"]
+
+##
+# System / privileged data
+##
+[system]
 inherit = "default"
-repository = "b2:your-bucket:/restic-backups"
-password-file = "/path/to/b2_pw"
 
-[b2_example.backup]
-source = ["/some/path/to/backup"]
-exclude-file = ["/path/to/restic_b2ignore"]
+[system.backup]
+source = [
+  "/etc/ssh",
+  "/etc/cron.d",
+  "/etc/cron.daily",
+  "/etc/cron.hourly",
+  "/etc/cron.monthly",
+  "/etc/crontab",
+  "/etc/fstab",
+  "/home/username/docker",
+  "/home/username/git"
+]
 
-[b2_example.env]
-B2_ACCOUNT_ID = "..."
-B2_APPLICATION_KEY = "..."
+schedule = "daily"
+schedule-permission = "system"
+schedule-priority = "background"
 
-[rclone_backup]
-inherit = "default"
-repository = "rclone:your-remote:restic-backups"
+[system.tags]
+tags = ["system", "privileged"]
 
-[rclone_backup.backup]
-source = ["/home/username"]
+#######################################################################
+# Example remote backups                                              #
+#                                                                     #
+# Note: This pattern is not recommended. Instead, you should schedule #
+# rsync clone jobs, i.e.:                                             #
+#                                                                     #
+# rclone sync /path/to/restic-repo rclone-remote-name:restic-backups  #
+#######################################################################
 
-[rclone_backup.tags]
-tags = ["rclone", "home", "userland"]
+# [b2_example]
+# inherit = "default"
+# repository = "b2:your-bucket:/restic-backups"
+# password-file = "/path/to/b2_pw"
 
-[rclone_backup.env]
-RCLONE_CONFIG = "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
+# [b2_example.backup]
+# source = ["/some/path/to/backup"]
+# exclude-file = ["/path/to/restic_b2ignore"]
 
-[pcloud-backup]
-inherit = "default"
-repository = "rclone:your-remote:/path/to/restic/repo"
+# [b2_example.env]
+# B2_ACCOUNT_ID = "..."
+# B2_APPLICATION_KEY = "..."
 
-[pcloud-backup.env]
-RCLONE_CONFIG = "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
+# [rclone_backup]
+# inherit = "default"
+# repository = "rclone:your-remote:restic-backups"
 
-[pcloud-backup.backup]
-source = ["/home/username"]
+# [rclone_backup.backup]
+# source = ["/home/username"]
 
-[pcloud-backup.tags]
-tags = ["pcloud", "home", "userland"]
+# [rclone_backup.tags]
+# tags = ["rclone", "home", "userland"]
 
-[sftp-backup]
-inherit = "default"
-repository = "sftp:user@host:/path/to/restic-repo"
+# [rclone_backup.env]
+# RCLONE_CONFIG = "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
 
-[sftp-backup.backup]
-source = ["/home/username"]
+# [pcloud-backup]
+# inherit = "default"
+# repository = "rclone:your-remote:/path/to/restic/repo"
 
-[sftp-backup.tags]
-tags = ["sftp"]
+# [pcloud-backup.env]
+# RCLONE_CONFIG = "{{ default "~/.config/rclone/rclone.pcloud.conf" (env "RCLONE_CONFIG") }}"
 
-[sftp-backup.env]
-SSH_AUTH_SOCK = "{{ default "" (env "SSH_AUTH_SOCK") }}"
+# [pcloud-backup.backup]
+# source = ["/home/username"]
+
+# [pcloud-backup.tags]
+# tags = ["pcloud", "home", "userland"]
+
+# [sftp-backup]
+# inherit = "default"
+# repository = "sftp:user@host:/path/to/restic-repo"
+
+# [sftp-backup.backup]
+# source = ["/home/username"]
+
+# [sftp-backup.tags]
+# tags = ["sftp"]
+
+# [sftp-backup.env]
+# SSH_AUTH_SOCK = "{{ default "" (env "SSH_AUTH_SOCK") }}"

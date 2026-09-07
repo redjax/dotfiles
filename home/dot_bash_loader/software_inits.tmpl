@@ -134,7 +134,7 @@ if [[ -d "{{ .chezmoi.homeDir }}/.atuin" ]]; then
   export PATH="{{ .chezmoi.homeDir }}/.atuin/bin:$PATH"
 
   if command -v atuin &>/dev/null; then
-    . "$HOME/.atuin/bin/env"
+    . "{{ .chezmoi.homeDir }}/.atuin/bin/env"
 
     [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
     eval "$(atuin init bash)"
@@ -174,3 +174,10 @@ if command -v k0s &>/dev/null; then
   source "$K0S_BASH_COMPLETION"
 fi
 
+## Flyline
+if [[ -f "{{ .chezmoi.homeDir }}/.local/lib/libflyline.so" ]]; then
+    if enable -f "{{ .chezmoi.homeDir }}/.local/lib/libflyline.so" flyline 2>/dev/null; then
+        # flyline loaded successfully
+        :
+    fi
+fi
