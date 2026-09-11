@@ -1,0 +1,9 @@
+## Indent with two spaces.
+-i
+2
+
+## Indent case branches.
+-ci
+
+## Apply binary-next-line redirection formatting.
+-sr
