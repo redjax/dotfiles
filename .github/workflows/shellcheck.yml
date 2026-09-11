@@ -1,0 +1,122 @@
+---
+name: ShellCheck
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - "home/**"
+      - "scripts/**"
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck rendered templates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck --version
+
+      - name: Install chezmoi
+        run: |
+          curl -fsLS https://get.chezmoi.io | sh -s -- -b "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          chezmoi --version
+
+      - name: Render chezmoi source
+        env:
+          CHEZMOI_DATA_custom_hostname: github-actions
+        run: |
+          set -euo pipefail
+
+          rendered_dir="${RUNNER_TEMP}/chezmoi-rendered"
+
+          mkdir -p "${rendered_dir}"
+
+          chezmoi archive \
+            --source="${GITHUB_WORKSPACE}" \
+            --output="${rendered_dir}.tar"
+
+          tar \
+            --extract \
+            --file="${rendered_dir}.tar" \
+            --directory="${rendered_dir}"
+
+          rm -f "${rendered_dir}.tar"
+
+      - name: Install ShellCheck configuration
+        run: |
+          cp .shellcheckrc "${RUNNER_TEMP}/chezmoi-rendered/.shellcheckrc"
+
+      - name: Run ShellCheck
+        env:
+          RENDERED_DIR: ${{ runner.temp }}/chezmoi-rendered
+        run: |
+          set -euo pipefail
+
+          mapfile -t scripts < <(
+            {
+              find "${RENDERED_DIR}" \
+                -type f \
+                \( \
+                  -name "*.sh" \
+                  -o -name "*.bash" \
+                  -o -name "*.zsh" \
+                  -o -name "*.ksh" \
+                \)
+
+              find "${RENDERED_DIR}" \
+                -type f \
+                -executable \
+                -exec sh -c '
+                  for file; do
+                    if head -n 1 "$file" 2>/dev/null | grep -q "^#!.*sh"; then
+                      printf "%s\n" "$file"
+                    fi
+                  done
+                ' sh {} +
+            } | sort -u
+          )
+
+          if ((${#scripts[@]} == 0)); then
+            echo "No shell scripts found."
+            exit 0
+          fi
+
+          echo "Found ${#scripts[@]} shell scripts."
+
+          failed=0
+
+          for script in "${scripts[@]}"; do
+            relative="${script#${RENDERED_DIR}/}"
+
+            echo "Checking ${relative}"
+
+            if ! shellcheck \
+              --severity=warning \
+              --color=always \
+              "${script}"; then
+              failed=$((failed + 1))
+            fi
+          done
+
+          if ((failed > 0)); then
+            echo "ShellCheck found issues in ${failed} file(s)."
+            exit 1
+          fi
+
+          echo "ShellCheck passed."
