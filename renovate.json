@@ -12,6 +12,17 @@
                 "patch"
             ],
             "automerge": true
+        },
+        {
+            "description": "Automerge GitHub Actions digest updates",
+            "matchManagers": [
+                "github-actions"
+            ],
+            "matchUpdateTypes": [
+                "pinDigest",
+                "digest"
+            ],
+            "automerge": true
         }
     ]
 }
