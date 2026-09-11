@@ -14,11 +14,17 @@ on:
           - minor
           - major
 
+permissions:
+  contents: read
+
 jobs:
   setup:
+    name: Determine release version
     runs-on: ubuntu-latest
+
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -27,43 +33,65 @@ jobs:
 
       - name: Get latest tag
         id: get_tag
+        shell: bash
         run: |
+          set -euo pipefail
+
           git fetch --tags
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-          if [ -z "$LATEST_TAG" ]; then
-            LATEST_TAG="v0.0.0"
+
+          latest_tag="$(
+            git tag --sort=-v:refname |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+              head -n 1
+          )"
+
+          if [[ -z "${latest_tag}" ]]; then
+            latest_tag="v0.0.0"
           fi
-          echo "Latest tag: $LATEST_TAG"
-          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+          echo "Latest tag: ${latest_tag}"
+          echo "latest_tag=${latest_tag}" >> "${GITHUB_OUTPUT}"
 
       - name: Bump version
         id: bump_version
+        shell: bash
+        env:
+          LATEST_TAG: ${{ steps.get_tag.outputs.latest_tag }}
+          BUMP: ${{ inputs.bump }}
         run: |
-          LATEST="${{ steps.get_tag.outputs.latest_tag }}"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+          set -euo pipefail
 
-          BUMP="${{ github.event.inputs.bump }}"
-          case "$BUMP" in
+          IFS='.' read -r major minor patch <<< "${LATEST_TAG#v}"
+
+          case "${BUMP}" in
             major)
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
+              major=$((major + 1))
+              minor=0
+              patch=0
               ;;
             minor)
-              MINOR=$((MINOR + 1))
-              PATCH=0
+              minor=$((minor + 1))
+              patch=0
               ;;
             patch)
-              PATCH=$((PATCH + 1))
+              patch=$((patch + 1))
+              ;;
+            *)
+              echo "::error::Invalid version bump: ${BUMP}"
+              exit 1
               ;;
           esac
 
-          NEW_TAG="$MAJOR.$MINOR.$PATCH"
-          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+          new_tag="${major}.${minor}.${patch}"
+
+          echo "New version: ${new_tag}"
+          echo "new_tag=${new_tag}" >> "${GITHUB_OUTPUT}"
 
   build:
+    name: Build ${{ matrix.os }}-${{ matrix.arch }}
     needs: setup
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         include:
@@ -75,163 +103,343 @@ jobs:
             arch: amd64
           - os: darwin
             arch: arm64
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
-      - name: Create release directory
+      - name: Install dependencies
+        shell: bash
         run: |
-          mkdir -p release/
-          mkdir -p temp_chezmoi/
+          set -euo pipefail
 
-      - name: Download chezmoi binary
+          sudo apt-get update
+          sudo apt-get install -y jq zip
+
+      - name: Install chezmoi
+        shell: bash
         run: |
-          CHEZMOI_VERSION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/twpayne/chezmoi/releases/latest | \
-            jq -r '.tag_name')
-          echo "Latest chezmoi version: $CHEZMOI_VERSION"
+          set -euo pipefail
 
-          if [ -z "$CHEZMOI_VERSION" ] || [ "$CHEZMOI_VERSION" = "null" ]; then
-            echo "Error: Failed to fetch chezmoi version"
+          mkdir -p "${HOME}/.local/bin"
+
+          curl -fsLS https://get.chezmoi.io |
+            sh -s -- -b "${HOME}/.local/bin"
+
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+          chezmoi --version
+
+      - name: Install shellfmt
+        shell: bash
+        env:
+          SHELLFMT_VERSION: "3.10.0"
+        run: |
+          set -euo pipefail
+
+          install_dir="${HOME}/.local/bin"
+          mkdir -p "${install_dir}"
+
+          shellfmt_url="https://github.com/lu-zero/shellfmt/releases/download/v${SHELLFMT_VERSION}/shellfmt-${SHELLFMT_VERSION}-linux-amd64"
+
+          curl \
+            --fail \
+            --location \
+            --silent \
+            --show-error \
+            --output "${install_dir}/shellfmt" \
+            "${shellfmt_url}"
+
+          chmod +x "${install_dir}/shellfmt"
+
+          echo "${install_dir}" >> "${GITHUB_PATH}"
+
+          shellfmt --version
+
+      - name: Create release directories
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf release temp_chezmoi deploy
+
+          mkdir -p \
+            release/dotfiles \
+            temp_chezmoi \
+            deploy
+
+      - name: Render chezmoi source
+        shell: bash
+        env:
+          CHEZMOI_DATA_custom_hostname: github-actions
+        run: |
+          set -euo pipefail
+
+          archive="${RUNNER_TEMP}/chezmoi-rendered.tar"
+
+          chezmoi archive \
+            --source="${GITHUB_WORKSPACE}" \
+            --output="${archive}"
+
+          tar \
+            --extract \
+            --file="${archive}" \
+            --directory=release/dotfiles
+
+          echo "Rendered files:"
+          find release/dotfiles -type f -print | sort
+
+      - name: Format rendered shell files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ./scripts/codeql/shellfmt_rendered_scripts.sh \
+            "${GITHUB_WORKSPACE}/release/dotfiles"
+
+      - name: Verify rendered shell files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          shell_file_count="$(
+            find release/dotfiles \
+              -type f \
+              \( \
+                -name '*.sh' \
+                -o -name '*.bash' \
+                -o -name '*.zsh' \
+                -o -name '*.ksh' \
+                -o -name '*.bats' \
+              \) |
+              wc -l
+          )"
+
+          echo "Rendered shell files: ${shell_file_count}"
+
+      - name: Download chezmoi release binary
+        shell: bash
+        env:
+          CHEZMOI_OS: ${{ matrix.os }}
+          CHEZMOI_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+
+          chezmoi_version="$(
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              https://api.github.com/repos/twpayne/chezmoi/releases/latest |
+              jq -r '.tag_name'
+          )"
+
+          if [[ -z "${chezmoi_version}" || "${chezmoi_version}" == "null" ]]; then
+            echo "::error::Failed to determine the latest chezmoi version."
             exit 1
           fi
 
-          CHEZMOI_OS="${{ matrix.os }}"
-          CHEZMOI_ARCH="${{ matrix.arch }}"
+          echo "Latest chezmoi version: ${chezmoi_version}"
 
-          CHEZMOI_URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/chezmoi_${CHEZMOI_VERSION#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
+          chezmoi_url="https://github.com/twpayne/chezmoi/releases/download/${chezmoi_version}/chezmoi_${chezmoi_version#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
 
-          echo "Downloading from: $CHEZMOI_URL"
-          curl -L "$CHEZMOI_URL" | tar -xz -C temp_chezmoi/
+          echo "Downloading chezmoi binary for ${CHEZMOI_OS}/${CHEZMOI_ARCH}"
 
-          # Move the binary to release directory
-          mv temp_chezmoi/chezmoi release/
+          curl \
+            --fail \
+            --location \
+            --silent \
+            --show-error \
+            "${chezmoi_url}" |
+            tar \
+              --extract \
+              --gzip \
+              --directory=temp_chezmoi
 
-      - name: Copy dotfiles templates
+          install -m 0755 \
+            temp_chezmoi/chezmoi \
+            release/chezmoi
+
+          rm -rf temp_chezmoi
+
+      - name: Copy release metadata
+        shell: bash
         run: |
-          # Copy the home directory (contains all templates)
-          cp -r home/ release/dotfiles/
+          set -euo pipefail
 
-          # Copy any additional config files users might need
-          cp .chezmoidata.yml release/ 2>/dev/null || echo ".chezmoidata.yml not found, skipping"
+          if [[ -f .chezmoidata.yml ]]; then
+            cp .chezmoidata.yml release/
+          fi
 
       - name: Create installation script
+        shell: bash
+        env:
+          RELEASE_OS: ${{ matrix.os }}
+          RELEASE_ARCH: ${{ matrix.arch }}
         run: |
-          cat <<'EOF' > release/install.sh
-          #!/bin/bash
-          set -e
+          set -euo pipefail
 
-          echo "Installing dotfiles with bundled chezmoi..."
-          echo ""
-          echo "IMPORTANT: This will modify your home directory dotfiles!"
-          echo "Make sure you have backed up any existing dotfiles you want to keep."
-          echo ""
-          read -p "Do you want to continue? (y/N): " -n 1 -r
+          cat > release/install.sh <<'EOF'
+          #!/usr/bin/env bash
+
+          set -euo pipefail
+
+          echo "Installing dotfiles with bundled chezmoi"
           echo
-          if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+          echo "IMPORTANT: This will modify your home directory dotfiles!"
+          echo "Make sure you have backed up any dotfiles you want to keep."
+          echo
+
+          read -r -p "Do you want to continue? (y/N): " reply
+          echo
+
+          if [[ ! "${reply}" =~ ^[Yy]$ ]]; then
               echo "Installation cancelled."
               exit 1
           fi
 
-          # Get the directory where this script is located
           SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-          CHEZMOI_BIN="$SCRIPT_DIR/chezmoi"
-          DOTFILES_DIR="$SCRIPT_DIR/dotfiles"
+          CHEZMOI_BIN="${SCRIPT_DIR}/chezmoi"
+          DOTFILES_DIR="${SCRIPT_DIR}/dotfiles"
 
-          # Make chezmoi executable
-          chmod +x "$CHEZMOI_BIN"
+          chmod +x "${CHEZMOI_BIN}"
 
-          # Check if chezmoi source directory already exists
-          if [ -d "$HOME/.local/share/chezmoi" ]; then
-              echo "Existing chezmoi source found. Backing up to ~/.local/share/chezmoi.backup"
-              mv "$HOME/.local/share/chezmoi" "$HOME/.local/share/chezmoi.backup"
+          if [[ -d "${HOME}/.local/share/chezmoi" ]]; then
+              backup_dir="${HOME}/.local/share/chezmoi.backup"
+
+              echo "Existing chezmoi source found."
+
+              if [[ -e "${backup_dir}" ]]; then
+                  echo "Removing previous backup: ${backup_dir}"
+                  rm -rf "${backup_dir}"
+              fi
+
+              echo "Backing up existing source to: ${backup_dir}"
+              mv \
+                  "${HOME}/.local/share/chezmoi" \
+                  "${backup_dir}"
           fi
 
-          # Initialize chezmoi with our dotfiles
-          echo "Initializing chezmoi..."
-          "$CHEZMOI_BIN" init --source "$DOTFILES_DIR"
+          echo "Initializing chezmoi"
+          "${CHEZMOI_BIN}" init --source "${DOTFILES_DIR}"
 
-          # Apply the dotfiles
-          echo "Applying dotfiles..."
-          "$CHEZMOI_BIN" apply --verbose
+          echo "Applying dotfiles"
+          "${CHEZMOI_BIN}" apply --verbose
 
-          echo ""
+          echo
           echo "Installation complete!"
-          echo "You may need to restart your shell or run 'exec \$SHELL' to load the new configuration."
+          echo 'You may need to restart your shell or run "exec $SHELL" to load your configuration.'
           EOF
 
           chmod +x release/install.sh
 
-      - name: Create README for release
+      - name: Create release README
+        shell: bash
+        env:
+          RELEASE_OS: ${{ matrix.os }}
+          RELEASE_ARCH: ${{ matrix.arch }}
+          RELEASE_VERSION: ${{ needs.setup.outputs.new_tag }}
         run: |
-          cat <<EOF > release/README.txt
+          set -euo pipefail
+
+          cat > release/README.txt <<EOF
           # Dotfiles with Bundled Chezmoi
 
           This archive contains:
-          - chezmoi binary (for ${{ matrix.os }}/${{ matrix.arch }})
-          - dotfiles templates
-          - install.sh script for easy installation
+
+          - Rendered dotfiles
+          - Bundled chezmoi binary for ${RELEASE_OS}/${RELEASE_ARCH}
+          - Installation script
 
           ## Installation
 
-          1. Extract this archive to a temporary directory
-          2. Run: ./install.sh
-          3. Follow the prompts
+          1. Extract the archive.
+          2. Run \`./install.sh\`.
+          3. Follow the prompts.
 
           ## Manual Installation
 
-          If you prefer to install manually:
+          Make chezmoi executable:
 
-          1. Make chezmoi executable: chmod +x chezmoi
-          2. Initialize chezmoi: ./chezmoi init --source dotfiles/
-          3. Review what will be changed: ./chezmoi diff
-          4. Apply the dotfiles: ./chezmoi apply
+              chmod +x chezmoi
+
+          Initialize chezmoi:
+
+              ./chezmoi init --source dotfiles/
+
+          Review the changes:
+
+              ./chezmoi diff
+
+          Apply the dotfiles:
+
+              ./chezmoi apply
+
+          ## Version
+
+          ${RELEASE_VERSION}
 
           ## Source
 
-          GitHub: https://github.com/redjax/dotfiles
+          https://github.com/redjax/dotfiles
           EOF
 
-      - name: Create archives
+      - name: Prepare archive contents
+        shell: bash
         run: |
-          VERSION="${{ needs.setup.outputs.new_tag }}"
-          OS_ARCH="${{ matrix.os }}-${{ matrix.arch }}"
+          set -euo pipefail
 
-          # Create deploy directory and move release contents into it
-          mkdir -p deploy/
-          mv release/* deploy/
+          rm -rf deploy
+          mkdir -p deploy
 
-          # Create ZIP archive
-          zip -r "dotfiles-${OS_ARCH}-v${VERSION}.zip" deploy/
+          cp -a release/. deploy/
 
-          # Create TAR.GZ archive
-          tar -czf "dotfiles-${OS_ARCH}-v${VERSION}.tar.gz" deploy/
+      - name: Create archives
+        shell: bash
+        env:
+          VERSION: ${{ needs.setup.outputs.new_tag }}
+          OS_ARCH: ${{ matrix.os }}-${{ matrix.arch }}
+        run: |
+          set -euo pipefail
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+          zip \
+            --recurse-paths \
+            "dotfiles-${OS_ARCH}-v${VERSION}.zip" \
+            deploy
+
+          tar \
+            --create \
+            --gzip \
+            --file="dotfiles-${OS_ARCH}-v${VERSION}.tar.gz" \
+            deploy
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a0 # v7
         with:
           name: release-${{ matrix.os }}-${{ matrix.arch }}
           path: |
-            *.zip
-            *.tar.gz
+            dotfiles-*.zip
+            dotfiles-*.tar.gz
+          if-no-files-found: error
+          retention-days: 30
 
   release:
+    name: Create GitHub release
     needs:
-      - build
       - setup
+      - build
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Download all artifacts
+    steps:
+      - name: Download release artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
-          path: artifacts/
+          path: artifacts
           merge-multiple: true
 
       - name: Create GitHub Release
