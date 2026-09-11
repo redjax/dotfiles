@@ -1,0 +1,17 @@
+---
+name: PR Checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  renovate-gate:
+    name: Renovate Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Renovate gate
+        run: echo "Indicate success to Renovate to enable auto-merging."
