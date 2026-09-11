@@ -111,10 +111,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      ##########################################################################
-      # Prepare directories
-      ##########################################################################
-
       - name: Create release directories
         shell: bash
         run: |
@@ -123,11 +119,7 @@ jobs:
           mkdir -p release/dotfiles
           mkdir -p temp_chezmoi
 
-      ##########################################################################
-      # Download the target-platform chezmoi binary
-      ##########################################################################
-
-      - name: Download chezmoi binary
+      - name: Download target-platform chezmoi binary
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -155,7 +147,7 @@ jobs:
 
           CHEZMOI_URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/chezmoi_${CHEZMOI_VERSION#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
 
-          echo "Downloading chezmoi from:"
+          echo "Downloading target-platform chezmoi:"
           echo "${CHEZMOI_URL}"
 
           curl \
@@ -164,65 +156,84 @@ jobs:
             "${CHEZMOI_URL}" |
             tar -xz -C temp_chezmoi
 
-          mv temp_chezmoi/chezmoi release/chezmoi
+          mv \
+            temp_chezmoi/chezmoi \
+            release/chezmoi
 
           chmod +x release/chezmoi
 
-          release/chezmoi --version
+          echo "Target chezmoi binary:"
+          file release/chezmoi
 
-      ##########################################################################
-      # Render the chezmoi source
-      #
-      # The repository contains .tmpl files. We render them into
-      # release/dotfiles so that everything below this point operates on the
-      # actual files users will receive.
-      ##########################################################################
+      - name: Download Linux chezmoi for rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CHEZMOI_VERSION="$(
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              https://api.github.com/repos/twpayne/chezmoi/releases/latest |
+              jq -r '.tag_name'
+          )"
+
+          CHEZMOI_URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/chezmoi_${CHEZMOI_VERSION#v}_linux_amd64.tar.gz"
+
+          echo "Downloading Linux chezmoi for CI rendering:"
+          echo "${CHEZMOI_URL}"
+
+          curl \
+            --fail \
+            --location \
+            "${CHEZMOI_URL}" |
+            tar -xz -C temp_chezmoi
+
+          mv \
+            temp_chezmoi/chezmoi \
+            "${RUNNER_TEMP}/chezmoi"
+
+          chmod +x "${RUNNER_TEMP}/chezmoi"
+
+          echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
+
+          "${RUNNER_TEMP}/chezmoi" --version
 
       - name: Render chezmoi files
         shell: bash
         run: |
           set -euo pipefail
 
-          echo "Rendering chezmoi source into release/dotfiles..."
+          echo "Rendering chezmoi source"
 
-          ./release/chezmoi init \
-            --source="${GITHUB_WORKSPACE}/home" \
+          "${RUNNER_TEMP}/chezmoi" init \
+            --source="${GITHUB_WORKSPACE}" \
             --destination="${GITHUB_WORKSPACE}/release/dotfiles"
 
-          ./release/chezmoi execute-template \
-            --init \
-            </dev/null >/dev/null 2>&1 || true
+          echo "Rendered release tree:"
+          find release/dotfiles -type f -print | sort
 
-      ##########################################################################
-      # Format rendered shell files
-      #
-      # This uses the existing repository script and:
-      #
-      #   .config/shellfmt/options
-      #
-      # It operates ONLY on the rendered files in release/dotfiles.
-      ##########################################################################
-
-      - name: Install shellfmt
+      - name: Install shfmt
         shell: bash
         run: |
           set -euo pipefail
 
-          SHELLFMT_VERSION="3.10.0"
+          SHFMT_VERSION="3.10.0"
 
           curl \
             --fail \
             --location \
             --silent \
             --show-error \
-            "https://github.com/mvdan/sh/releases/download/v${SHELLFMT_VERSION}/shfmt_v${SHELLFMT_VERSION}_linux_amd64" \
-            --output "${RUNNER_TEMP}/shellfmt"
+            "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64" \
+            --output "${RUNNER_TEMP}/shfmt"
 
-          chmod +x "${RUNNER_TEMP}/shellfmt"
+          chmod +x "${RUNNER_TEMP}/shfmt"
 
           echo "${RUNNER_TEMP}" >> "${GITHUB_PATH}"
 
-          "${RUNNER_TEMP}/shellfmt" --version
+          "${RUNNER_TEMP}/shfmt" --version
 
       - name: Format rendered shell files
         shell: bash
@@ -232,24 +243,18 @@ jobs:
           ./scripts/codeql/shellfmt_rendered_scripts.sh \
             "${GITHUB_WORKSPACE}/release/dotfiles"
 
-      ##########################################################################
-      # Copy release metadata/configuration
-      ##########################################################################
-
       - name: Copy dotfiles release metadata
         shell: bash
         run: |
           set -euo pipefail
 
           if [[ -f ".chezmoidata.yml" ]]; then
-            cp ".chezmoidata.yml" "release/.chezmoidata.yml"
+            cp \
+              ".chezmoidata.yml" \
+              "release/.chezmoidata.yml"
           else
             echo "[INFO] .chezmoidata.yml not found, skipping."
           fi
-
-      ##########################################################################
-      # Create installer
-      ##########################################################################
 
       - name: Create installation script
         shell: bash
@@ -260,13 +265,14 @@ jobs:
           #!/bin/bash
           set -e
 
-          echo "Installing dotfiles with bundled chezmoi..."
+          echo "Installing dotfiles with bundled chezmoi"
           echo ""
           echo "IMPORTANT: This will modify your home directory dotfiles!"
           echo "Make sure you have backed up any existing dotfiles you want to keep."
           echo ""
           read -p "Do you want to continue? (y/N): " -n 1 -r
           echo
+
           if [[ ! $REPLY =~ ^[Yy]$ ]]; then
               echo "Installation cancelled."
               exit 1
@@ -283,10 +289,10 @@ jobs:
               mv "$HOME/.local/share/chezmoi" "$HOME/.local/share/chezmoi.backup"
           fi
 
-          echo "Initializing chezmoi..."
+          echo "Initializing chezmoi"
           "$CHEZMOI_BIN" init --source "$DOTFILES_DIR"
 
-          echo "Applying dotfiles..."
+          echo "Applying dotfiles"
           "$CHEZMOI_BIN" apply --verbose
 
           echo ""
@@ -295,10 +301,6 @@ jobs:
           EOF
 
           chmod +x release/install.sh
-
-      ##########################################################################
-      # Create release README
-      ##########################################################################
 
       - name: Create release README
         shell: bash
@@ -356,10 +358,6 @@ jobs:
           GitHub: https://github.com/redjax/dotfiles
           EOF
 
-      ##########################################################################
-      # Verify the release contents before archiving
-      ##########################################################################
-
       - name: Verify release contents
         shell: bash
         run: |
@@ -385,10 +383,6 @@ jobs:
           echo "Release directory size:"
           du -sh release
 
-      ##########################################################################
-      # Archive the fully rendered and formatted release
-      ##########################################################################
-
       - name: Create archives
         shell: bash
         env:
@@ -401,13 +395,15 @@ jobs:
 
           cp -a release/. deploy/
 
-          echo "Creating ZIP archive..."
+          echo "Creating ZIP archive"
+
           zip \
             --recurse-paths \
             "dotfiles-${OS_ARCH}-v${VERSION}.zip" \
             deploy
 
-          echo "Creating TAR.GZ archive..."
+          echo "Creating TAR.GZ archive"
+
           tar \
             --create \
             --gzip \
@@ -416,13 +412,10 @@ jobs:
 
           echo
           echo "Created archives:"
+
           ls -lh \
             "dotfiles-${OS_ARCH}-v${VERSION}.zip" \
             "dotfiles-${OS_ARCH}-v${VERSION}.tar.gz"
-
-      ##########################################################################
-      # Upload archives for the release job
-      ##########################################################################
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a0 # v7
@@ -459,7 +452,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          find artifacts -type f -maxdepth 2 -print | sort
+          find artifacts \
+            -maxdepth 2 \
+            -type f \
+            -print |
+            sort
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
