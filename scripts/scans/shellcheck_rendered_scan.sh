@@ -2,302 +2,184 @@
 
 set -euo pipefail
 
-## Get the directory where this script is located (regardless of where it's called from)
 THIS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-## Repository root is 2 levels up from this script
 REPO_ROOT="$(cd "${THIS_DIR}/../.." && pwd)"
 
-## Check if shellcheck is installed
-check_shellcheck() {
-    if command -v shellcheck &> /dev/null; then
-        echo "Shellcheck is installed: $(shellcheck --version | head -n2 | tail -n1)"
-        return 0
-    else
-        echo "[WARNING] Shellcheck is not installed"
-        return 1
-    fi
+usage() {
+  cat <<EOF
+Usage: $0 [OPTIONS]
+
+Render the chezmoi source and run ShellCheck against the rendered files.
+
+Options:
+  --severity, -s LEVEL   Minimum severity: error, warning, info, style
+                         Default: warning
+  --use-rc               Use .shellcheckrc from the repository
+  --keep                 Keep the rendered files after the scan
+  --help, -h             Show this help
+EOF
 }
 
-## Check if chezmoi is installed
-check_chezmoi() {
-    if command -v chezmoi &> /dev/null; then
-        echo "Chezmoi is installed: $(chezmoi --version 2>&1 | head -n1)"
-        return 0
-    else
-        echo "[WARNING] Chezmoi is not installed"
-        return 1
-    fi
+require_command() {
+  local command_name="$1"
+
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    echo "${command_name} is not installed."
+    return 1
+  fi
 }
 
-## Render chezmoi templates to temporary directory
-render_chezmoi() {
-    local temp_dir="${1:-/tmp/chezmoi-rendered-$$}"
-    
-    if ! command -v chezmoi &> /dev/null; then
-        echo "[ERROR] Chezmoi is not installed. Cannot render templates."
-        return 1
-    fi
-    
-    echo "Creating temporary directory: ${temp_dir}" >&2
-    mkdir -p "$temp_dir"
-    
-    echo "Rendering chezmoi templates..." >&2
-    
-    ## Set chezmoi data values to avoid prompts
-    export CHEZMOI_DATA_custom_hostname="shellcheck-scan"
-    
-    ## Archive rendered templates (redirect warnings to /dev/null)
-    chezmoi archive --output="${temp_dir}.tar" --source="${REPO_ROOT}" 2>/dev/null
-    
-    ## Check if archive was created
-    if [ ! -f "${temp_dir}.tar" ]; then
-        echo "[ERROR] Failed to create chezmoi archive" >&2
-        rm -rf "$temp_dir"
-        return 1
-    fi
-    
-    ## Extract rendered templates (suppress tar warnings)
-    tar -xf "${temp_dir}.tar" -C "$temp_dir" 2>/dev/null
-    
-    ## Check if extraction succeeded
-    if [ ! "$(ls -A "$temp_dir" 2>/dev/null)" ]; then
-        echo "[ERROR] Failed to extract chezmoi archive or archive is empty" >&2
-        rm -rf "$temp_dir" "${temp_dir}.tar"
-        return 1
-    fi
-    
-    rm -f "${temp_dir}.tar"
-    echo "Successfully rendered chezmoi templates to: ${temp_dir}" >&2
-    
-    ## Show what was rendered
-    echo "Rendered files:" >&2
-    local file_count
-    file_count=$(find "$temp_dir" -type f | wc -l)
-    echo "  Total files: ${file_count}" >&2
-    
-    ## Return the path via stdout
-    echo "$temp_dir"
-    return 0
-}
-
-## Find all shell scripts in a directory
 find_shell_scripts() {
-    local search_path="${1:-$REPO_ROOT}"
-    
-    ## Find shell scripts by extension and shebang
-    {
-        ## Find files with shell script extensions
-        find "$search_path" -type f \( \
-            -name "*.sh" -o \
-            -name "*.bash" -o \
-            -name "*.zsh" -o \
-            -name "*.ksh" \
-        \)
-        
-        ## Find executable files with shell shebang
-        find "$search_path" -type f -executable -exec sh -c '
-            for file; do
+  local search_path="${1:-$REPO_ROOT}"
+
+  {
+    find "$search_path" -type f \( \
+      -name '*.sh' -o \
+      -name '*.bash' -o \
+      -name '*.zsh' -o \
+      -name '*.ksh' \
+      -o -name '*.sh.tmpl' \
+      -o -name '*.bash.tmpl' \
+      -o -name '*.zsh.tmpl' \
+      -o -name '*.ksh.tmpl' \
+      \)
+
+    find "$search_path" -type f \( \
+      -name '.bashrc' -o \
+      -name '.bash_profile' -o \
+      -name '.bash_login' -o \
+      -name '.bash_logout' -o \
+      -name '.bash_aliases' \
+      -o -name '.zshrc' \
+      -o -name '.zprofile' \
+      -o -name '.zlogin' \
+      -o -name '.zlogout' \
+      -o -name '.zshenv' \
+      -o -name '.profile' \
+      \)
+
+    find "$search_path" -type f -executable -exec sh -c '
+            for file do
                 if head -n1 "$file" 2>/dev/null | grep -q "^#!.*sh"; then
                     echo "$file"
                 fi
             done
         ' sh {} +
-    } | sort -u
+  } | sort -u
 }
 
-## Run shellcheck on rendered files
+render_chezmoi() {
+  local output_dir="$1"
+  local archive="${output_dir}.tar"
+
+  mkdir -p "$output_dir"
+
+  export CHEZMOI_DATA_custom_hostname="shellcheck-scan"
+
+  echo "Rendering chezmoi source..."
+  chezmoi archive \
+    --output="$archive" \
+    --source="$REPO_ROOT"
+
+  tar -xf "$archive" -C "$output_dir"
+  rm -f "$archive"
+
+  if ! find "$output_dir" -type f -print -quit | grep -q .; then
+    echo "Rendered archive is empty."
+    return 1
+  fi
+
+  echo "Rendered files: $(find "$output_dir" -type f | wc -l)"
+}
+
 run_shellcheck() {
-    local rendered_dir="$1"
-    local severity="${2:-warning}"
-    local use_rc_file="${3:-false}"
-    
-    echo "Scanning directory: ${rendered_dir}"
-    
-    ## Check for .shellcheckrc file (from source repo, not rendered)
-    local rc_file="${REPO_ROOT}/.shellcheckrc"
-    local exclude_codes=""
-    
-    if [ "$use_rc_file" = "true" ] && [ -f "$rc_file" ]; then
-        echo "Using shellcheck config: $rc_file"
-        ## Copy rc file to rendered directory so shellcheck can find it
-        cp "$rc_file" "${rendered_dir}/.shellcheckrc"
-    else
-        echo "Not using .shellcheckrc file"
-        ## Add basic exclusions for rendered files
-        exclude_codes="SC2154"  # Variables from templates are now assigned
-    fi
-    
-    echo "Finding shell scripts in rendered output..."
-    
-    ## Find all shell scripts in rendered directory
-    local scripts
-    mapfile -t scripts < <(find_shell_scripts "$rendered_dir")
-    
-    local script_count="${#scripts[@]}"
-    echo "Found ${script_count} shell script(s)"
-    
-    if [ "$script_count" -eq 0 ]; then
-        echo "No shell scripts found to check"
-        return 0
-    fi
-    
-    echo ""
-    echo "================================"
-    echo "Running Shellcheck on Rendered Files"
-    echo "================================"
-    if [ -n "$exclude_codes" ]; then
-        echo "Excluded codes: ${exclude_codes}"
-    fi
-    echo "Minimum severity: ${severity}"
-    echo ""
-    
-    local failed_count=0
-    local checked_count=0
-    
-    ## Run shellcheck on each file
-    for script in "${scripts[@]}"; do
-        checked_count=$((checked_count + 1))
-        local relative_path="${script#$rendered_dir/}"
-        
-        echo "[$checked_count/$script_count] Checking: $relative_path"
-        
-        ## Build shellcheck command
-        local shellcheck_cmd=(shellcheck)
-        
-        if [ -n "$exclude_codes" ]; then
-            shellcheck_cmd+=(--exclude="$exclude_codes")
-        fi
-        
-        shellcheck_cmd+=(
-            --severity="$severity"
-            --color=auto
-            "$script"
-        )
-        
-        if "${shellcheck_cmd[@]}"; then
-            echo "  OK"
-        else
-            echo "  FAILED"
-            failed_count=$((failed_count + 1))
-        fi
-        echo ""
-    done
-    
-    echo "================================"
-    echo "Shellcheck Summary (Rendered)"
-    echo "================================"
-    echo "Checked: ${checked_count} files"
-    echo "Failed:  ${failed_count} files"
-    echo "Passed:  $((checked_count - failed_count)) files"
-    echo ""
-    
-    if [ "$failed_count" -gt 0 ]; then
-        echo "[ERROR] Shellcheck found issues in ${failed_count} rendered file(s)"
-        return 1
-    else
-        echo "SUCCESS: All rendered scripts passed shellcheck"
-        return 0
-    fi
+  local rendered_dir="$1"
+  local severity="$2"
+  local use_rc_file="$3"
+
+  local rc_file="${REPO_ROOT}/.shellcheckrc"
+  local scripts
+  local shellcheck_args=(
+    "--severity=${severity}"
+    "--color=auto"
+  )
+
+  if [[ "$use_rc_file" == "true" && -f "$rc_file" ]]; then
+    cp "$rc_file" "${rendered_dir}/.shellcheckrc"
+    echo "Using ShellCheck configuration: ${rc_file}"
+  else
+    shellcheck_args+=("--norc")
+    echo "Not using .shellcheckrc."
+  fi
+
+  mapfile -t scripts < <(find_shell_scripts "$rendered_dir")
+
+  if [[ ${#scripts[@]} -eq 0 ]]; then
+    echo "No shell scripts found in rendered output."
+    return 0
+  fi
+
+  echo "Found ${#scripts[@]} shell script(s) in rendered output."
+  echo "Minimum severity: ${severity}"
+
+  shellcheck "${shellcheck_args[@]}" "${scripts[@]}"
 }
 
-## Main execution
 main() {
-    local severity="warning"
-    local use_rc_file="false"
-    local keep_rendered="false"
-    
-    ## Parse command line arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            --severity|-s)
-                severity="$2"
-                shift 2
-                ;;
-            --use-rc)
-                use_rc_file="true"
-                shift
-                ;;
-            --keep)
-                keep_rendered="true"
-                shift
-                ;;
-            --help|-h)
-                echo "Usage: $0 [OPTIONS]"
-                echo ""
-                echo "Render chezmoi templates and run shellcheck on the rendered output"
-                echo ""
-                echo "Options:"
-                echo "  --severity, -s LEVEL Minimum severity level (error, warning, info, style)"
-                echo "                       Default: warning"
-                echo "  --use-rc             Use .shellcheckrc from repository root"
-                echo "                       Default: false (rendered files should be valid shell)"
-                echo "  --keep               Keep rendered files in /tmp after scan"
-                echo "  --help, -h           Show this help message"
-                echo ""
-                echo "Note: This scans RENDERED templates, so template variables should be resolved"
-                exit 0
-                ;;
-            *)
-                echo "[ERROR] Unknown option: $1"
-                echo "Use --help for usage information"
-                exit 1
-                ;;
-        esac
-    done
-    
-    echo "Shellcheck Rendered Scan Script"
-    echo "Script location: ${THIS_DIR}"
-    echo "Repository root: ${REPO_ROOT}"
-    
-    echo ""
-    
-    ## Check for required tools
-    if ! check_shellcheck; then
-        echo "[ERROR] Shellcheck is required but not installed"
-        echo "Please install shellcheck first"
-        exit 1
-    fi
-    
-    if ! check_chezmoi; then
-        echo "[ERROR] Chezmoi is required but not installed"
-        echo "Please install chezmoi first"
-        exit 1
-    fi
-    
-    echo ""
-    
-    ## Render chezmoi templates
-    local rendered_dir
-    rendered_dir=$(render_chezmoi "/tmp/chezmoi-shellcheck-$$")
-    
-    if [ -z "$rendered_dir" ] || [ ! -d "$rendered_dir" ]; then
-        echo "[ERROR] Failed to render templates"
-        exit 1
-    fi
-    
-    echo ""
-    
-    ## Run shellcheck on rendered files
-    local result=0
-    if run_shellcheck "$rendered_dir" "$severity" "$use_rc_file"; then
-        result=0
-    else
-        result=1
-    fi
-    
-    ## Cleanup
-    if [ "$keep_rendered" = "true" ]; then
-        echo ""
-        echo "Rendered files kept at: ${rendered_dir}"
-    else
-        echo ""
-        echo "Cleaning up: ${rendered_dir}"
-        rm -rf "$rendered_dir"
-    fi
-    
-    exit $result
+  local severity="warning"
+  local use_rc_file="false"
+  local keep_rendered="false"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    --severity | -s)
+      if [[ $# -lt 2 ]]; then
+        echo "Missing value for $1."
+        usage
+        return 1
+      fi
+      severity="$2"
+      shift 2
+      ;;
+    --use-rc)
+      use_rc_file="true"
+      shift
+      ;;
+    --keep)
+      keep_rendered="true"
+      shift
+      ;;
+    --help | -h)
+      usage
+      return 0
+      ;;
+    *)
+      echo "Unknown option: $1."
+      usage
+      return 1
+      ;;
+    esac
+  done
+
+  echo "ShellCheck rendered scan"
+  echo "Repository: ${REPO_ROOT}"
+
+  require_command shellcheck
+  require_command chezmoi
+
+  local rendered_dir
+  rendered_dir="$(mktemp -d "${TMPDIR:-/tmp}/chezmoi-shellcheck.XXXXXX")"
+
+  if [[ "$keep_rendered" != "true" ]]; then
+    trap 'rm -rf "$rendered_dir"' EXIT
+  fi
+
+  echo "Rendered output: ${rendered_dir}"
+
+  render_chezmoi "$rendered_dir"
+  run_shellcheck "$rendered_dir" "$severity" "$use_rc_file"
+
+  echo "ShellCheck passed."
 }
 
-## Run main function
 main "$@"
