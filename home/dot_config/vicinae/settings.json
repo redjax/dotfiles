@@ -29,7 +29,7 @@
       "system_info": false
    },
    "launcher_window": {
-      "opacity": 0.8,
+      "opacity": 1,
       "compact_mode": {
          "enabled": false
       }
