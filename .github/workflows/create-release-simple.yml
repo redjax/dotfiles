@@ -14,6 +14,9 @@ on:
           - minor
           - major
 
+permissions:
+  contents: read
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -28,11 +31,20 @@ jobs:
       - name: Get latest tag
         id: get_tag
         run: |
+          set -euo pipefail
+
           git fetch --tags
-          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+
+          LATEST_TAG=$(
+            git tag --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+            head -n 1
+          )
+
           if [ -z "$LATEST_TAG" ]; then
             LATEST_TAG="v0.0.0"
           fi
+
           echo "Latest tag: $LATEST_TAG"
           echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 
@@ -64,6 +76,10 @@ jobs:
   build:
     needs: setup
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     strategy:
       matrix:
         include:
@@ -87,27 +103,42 @@ jobs:
           mkdir -p temp_chezmoi/
 
       - name: Download chezmoi binary
+        env:
+          CHEZMOI_VERSION: v2.72.2
         run: |
-          CHEZMOI_VERSION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/twpayne/chezmoi/releases/latest | \
-            jq -r '.tag_name')
-          echo "Latest chezmoi version: $CHEZMOI_VERSION"
-
-          if [ -z "$CHEZMOI_VERSION" ] || [ "$CHEZMOI_VERSION" = "null" ]; then
-            echo "Error: Failed to fetch chezmoi version"
-            exit 1
-          fi
+          set -euo pipefail
 
           CHEZMOI_OS="${{ matrix.os }}"
           CHEZMOI_ARCH="${{ matrix.arch }}"
 
-          CHEZMOI_URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/chezmoi_${CHEZMOI_VERSION#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
+          ARCHIVE="chezmoi_${CHEZMOI_VERSION#v}_${CHEZMOI_OS}_${CHEZMOI_ARCH}.tar.gz"
+          URL="https://github.com/twpayne/chezmoi/releases/download/${CHEZMOI_VERSION}/${ARCHIVE}"
 
-          echo "Downloading from: $CHEZMOI_URL"
-          curl -L "$CHEZMOI_URL" | tar -xz -C temp_chezmoi/
+          echo "Downloading chezmoi ${CHEZMOI_VERSION}"
+          echo "URL: ${URL}"
 
-          # Move the binary to release directory
-          mv temp_chezmoi/chezmoi release/
+          curl \
+            --fail \
+            --location \
+            --show-error \
+            --retry 5 \
+            --retry-delay 2 \
+            --retry-all-errors \
+            --connect-timeout 15 \
+            --max-time 120 \
+            --output "temp_chezmoi/${ARCHIVE}" \
+            "$URL"
+
+          tar \
+            --extract \
+            --gzip \
+            --file "temp_chezmoi/${ARCHIVE}" \
+            --directory temp_chezmoi
+
+          test -f temp_chezmoi/chezmoi
+
+          mv temp_chezmoi/chezmoi release/chezmoi
+          chmod +x release/chezmoi
 
       - name: Copy dotfiles templates
         run: |
@@ -121,48 +152,76 @@ jobs:
         run: |
           cat <<'EOF' > release/install.sh
           #!/bin/bash
-          set -e
+          set -euo pipefail
 
-          echo "Installing dotfiles with bundled chezmoi..."
+          echo "Installing dotfiles with bundled chezmoi"
           echo ""
           echo "IMPORTANT: This will modify your home directory dotfiles!"
           echo "Make sure you have backed up any existing dotfiles you want to keep."
           echo ""
+
           read -p "Do you want to continue? (y/N): " -n 1 -r
           echo
+
           if [[ ! $REPLY =~ ^[Yy]$ ]]; then
               echo "Installation cancelled."
-              exit 1
+              exit 0
           fi
 
-          # Get the directory where this script is located
           SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
           CHEZMOI_BIN="$SCRIPT_DIR/chezmoi"
           DOTFILES_DIR="$SCRIPT_DIR/dotfiles"
+          CHEZMOI_SOURCE="$HOME/.local/share/chezmoi"
 
-          # Make chezmoi executable
           chmod +x "$CHEZMOI_BIN"
 
-          # Check if chezmoi source directory already exists
-          if [ -d "$HOME/.local/share/chezmoi" ]; then
-              echo "Existing chezmoi source found. Backing up to ~/.local/share/chezmoi.backup"
-              mv "$HOME/.local/share/chezmoi" "$HOME/.local/share/chezmoi.backup"
+          if [ ! -x "$CHEZMOI_BIN" ]; then
+              echo "Error: chezmoi binary not found or not executable."
+              exit 1
           fi
 
-          # Initialize chezmoi with our dotfiles
-          echo "Initializing chezmoi..."
+          if [ ! -d "$DOTFILES_DIR" ]; then
+              echo "Error: dotfiles directory not found."
+              exit 1
+          fi
+
+          if [ -d "$CHEZMOI_SOURCE" ]; then
+              BACKUP_DIR="$HOME/.local/share/chezmoi.backup.$(date +%Y%m%d-%H%M%S)"
+
+              echo ""
+              echo "Existing chezmoi source found."
+              echo "Backing it up to:"
+              echo "  $BACKUP_DIR"
+
+              mv "$CHEZMOI_SOURCE" "$BACKUP_DIR"
+          fi
+
+          echo ""
+          echo "Initializing chezmoi"
           "$CHEZMOI_BIN" init --source "$DOTFILES_DIR"
 
-          # Apply the dotfiles
-          echo "Applying dotfiles..."
+          echo ""
+          echo "The following changes will be applied:"
+          echo ""
+          "$CHEZMOI_BIN" diff
+          echo ""
+
+          read -p "Apply these changes? (y/N): " -n 1 -r
+          echo
+
+          if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+              echo "Installation cancelled."
+              echo ""
+              echo "Your previous chezmoi source was backed up if one existed."
+              exit 0
+          fi
+
+          echo "Applying dotfiles"
           "$CHEZMOI_BIN" apply --verbose
 
           echo ""
           echo "Installation complete!"
           echo "You may need to restart your shell or run 'exec \$SHELL' to load the new configuration."
-          EOF
-
-          chmod +x release/install.sh
 
       - name: Create README for release
         run: |
@@ -208,6 +267,21 @@ jobs:
 
           # Create TAR.GZ archive
           tar -czf "dotfiles-${OS_ARCH}-v${VERSION}.tar.gz" deploy/
+
+      - name: Validate release
+        run: |
+          set -euo pipefail
+
+          test -x deploy/chezmoi
+          test -x deploy/install.sh
+          test -d deploy/dotfiles
+
+          echo "Release contents:"
+          find deploy -maxdepth 3 -type f -print | sort
+
+          echo ""
+          echo "Chezmoi version:"
+          deploy/chezmoi --version
 
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
