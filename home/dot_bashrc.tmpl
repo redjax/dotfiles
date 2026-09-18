@@ -14,13 +14,6 @@ if [[ ":$PATH:" != "*/usr/local/bin" ]]; then
 fi
 ## Set alias for xdg-open
 alias open="xdg-open"
-{{ else if eq .chezmoi.os "darwin" -}}
-## Add homebrew bin to path
-if command -v brew -v 2>&1 /dev/null; then
-  if [[ ":$PATH:" != "*/opt/homebrew/bin" ]]; then
-    export PATH="$PATH:/opt/homebrew/bin"
-  fi
-fi
 {{ end }}
 ## History settings
 # Ignore duplicates and leading spaces

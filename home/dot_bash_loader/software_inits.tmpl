@@ -31,13 +31,12 @@ fi
 ## Enable x-cmd if it's installed
 [ ! -f "{{ .chezmoi.homeDir }}/.x-cmd.root/X" ] || . "{{ .chezmoi.homeDir }}/.x-cmd.root/X"
 
-## Homebrew
-if [[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+## Homebrew / Linuxbrew
+if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    # Disable Homebrew analytics
-    export HOMEBREW_NO_ANALYTICS=1
 
-    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+    ## Disable Homebrew analytics
+    export HOMEBREW_NO_ANALYTICS=1
 fi
 
 ## Go
@@ -180,4 +179,12 @@ if [[ -f "{{ .chezmoi.homeDir }}/.local/lib/libflyline.so" ]]; then
         # flyline loaded successfully
         :
     fi
+fi
+
+###########
+# Espanso #
+###########
+
+if [[ -x "{{ .chezmoi.homeDir }}/Applications/Espanso.AppImage" ]]; then
+    alias espanso="{{ .chezmoi.homeDir }}/Applications/Espanso.AppImage"
 fi
