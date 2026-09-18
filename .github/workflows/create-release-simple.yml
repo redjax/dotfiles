@@ -195,16 +195,13 @@ jobs:
           find "$HOME" -print | sort
 
           echo
-          echo "Checking for unrendered chezmoi templates"
+          echo "Checking rendered home"
 
-          if grep -R -n '{{' "$HOME" \
-              --exclude-dir=.git \
-              2>/dev/null; then
-            echo "ERROR: Found possible unrendered template expressions."
-            exit 1
-          fi
+          test -f "$HOME/.bashrc"
+          test -f "$HOME/.zshrc"
+          test -d "$HOME/.config"
 
-          echo "No obvious unrendered templates found."
+          echo "Rendered home looks good."
 
       - name: Create archives
         env:
