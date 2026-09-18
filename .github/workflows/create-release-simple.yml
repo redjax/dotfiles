@@ -104,6 +104,7 @@ jobs:
 
       - name: Download chezmoi binary
         env:
+          # renovate: datasource=github-releases depName=twpayne/chezmoi
           CHEZMOI_VERSION: v2.72.2
         run: |
           set -euo pipefail
