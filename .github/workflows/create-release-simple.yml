@@ -148,9 +148,6 @@ jobs:
           set -euo pipefail
 
           mkdir -p "$RUNNER_TEMP/rendered-home"
-          mkdir -p "$RUNNER_TEMP/chezmoi-source"
-
-          cp -R home/. "$RUNNER_TEMP/chezmoi-source/"
 
       - name: Render dotfiles
         env:
@@ -159,7 +156,7 @@ jobs:
           set -euo pipefail
 
           CHEZMOI="$RUNNER_TEMP/chezmoi/chezmoi"
-          SOURCE="$RUNNER_TEMP/chezmoi-source"
+          SOURCE="$GITHUB_WORKSPACE/home"
 
           echo "+------------------+"
           echo "Runner Config"
@@ -175,27 +172,17 @@ jobs:
           "$CHEZMOI" --version
           echo
 
-          echo "chezmoi.os: " $("$CHEZMOI" execute-template '{{ .chezmoi.os }}')
-
-          echo "chezmoi.arch: " $("$CHEZMOI" execute-template '{{ .chezmoi.arch }}')
+          echo "chezmoi.os: $("$CHEZMOI" execute-template '{{ .chezmoi.os }}')"
+          echo "chezmoi.arch: $("$CHEZMOI" execute-template '{{ .chezmoi.arch }}')"
           echo
 
-          echo "+------------------+"
-          echo "Initializing source"
-          echo "+------------------+"
-
-          "$CHEZMOI" init \
-            --source "$SOURCE" \
-            --destination "$HOME"
-
-          echo
           echo "+------------------+"
           echo "Rendering dotfiles"
           echo "+------------------+"
 
           "$CHEZMOI" apply \
+            --source "$SOURCE" \
             --destination "$HOME" \
-            --exclude=scripts \
             --verbose
 
       - name: Verify rendered files
