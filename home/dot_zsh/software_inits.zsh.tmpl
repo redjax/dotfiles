@@ -177,11 +177,8 @@ fi
 ########################
 if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
     ## Disable telemetry
     export HOMEBREW_NO_ANALYTICS=1
-
-    path_add "/home/linuxbrew/.linuxbrew/bin"
 fi
 
 ###############
@@ -344,4 +341,12 @@ fi
 ## Jiu-jitsu (jj)
 if command -v jj &>/dev/null; then
   source <(jj util completion zsh)
+fi
+
+###########
+# Espanso #
+###########
+
+if [[ -x "{{ .chezmoi.homeDir }}/Applications/Espanso.AppImage" ]]; then
+    alias espanso="{{ .chezmoi.homeDir }}/Applications/Espanso.AppImage"
 fi

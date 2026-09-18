@@ -66,15 +66,6 @@ set -g xterm-keys on
 bind-key -n Home send-keys Escape "[H"
 bind-key -n End send-keys Escape "[F"
 
-## Read user's shell
-{{ $userVar := (env "USER") -}}
-{{- $userShell := (index (splitList ":" (output "getent" "passwd" $userVar)) 6 | trim) -}}
-{{- if eq $userShell "/usr/bin/zsh" -}}
-set -g default-shell /usr/bin/zsh
-{{- else -}}
-set -g default-shell /bin/bash
-{{- end }}
-
 ## Compatibility for keybinds like ALT+ARROWKEY on older terminals like PuTTY
 # set -g terminal-overrides "xterm*:kLFT5=\\eOD:kRIT5=\\eOC:kUP5=\\eOA:kDN5=\\eOB:smkx@:rmkx@"
 

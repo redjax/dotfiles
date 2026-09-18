@@ -4,6 +4,17 @@
         "config:best-practices"
     ],
     "separateMinorPatch": true,
+    "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/(^|/)\\.github/workflows/.+\\.ya?ml$/"
+            ],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\s+[A-Za-z0-9_]+_VERSION:\\s*[\"']?(?<currentValue>[^\\s\"']+)[\"']?"
+            ]
+        }
+    ],
     "packageRules": [
         {
             "description": "Automerge minor and patch updates",
