@@ -175,7 +175,7 @@ jobs:
           "$CHEZMOI" --version
           echo
 
-          echo "chezmoi.os: " $()"$CHEZMOI" execute-template '{{ .chezmoi.os }}')
+          echo "chezmoi.os: " $("$CHEZMOI" execute-template '{{ .chezmoi.os }}')
 
           echo "chezmoi.arch: " $("$CHEZMOI" execute-template '{{ .chezmoi.arch }}')
           echo
