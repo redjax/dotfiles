@@ -53,10 +53,10 @@ My dotfiles, managed by [chezmoi](https://www.chezmoi.io/).
 
 At some point in 2016, I started putting scripts and configurations in a git repository ([first commit (2016)](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb)). Since then, this repository has been completely overhauled multiple times. When I start over, I create an archive of the `main` branch, delete everything, and I might copy bits and pieces from the archive into the new iteration.
 
-| Archive Branch                                                                     | Date Created | Note                                                |
-| ---------------------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
-| [`archive/2025-07-07`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020. |
-| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-06-24) | 06/24/2025   | Archive of my original dotfiles repository.         |
+| Archive Branch                                                                     | Date Created | Note                                                                                                          |
+| ---------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| [`archive/2025-07-07`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020.                                                           |
+| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-06-24) | 06/24/2025   | Archive of my original dotfiles repository. It was originally hosted on Gitlab, and started sometime in 2016. |
 
 ## Quick Start
 
