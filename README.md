@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD033 -->
 # Dotfiles <!-- omit in toc -->
 
 <!-- Repo image -->
