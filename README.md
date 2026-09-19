@@ -197,6 +197,8 @@ esac
 
 After installing `chezmoi` and initializing your home directory with `chezmoi apply -v`, you should no longer directly edit `chezmoi`-managed dotfiles. Instead, use the `chezmoi edit $FILE` command. For example, to edit your `~/.bashrc`, run `chezmoi edit ~/.bashrc`.
 
+Chezmoi clones to `~/.local/share/chezmoi`. You can get here in the terminal by running `chezmoi cd`, or open the path in a text editor like VSCode. This is essentially the same as running `chezmoi edit $FILE`. After making changes to files in `~/.local/share/chezmoi`, run `chezmoi apply` regenerate changed dotfiles.
+
 You can do a "dry run" of the `chezmoi apply` command to see everything that would change before actually applying those changes. Use the command: `chezmoi apply --dry-run --verbose` to do a dry run.
 
 Sometimes a program will either automatically append lines to your `~/.bashrc`, or will suggest you do so and provide commands you can copy/paste to automatically add the required init lines. This will cause conflicts with your `chezmoi`-managed version of the file. To fix this, use the `chezmoi merge $FILE` command, i.e. `chezmoi merge ~/.bashrc`. This will open a merge tool (`vimdiff` by default), where you can compare the changes and automatically add them to your `chezmoi` template file (`dot_filename.tmpl`).
