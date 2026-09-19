@@ -26,8 +26,7 @@ echo ""
 if ! command -v chezmoi &>/dev/null; then
     echo "Installing chezmoi"
 
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
-    if [[ $? -ne 0 ]]; then
+    if ! sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin; then
         echo "[ERROR] Failed to install chezmoi" >&2
         exit 1
     fi
@@ -48,8 +47,7 @@ fi
 echo "Using dotfiles URL: $dotfiles_url"
 echo ""
 
-chezmoi init redjax
-if [[ $? -ne 0 ]]; then
+if ! chezmoi init redjax; then
     echo "[ERROR] Failed applying chezmoi dotfiles." >&2
     exit 1
 fi
@@ -81,9 +79,11 @@ case $yn in
         fi
     fi
 
-    if [[ $? -ne 0 ]]; then
+    LAST_EXIT=$?
+
+    if [[ $LAST_EXIT -ne 0 ]]; then
         echo "[ERROR] Failed to apply dotfiles with chezmoi." >&2
-        exit $?
+        exit $LAST_EXIT
     fi
     ;;
 [Nn])
