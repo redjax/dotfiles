@@ -185,7 +185,7 @@ esac
 - Initialize with this repository
   - `chezmoi init redjax`
     - `chezmoi` will automatically find `github.com/redjax/dotfiles`
-    - If you used a name other than `dotfiles` for your repository, you can tell `chezmoi` the URL to the repository with:
+    - You can also tell `chezmoi` to use a specific repository URL:
       - (HTTP) `chezmoi init https://github.com/redjax/dotfiles.git`
       - (SSH) `chezmoi init git@github.com:redjax/dotfiles.git`
 - Run `chezmoi diff` to see what `chezmoi apply` will change
