@@ -54,7 +54,7 @@ At some point in 2016, I started putting scripts and configurations in a git rep
 
 | Archive Branch                                                                     | Date Created | Note                                                |
 | ---------------------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
-| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020. |
+| [`archive/2025-07-07`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020. |
 | [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-06-24) | 06/24/2025   | Archive of my original dotfiles repository.         |
 
 ## Quick Start
