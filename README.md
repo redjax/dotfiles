@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD033 -->
 # Dotfiles <!-- omit in toc -->
 
 <!-- Repo image -->
@@ -50,12 +51,12 @@
 
 My dotfiles, managed by [chezmoi](https://www.chezmoi.io/).
 
-At some point in 2016, I started putting scripts and configurations in a git repository ([first commit (2016)](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb)). Since then, this repository has been completely overhauled multiple times. When I start over, I create an archive of the `main` branch, delete everything, and start over.
+At some point in 2016, I started putting scripts and configurations in a git repository ([first commit (2016)](https://github.com/redjax/dotfiles/commit/ade1c5939e8b8507e34a7c14a5b1aaa1f726e3cb)). Since then, this repository has been completely overhauled multiple times. When I start over, I create an archive of the `main` branch, delete everything, and I might copy bits and pieces from the archive into the new iteration.
 
-| Archive Branch                                                                     | Date Created | Note                                                |
-| ---------------------------------------------------------------------------------- | ------------ | --------------------------------------------------- |
-| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020. |
-| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-06-24) | 06/24/2025   | Archive of my original dotfiles repository.         |
+| Archive Branch                                                                     | Date Created | Note                                                                                                          |
+| ---------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| [`archive/2025-07-07`](https://github.com/redjax/dotfiles/tree/archive/2025-07-07) | 07/07/2025   | Archive of the 2nd iteration, started in June 2020.                                                           |
+| [`archive/2025-06-24`](https://github.com/redjax/dotfiles/tree/archive/2025-06-24) | 06/24/2025   | Archive of my original dotfiles repository. It was originally hosted on Gitlab, and started sometime in 2016. |
 
 ## Quick Start
 
@@ -83,11 +84,11 @@ Otherwise, copy and paste this script into `init-dotfiles.sh` and run `chmod +x 
 
 set -uo pipefail
 
-USE_HTTP=false
+USE_HTTP=true
 VERBOSE=false
 
 if ! command -v curl &>/dev/null; then
-    echo "[ERROR] curl is not installed"
+    echo "[ERROR] curl is not installed" >&2
     exit 1
 fi
 
@@ -107,13 +108,16 @@ echo ""
 if ! command -v chezmoi &>/dev/null; then
     echo "Installing chezmoi"
 
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to install chezmoi"
+    if ! sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin; then
+        echo "[ERROR] Failed to install chezmoi" >&2
         exit 1
     fi
 
     export PATH="$PATH:$HOME/.local/bin"
+
+    echo ""
+    echo "Chezmoi installed. Add this to your ~/.bashrc:"
+    echo "  export PATH=\"\$PATH:\$HOME/.local/bin\""
 fi
 
 if [[ "$USE_HTTP" == "true" ]]; then
@@ -125,9 +129,8 @@ fi
 echo "Using dotfiles URL: $dotfiles_url"
 echo ""
 
-chezmoi init redjax
-if [[ $? -ne 0 ]]; then
-    echo "[ERROR] Failed applying chezmoi dotfiles."
+if ! chezmoi init redjax; then
+    echo "[ERROR] Failed applying chezmoi dotfiles." >&2
     exit 1
 fi
 
@@ -149,18 +152,27 @@ case $yn in
 [Yy])
     echo "Running chezmoi apply"
     if [[ "$VERBOSE" == true ]]; then
-        chezmoi apply --verbose
+        if ! chezmoi apply --verbose >&2; then
+            echo "[ERROR] Failed applying dotfiles with chezmoi" >&2
+        fi
     else
-        chezmoi apply
+        if ! chezmoi apply >&2; then
+            echo "[ERROR] Failed applying dotfiles with chezmoi" >&2
+        fi
     fi
 
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to apply dotfiles with chezmoi."
-        exit $?
+    LAST_EXIT=$?
+
+    if [[ $LAST_EXIT -ne 0 ]]; then
+        echo "[ERROR] Failed to apply dotfiles with chezmoi." >&2
+        exit $LAST_EXIT
     fi
     ;;
 [Nn])
     echo "When you are ready to apply the dotfiles, just run 'chezmoi apply'. You can do a dry run by adding --dry-run to the command."
+    echo "If you get an error saying something like 'command chezmoi not found,' make sure you have this in your ~/.bashrc:"
+    echo "  export PATH=\"\$PATH:\$HOME/.local/bin\""
+
     exit 0
     ;;
 esac
@@ -174,7 +186,7 @@ esac
 - Initialize with this repository
   - `chezmoi init redjax`
     - `chezmoi` will automatically find `github.com/redjax/dotfiles`
-    - If you used a name other than `dotfiles` for your repository, you can tell `chezmoi` the URL to the repository with:
+    - You can also tell `chezmoi` to use a specific repository URL:
       - (HTTP) `chezmoi init https://github.com/redjax/dotfiles.git`
       - (SSH) `chezmoi init git@github.com:redjax/dotfiles.git`
 - Run `chezmoi diff` to see what `chezmoi apply` will change
@@ -185,6 +197,8 @@ esac
 ## Usage
 
 After installing `chezmoi` and initializing your home directory with `chezmoi apply -v`, you should no longer directly edit `chezmoi`-managed dotfiles. Instead, use the `chezmoi edit $FILE` command. For example, to edit your `~/.bashrc`, run `chezmoi edit ~/.bashrc`.
+
+Chezmoi clones to `~/.local/share/chezmoi`. You can get here in the terminal by running `chezmoi cd`, or open the path in a text editor like VSCode. This is essentially the same as running `chezmoi edit $FILE`. After making changes to files in `~/.local/share/chezmoi`, run `chezmoi apply` regenerate changed dotfiles.
 
 You can do a "dry run" of the `chezmoi apply` command to see everything that would change before actually applying those changes. Use the command: `chezmoi apply --dry-run --verbose` to do a dry run.
 
