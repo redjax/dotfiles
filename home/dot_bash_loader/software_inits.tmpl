@@ -35,6 +35,9 @@ fi
 if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
+    ## Add ~/Applications dir to PATH
+    export PATH="${PATH}:{{ .chezmoi.homeDir }}/Applications"
+
     ## Disable Homebrew analytics
     export HOMEBREW_NO_ANALYTICS=1
 fi
