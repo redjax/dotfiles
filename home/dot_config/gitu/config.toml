@@ -1,0 +1,20 @@
+## Config for gitu Git porcelain TUI.
+#  Default config:
+#    https://github.com/altsem/gitu/blob/master/src/default_config.toml
+
+[general]
+always_show_help.enabled = false
+## Sets initially collapsed sections in the editor. e.g.:
+#  collapsed_sections = ["untracked", "recent_commits", "branch_status"]
+collapsed_sections = []
+stash_list_limit = 15
+recent_commits_limit = 30
+log_author_width = 15
+mouse_support = true
+
+## When to prompt for discard confirmation. Options:
+#  "line"  - always prompt even for individual lines (default),
+#  "hunk"  - prompt for files and hunks,
+#  "file"  - only prompt when discarding whole files,
+#  "never" - never prompt when discarding.
+confirm_discard = "line"
