@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0 # Trufflehog needs full history
 
       - name: Run Trufflehog scan on source
-        uses: trufflesecurity/trufflehog@7582042e4214365f7e18dc4edad30a006aa1427a # main
+        uses: trufflesecurity/trufflehog@c85580b712841eda4c53bc28fc6ace6100e8c16c # main
         with:
           extra_args: --results=verified,unknown --json
         continue-on-error: true
