@@ -1,0 +1,19 @@
+{{- $configureGit := promptBoolOnce . "git.configure" "Configure Git on this machine? (y/N)" false -}}
+
+{{- $gitName := "" -}}
+{{- $gitEmail := "" -}}
+
+{{- if $configureGit -}}
+{{- $gitName = promptStringOnce . "git.user.name" "Git username" -}}
+{{- $gitEmail = promptStringOnce . "git.user.email" "Git email" -}}
+{{- end -}}
+
+[data.git]
+    configure = {{ $configureGit }}
+
+{{- if $configureGit }}
+
+[data.git.user]
+    name = {{ $gitName | quote }}
+    email = {{ $gitEmail | quote }}
+{{- end }}

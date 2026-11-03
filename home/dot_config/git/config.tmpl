@@ -1,0 +1,68 @@
+#####################
+# Git configuration #
+#####################
+
+{{/* Only generate user section if a git user and email were given. */}}
+{{- if and (hasKey . "git") (hasKey .git "configure") .git.configure (hasKey .git "user") .git.user.name .git.user.email -}}
+## Uses inputs user provided during chezmoi init
+[user]
+  name = {{ .git.user.name | quote }}
+  email = {{ .git.user.email | quote }}
+{{- else }}
+# [user]
+#   name = "Your Name"
+#   email = "your@email.com"
+{{- end }}
+
+[init]
+  defaultBranch = main
+
+[core]
+  ## Track changes to filemode, i.e. chmod +x
+  filemode = true
+  ## Convert CRLF line endings to LF when committing, but do not
+  #  automatically convert LF to CRLF when checking out files.
+  autocrlf = input
+  pager = less -FRX
+  ## Use the preferred editor from the environment, defaulting to nano.
+  editor = {{ env "EDITOR" | default "nano" | quote }}
+
+[pull]
+  ## Rebase local commits on top of upstream changes instead of
+  #  creating a merge commit when pulling.
+  rebase = true
+
+[fetch]
+  ## Automatically remove local remote-tracking references for
+  #  branches that no longer exist on the remote.
+  prune = true
+
+[push]
+  ## Automatically configure the upstream tracking branch when
+  #  pushing a local branch that does not yet have an upstream.
+  autoSetupRemote = true
+
+[rerere]
+  ## Record resolved merge conflicts and automatically reuse
+  #  previous resolutions when encountering the same conflicts.
+  enabled = true
+
+[color]
+  ui = auto
+
+[merge]
+  conflictstyle = zdiff3
+
+[help]
+  autocorrect = prompt
+
+[alias]
+  lg = log --graph --oneline --decorate
+  st = status
+  co = checkout
+  sw = switch
+  br = branch
+  ci = commit
+  last = log -1 HEAD
+  unstage = restore --staged
+  graph = log --graph --decorate --oneline --all
