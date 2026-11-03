@@ -1,13 +1,18 @@
-{{- if .git.configure }}
-
 #####################
 # Git configuration #
 #####################
 
+{{/* Only generate user section if a git user and email were given. */}}
+{{- if and (hasKey . "git") (hasKey .git "configure") .git.configure (hasKey .git "user") .git.user.name .git.user.email -}}
 ## Uses inputs user provided during chezmoi init
 [user]
   name = {{ .git.user.name | quote }}
   email = {{ .git.user.email | quote }}
+{{- else }}
+# [user]
+#   name = "Your Name"
+#   email = "your@email.com"
+{{- end }}
 
 [init]
   defaultBranch = main
@@ -61,5 +66,3 @@
   last = log -1 HEAD
   unstage = restore --staged
   graph = log --graph --decorate --oneline --all
-
-{{- end }}
