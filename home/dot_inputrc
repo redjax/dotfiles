@@ -1,3 +1,19 @@
+## Preserve system-wide Readline settings (if this file exists).
+$include /etc/inputrc
+
+## Use Emacs-style command-line editing.
+set editing-mode emacs
+
+## Ctrl+Left / Ctrl+Right: move by word.
 "\e[1;5D": backward-word
 "\e[1;5C": forward-word
+
+## Ctrl+Backspace when the terminal sends Ctrl+H.
 "\C-h": backward-kill-word
+
+## Alt+Backspace, or Ctrl+Backspace in terminals sending ESC + DEL.
+"\e\C-?": backward-kill-word
+
+## Ordinary Backspace and Delete.
+"\C-?": backward-delete-char
+"\e[3~": delete-char
