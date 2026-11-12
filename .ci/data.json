@@ -1,0 +1,7 @@
+{
+    "email": "ci@example.com",
+    "git": {
+        "name": "CI User",
+        "email": "ci@example.com"
+    }
+}
