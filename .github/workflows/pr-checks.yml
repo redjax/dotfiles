@@ -12,21 +12,17 @@ jobs:
     name: Validate templates
     uses: ./.github/workflows/validate-templates.yml
 
+  validate-scripts:
+    name: Validate scripts
+    uses: ./.github/workflows/validate-scripts.yml
+
   renovate-gate:
     name: Renovate Gate
     runs-on: ubuntu-latest
-    needs: validate-templates
-    if: always()
+    needs:
+      - validate-templates
+      - validate-scripts
 
     steps:
-      - name: Check validation result
-        env:
-          VALIDATION_RESULT: ${{ needs.validate-templates.result }}
-        run: |
-          if [[ "$VALIDATION_RESULT" != "success" ]]; then
-            echo "Template validation failed. Blocking Renovate."
-            exit 1
-          fi
-
       - name: Renovate gate
-        run: echo "Template validation passed. Indicating success to Renovate."
+        run: echo "Indicate success to Renovate to enable auto-merging."
