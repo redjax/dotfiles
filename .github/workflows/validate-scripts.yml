@@ -2,9 +2,6 @@
 name: Validate scripts
 
 on:
-  push:
-    branches:
-      - feat/lint-validate-shellscripts
   workflow_dispatch:
   workflow_call:
 
