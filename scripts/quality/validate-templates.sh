@@ -15,7 +15,7 @@ for file in "$CHEZMOI_CONFIG" "$CHEZMOI_DATA" "$SOURCE_DIR/.chezmoi.toml.tmpl"; 
   fi
 done
 
-if ! command -v chezmoi >/dev/null 2>&1; then
+if ! command -v chezmoi > /dev/null 2>&1; then
   echo "ERROR: chezmoi is not installed." >&2
   exit 1
 fi
@@ -38,7 +38,7 @@ while IFS= read -r -d '' template; do
     execute-template \
     --override-data-file "$CHEZMOI_DATA" \
     --file "$template" \
-    >/dev/null; then
+    > /dev/null; then
     echo "OK"
   else
     echo "FAILED"

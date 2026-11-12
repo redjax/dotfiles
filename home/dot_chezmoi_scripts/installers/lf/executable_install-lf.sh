@@ -6,13 +6,13 @@ API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
 ## Check dependencies
 for cmd in curl tar; do
-  if ! command -v "$cmd" >/dev/null 2>&1; then
+  if ! command -v "$cmd" > /dev/null 2>&1; then
     echo "Error: '$cmd' is required but not installed." >&2
     exit 1
   fi
 done
 
-if ! command -v unzip >/dev/null 2>&1; then
+if ! command -v unzip > /dev/null 2>&1; then
   HAVE_UNZIP=0
 else
   HAVE_UNZIP=1
@@ -24,7 +24,7 @@ trap 'rm -rf "$TMPDIR"' EXIT
 echo "Fetching latest release" >&2
 JSON="$(curl -fsSL "$API_URL")"
 
-## Parse latest release tag name 
+## Parse latest release tag name
 TAG="$(echo "$JSON" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p')"
 
 if [[ -z "$TAG" ]]; then
@@ -40,9 +40,9 @@ ARCH="$(uname -m)"
 
 case "$ARCH" in
   x86_64) ARCH="amd64" ;;
-  aarch64|arm64) ARCH="arm64" ;;
+  aarch64 | arm64) ARCH="arm64" ;;
   armv7l) ARCH="arm" ;;
-  i386|i686) ARCH="386" ;;
+  i386 | i686) ARCH="386" ;;
   *)
     echo "Unsupported architecture: $ARCH" >&2
     exit 1
@@ -50,7 +50,7 @@ case "$ARCH" in
 esac
 
 case "$OS" in
-  linux|darwin|freebsd|openbsd|netbsd) ;;
+  linux | darwin | freebsd | openbsd | netbsd) ;;
   *)
     echo "Unsupported OS: $OS" >&2
     exit 1
@@ -90,4 +90,3 @@ fi
 install -m 755 "$BIN" "$INSTALL_DIR/lf"
 
 echo "Installed lf to $INSTALL_DIR/lf"
-

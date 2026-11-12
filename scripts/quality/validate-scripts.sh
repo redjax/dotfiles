@@ -16,7 +16,7 @@ SHFMT_ARGS=(-i 2 -ci -sr)
 ## Files excluded from shfmt formatting checks.
 ## Paths are relative to the repository root.
 FORMAT_IGNORE=(
-  "home/dot_config/tmux-powerline/executable_config.sh"
+  # "home/dot_config/tmux-powerline/executable_config.sh"
 )
 
 ## Temporary directory for rendered templates.

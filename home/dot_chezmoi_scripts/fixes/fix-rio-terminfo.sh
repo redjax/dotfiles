@@ -7,7 +7,7 @@ if ! command -v curl >&/dev/null; then
 fi
 
 ## Check if terminfo is already installed
-if infocmp rio 2>/dev/null; then
+if infocmp rio > /dev/null 2>&1; then
   echo "Rio terminfo already installed"
 else
   echo "Installing Rio terminfo"
