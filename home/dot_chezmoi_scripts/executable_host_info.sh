@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
 
 ## Path to this script's parent dir
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
 ## Arg default values
 DEBUG=0
 
 ## Parse arguments
 while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --debug|-D)
-            DEBUG=1
-            ;;
+  case "$1" in
+    --debug | -D)
+      DEBUG=1
+      ;;
 
-        ## catch-all for unknown options
-        --*)
-            echo "Warning: Unknown option $1"
-            ;;
-        ## Unmatched/unhandled
-        *)
-            ## Handle positional args
-            #  You have to implement this based on the needs of the current script
-            ;;
-    esac
-    shift
+    ## catch-all for unknown options
+    --*)
+      echo "Warning: Unknown option $1"
+      ;;
+    ## Unmatched/unhandled
+    *)
+      ## Handle positional args
+      #  You have to implement this based on the needs of the current script
+      ;;
+  esac
+  shift
 done
 
 function Debug() {
-    if [[ $DEBUG -eq 1 ]]; then
-        echo "[DEBUG] $1"
-    fi
+  if [[ $DEBUG -eq 1 ]]; then
+    echo "[DEBUG] $1"
+  fi
 }
 
 Debug "Script dir: $SCRIPT_DIR"

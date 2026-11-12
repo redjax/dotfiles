@@ -20,9 +20,9 @@ install_fzf
 install_lazygit
 
 echo "--[ Installing tmux"
-if ! command -v tmux 2>&1 > /dev/null; then
+if ! command -v tmux > /dev/null 2>&1; then
   case "$LINUX_DISTRO" in
-    ubuntu|debian|pop|linuxmint)
+    ubuntu | debian | pop | linuxmint)
       sudo apt install -y tmux
       if [[ $? -ne 0 ]]; then
         echo "[ERROR] Failed installing tmux"
@@ -30,7 +30,7 @@ if ! command -v tmux 2>&1 > /dev/null; then
       fi
 
       ;;
-    fedora|rhel|centos|rocky|almalinux)
+    fedora | rhel | centos | rocky | almalinux)
       sudo dnf install -y tmux
       if [[ $? -ne 0 ]]; then
         echo "[ERROR] Failed installing tmux"
@@ -47,7 +47,7 @@ if ! command -v tmux 2>&1 > /dev/null; then
 
   echo "Tmux installed successfully."
 else
-    echo "Tmux is already installed."
+  echo "Tmux is already installed."
 fi
 
 echo "--[ Installing Tmux Plugin Manager (tpm)"
