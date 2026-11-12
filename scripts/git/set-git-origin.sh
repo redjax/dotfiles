@@ -10,7 +10,7 @@
 
 set -uo pipefail
 
-if ! command -v git &>/dev/null; then
+if ! command -v git &> /dev/null; then
   echo "[ERROR] git is not installed."
   exit 1
 fi
@@ -30,15 +30,15 @@ REMOTE_TYPE="ssh"
 REMOTE_URL=""
 
 function usage() {
-    echo ""
-    echo "Usage: ${0} [OPTIONS]"
-    echo ""
-    echo "Options:"
-    echo "  -h|--help          Print this help menu."
-    echo "  --ssh-url          Remote repository's SSH URL, i.e. git@github.com/redjax/dotfiles.git"
-    echo "  --https-url        Remote repository's HTTPS URL, i.e. https://github.com/redjax/dotfiles"
-    echo "  -t, --remote-type  Either 'https' or 'ssh'"
-    echo ""
+  echo ""
+  echo "Usage: ${0} [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h|--help          Print this help menu."
+  echo "  --ssh-url          Remote repository's SSH URL, i.e. git@github.com/redjax/dotfiles.git"
+  echo "  --https-url        Remote repository's HTTPS URL, i.e. https://github.com/redjax/dotfiles"
+  echo "  -t, --remote-type  Either 'https' or 'ssh'"
+  echo ""
 }
 
 ## Parse args
@@ -47,7 +47,7 @@ while [[ $# -gt 0 ]]; do
     --ssh-url)
       if [[ -z "$2" ]]; then
         echo "[ERROR] --ssh-url provided, but no URL given."
-        
+
         usage
         exit 1
       fi
@@ -58,7 +58,7 @@ while [[ $# -gt 0 ]]; do
     --https-url)
       if [[ -z "$2" ]]; then
         echo "[ERROR] --https-url provided, but no URL given."
-        
+
         usage
         exit 1
       fi
@@ -66,14 +66,14 @@ while [[ $# -gt 0 ]]; do
       REMOTE_HTTPS_URL="$2"
       shift 2
       ;;
-    -t|--remote-type)
+    -t | --remote-type)
       if [[ -z "$2" ]]; then
         echo "[ERROR] --remote-type provided, but no 'https'/'ssh' value given."
-        
+
         usage
         exit 1
       fi
-      
+
       ## Ensure value is https or ssh
       case "$2" in
         [Hh][Tt][Pp][Ss])
@@ -89,13 +89,13 @@ while [[ $# -gt 0 ]]; do
 
       shift 2
       ;;
-    -h|-help)
+    -h | -help)
       usage
       exit 0
       ;;
     *)
       echo "[ERROR] Invalid argument: $1"
-      
+
       usage
       exit 1
       ;;
@@ -105,7 +105,7 @@ done
 if [[ "${REMOTE_TYPE}" == "https" ]]; then
   REMOTE_URL="${REMOTE_HTTPS_URL}"
 else
-  REMOTE_URL="${REMOTE_SSH_URL}"  
+  REMOTE_URL="${REMOTE_SSH_URL}"
 fi
 
 ## Remove existing origin
@@ -117,7 +117,7 @@ fi
 
 ## Add new origin
 echo "Setting dotfiles remote repository URL to: (${REMOTE_TYPE}) ${REMOTE_URL}"
-if ! git remote add origin $REMOTE_URL; then
+if ! git remote add origin "$REMOTE_URL"; then
   echo "[ERROR] Failed to add new origin."
   exit 1
 fi
@@ -132,7 +132,7 @@ for branch in $(git for-each-ref --format='%(refname:short)' refs/heads/); do
   ## Check if branch exists on remote
   if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
     ## Update branch
-    git branch --set-upstream-to="origin/$branch" "$branch" 2>/dev/null &&
+    git branch --set-upstream-to="origin/$branch" "$branch" 2> /dev/null &&
       echo "[OK] Linked local branch '$branch' -> origin/$branch" ||
       echo "[WARN] Failed to set upstream for branch '$branch'"
   else

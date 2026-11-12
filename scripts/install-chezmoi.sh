@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-CURL_INSTALLED=$(command -v curl &>/dev/null && echo 1 || echo 0)
-WGET_INSTALLED=$(command -v wget &>/dev/null && echo 1 || echo 0)
+CURL_INSTALLED=$(command -v curl &> /dev/null && echo 1 || echo 0)
+WGET_INSTALLED=$(command -v wget &> /dev/null && echo 1 || echo 0)
 
 CHEZMOI_URL="chezmoi.io/getlb"
 CHEZMOI_INSTALL_DIR=$HOME/.local/bin

@@ -121,8 +121,8 @@ for img in "${IMAGES[@]}"; do
   CMD ["chezmoi", "apply", "--dry-run"]
 EOF
 
-  if docker build -t "chezmoi-test-$img" "$TEST_DIR" && \
-     docker run --rm "chezmoi-test-$img"; then
+  if docker build -t "chezmoi-test-$img" "$TEST_DIR" &&
+    docker run --rm "chezmoi-test-$img"; then
     echo
     echo "[SUCCESS] $img : PASS"
   else
@@ -131,9 +131,9 @@ EOF
   fi
 
   echo
-  
-  docker rmi "chezmoi-test-$img" &>/dev/null || true
-  rm -rf "$TEST_DIR" &>/dev/null
+
+  docker rmi "chezmoi-test-$img" &> /dev/null || true
+  rm -rf "$TEST_DIR" &> /dev/null
 
   echo "----------------------------------------------------------------------------------"
   echo
