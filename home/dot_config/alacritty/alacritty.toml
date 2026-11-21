@@ -1,0 +1,53 @@
+## Alacritty configuration
+#  https://alacritty.org/config-alacritty.html
+
+[general]
+live_config_reload = true
+
+[window]
+## Let the window manager decide where to put the window.
+startup_mode = "Windowed"
+
+## Initial window size
+dimensions = { columns = 120, lines = 25 }
+
+## Padding around terminal content, in pixels.
+padding = { x = 8, y = 8 }
+dynamic_padding = true
+
+## Allow applications such as shells and editors to change the title.
+dynamic_title = true
+
+[scrolling]
+## Maximum number of lines kept in scrollback.
+history = 10000
+
+## Lines scrolled per mouse wheel increment.
+multiplier = 3
+
+[font]
+## Keep the OS-native default font family for maximum portability.
+#  Linux: monospace
+#  Windows: Consolas
+size = 12.0
+
+[font.offset]
+x = 0
+y = 0
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }
+unfocused_hollow = true
+
+[mouse]
+hide_when_typing = true
+
+[selection]
+## Automatically copy selected text to the clipboard.
+save_to_clipboard = false
+
+[terminal]
+## Keep the platform's default shell.
+#  Linux: user's login shell
+#  Windows: PowerShell
+osc52 = "OnlyCopy"
