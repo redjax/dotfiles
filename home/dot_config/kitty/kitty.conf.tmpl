@@ -25,21 +25,29 @@ clear_all_mouse_actions
 ## Hide cursor after delay wwhen typing
 mouse_hide_wait -3.0
 
-## Force CTRL+Click for opening links (instead of just a click)
+## Disable ordinary left-click actions
 mouse_map left click ungrabbed no-op
+
+## Ctrl+click opens hyperlinks
 mouse_map ctrl+left click ungrabbed mouse_handle_click link
+
+## Normal text selection
+mouse_map left press ungrabbed mouse_selection normal
+
+## Shift+drag selects text when an application captures the mouse
+mouse_map shift+left press grabbed mouse_selection normal
+
+## Right-click copies selection instead of extending it
+mouse_map right press ungrabbed copy_to_clipboard
+mouse_map right press grabbed copy_to_clipboard
+
+## Ctrl+right-click pastes
+mouse_map ctrl+right press ungrabbed,grabbed paste_from_clipboard
 
 ## Disable cursor integration from shell so Kitty controls cursor shape
 shell_integration no-cursor
 ## Options: block, beam, underline, ibeam
 cursor_shape block
-
-## Copy on highlight + right click
-mouse_map right release ungrabbed copy_to_clipboard
-mouse_map right release grabbed copy_to_clipboard
-
-## Paste from clipboard on CTRL+right click
-mouse_map ctrl+right release ungrabbed,grabbed paste_from_clipboard
 
 ##############
 # Scrollback #
@@ -74,7 +82,7 @@ underline_hyperlinks always
 # Text selection #
 ##################
 
-copy_on_select yes
+copy_on_select no
 
 ## When the contents of the clipboard no longer reflect the current
 #  selection, clear it. This is primarily useful on platforms such as
