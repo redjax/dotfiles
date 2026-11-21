@@ -1,0 +1,89 @@
+## Alacritty configuration
+#  https://alacritty.org/config-alacritty.html
+
+[general]
+live_config_reload = true
+
+## Import themes
+#  Only the uncommented theme will be loaded.
+#  If multiple themes are uncommented, the last
+#  one in the list will used.
+import = [
+    ## Ayu Dark
+    "{{ .chezmoi.homeDir }}/.config/alacritty/themes/ayu-dark.toml",
+    ## Catppuccin Mocha
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/catppuccin-mocha.toml",
+    ## Catppuccin Macchiato
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/catppuccin-macchiato.toml",
+    ## Dracula (default)
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/dracula-default.toml",
+    ## Kanagawa Wave
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/kanagawa-wave.toml",
+    ## Kanagawa Dragon
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/kanagawa-dragon.toml",
+    ## Moonfly
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/moonfly-default.toml",
+    ## Nightfly
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/nightfly-default.toml",
+    ## Noctis Uva
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/noctis-uva.toml",
+    ## Noctis Obscuro
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/noctis-obscuro.toml",
+    ## Panda
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/panda-default.toml",
+    ## Tokyo Night
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/tokyo-night-default.toml",
+    ## Tokyo Night Moon
+    # "{{ .chezmoi.homeDir }}/.config/alacritty/themes/tokyo-night-moon.toml",
+]
+
+[window]
+## Let the window manager decide where to put the window.
+startup_mode = "Windowed"
+
+## Initial window size
+dimensions = { columns = 120, lines = 25 }
+
+## Padding around terminal content, in pixels.
+padding = { x = 8, y = 8 }
+dynamic_padding = true
+
+## Allow applications such as shells and editors to change the title.
+dynamic_title = true
+
+## Snap to character-cell increments when resizing on supported platforms.
+resize_increments = true
+
+[scrolling]
+## Maximum number of lines kept in scrollback.
+history = 20000
+
+## Lines scrolled per mouse wheel increment.
+multiplier = 3
+
+[font]
+## Keep the OS-native default font family for maximum portability.
+#  Linux: monospace
+#  Windows: Consolas
+size = 12.0
+
+[font.offset]
+x = 0
+y = 0
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }
+unfocused_hollow = true
+
+[mouse]
+hide_when_typing = true
+
+[selection]
+## Automatically copy selected text to the clipboard.
+save_to_clipboard = false
+
+[terminal]
+## Keep the platform's default shell.
+#  Linux: user's login shell
+#  Windows: PowerShell
+osc52 = "OnlyCopy"
