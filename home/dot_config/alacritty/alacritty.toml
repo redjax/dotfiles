@@ -23,7 +23,7 @@ resize_increments = true
 
 [scrolling]
 ## Maximum number of lines kept in scrollback.
-history = 10000
+history = 20000
 
 ## Lines scrolled per mouse wheel increment.
 multiplier = 3
