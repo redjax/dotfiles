@@ -13,7 +13,7 @@ EXCLUDE_PATTERNS=()
 
 ## Define -h/--help function
 function print_help() {
-  cat <<EOF
+  cat << EOF
 Usage: $(basename "$0") [OPTIONS]
 
 Restic backup script with support for multiple exclude files and patterns.
@@ -40,7 +40,7 @@ EOF
 ## Parse CLI args
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -s|--backup-src)
+    -s | --backup-src)
       if [[ -z $2 ]]; then
         echo "[ERROR] --backup-src provided but no path given."
 
@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
       SRC_DIR="$2"
       shift 2
       ;;
-    -r|--repo-file)
+    -r | --repo-file)
       if [[ -z $2 ]]; then
         echo "[ERROR] --repo-file provided but no path given."
 
@@ -62,7 +62,7 @@ while [[ $# -gt 0 ]]; do
       RESTIC_REPO_FILE="$2"
       shift 2
       ;;
-    -p|--password-file)
+    -p | --password-file)
       if [[ -z $2 ]]; then
         echo "[ERROR] --password-file provided but no path given."
 
@@ -75,31 +75,31 @@ while [[ $# -gt 0 ]]; do
       ;;
     --exclude-file)
       if [[ -n "$2" && "$2" != --* ]]; then
-          EXCLUDE_FILES+=("$2")
-          shift 2
+        EXCLUDE_FILES+=("$2")
+        shift 2
       else
-          echo "[ERROR] --exclude-file provided but no path given."
+        echo "[ERROR] --exclude-file provided but no path given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
     --exclude-pattern)
       if [[ -n "$2" && "$2" != --* ]]; then
-          EXCLUDE_PATTERNS+=("$2")
-          shift 2
+        EXCLUDE_PATTERNS+=("$2")
+        shift 2
       else
-          echo "[ERROR] --exclude-pattern provided but no path given."
+        echo "[ERROR] --exclude-pattern provided but no path given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
     --dry-run)
       DRY_RUN="true"
       shift
       ;;
-    -h|--help)
+    -h | --help)
       print_help
       exit 0
       ;;
@@ -131,10 +131,10 @@ done
 
 ## Print or run command
 if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
-  echo "Running restic cleanup command: $cmd"
+  echo "Running restic cleanup command: ${cmd[*]}"
 
   ## Run the command
-  "$cmd[@]"
+  "${cmd[@]}"
 
   if [[ $? -ne 0 ]]; then
     echo "[ERROR] Failed to run restic cleanup command."
@@ -144,6 +144,6 @@ if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
     exit 0
   fi
 else
-  echo "[DRY RUN] Would run restic cleanup command: $cmd[@]"
+  echo "[DRY RUN] Would run restic cleanup command: ${cmd[*]}"
   exit 0
 fi

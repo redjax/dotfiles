@@ -15,7 +15,7 @@
 set -euo pipefail
 
 ## Paths
-THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+THIS_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 DOT_RESTIC_DIR="$HOME/.restic"
 RESTIC_PASSWORDS_DIR="$DOT_RESTIC_DIR/passwords"
 
@@ -34,7 +34,7 @@ unset RESTIC_REPOSITORY
 unset RESTIC_PASSWORD_FILE
 
 print_help() {
-    cat <<EOF
+  cat << EOF
 Usage: $(basename "$0") [OPTIONS]
 
 Restic cleanup script.
@@ -57,96 +57,103 @@ EOF
 }
 
 ## Require restic
-if ! command -v restic &>/dev/null; then
-    echo "[ERROR] Restic is not installed. Please install Restic and retry."
-    exit 1
+if ! command -v restic &> /dev/null; then
+  echo "[ERROR] Restic is not installed. Please install Restic and retry."
+  exit 1
 fi
 
 ## Parse args
 while [[ $# -gt 0 ]]; do
-    case "$1" in
-        -r|--repo-file|--repository-file)
-            if [[ -z ${2:-} ]]; then
-                echo "[ERROR] --repository-file provided but no path given."
-                print_help; exit 1
-            fi
-            
-            RESTIC_REPO_FILE="$2"; shift 2
-            ;;
-        -p|--password-file)
-            if [[ -z ${2:-} ]]; then
-                echo "[ERROR] --password-file provided but no path given."
-                print_help; exit 1
-            fi
+  case "$1" in
+    -r | --repo-file | --repository-file)
+      if [[ -z ${2:-} ]]; then
+        echo "[ERROR] --repository-file provided but no path given."
+        print_help
+        exit 1
+      fi
 
-            RESTIC_PW_FILE="$2"; shift 2
-            ;;
-        --keep-daily)
-            if [[ -n "$2" && "$2" != --* ]]; then
-                KEEP_DAILY="$2"
-                shift 2
-            else
-                echo "[ERROR] --keep-daily provided but no number given."
+      RESTIC_REPO_FILE="$2"
+      shift 2
+      ;;
+    -p | --password-file)
+      if [[ -z ${2:-} ]]; then
+        echo "[ERROR] --password-file provided but no path given."
+        print_help
+        exit 1
+      fi
 
-                print_help
-                exit 1
-            fi
-            ;;
-            --keep-weekly)
-            if [[ -n "$2" && "$2" != --* ]]; then
-                KEEP_WEEKLY="$2"
-                shift 2
-            else
-                echo "[ERROR] --keep-weekly provided but no number given."
+      RESTIC_PW_FILE="$2"
+      shift 2
+      ;;
+    --keep-daily)
+      if [[ -n "$2" && "$2" != --* ]]; then
+        KEEP_DAILY="$2"
+        shift 2
+      else
+        echo "[ERROR] --keep-daily provided but no number given."
 
-                print_help
-                exit 1
-            fi
-            ;;
-            --keep-monthly)
-            if [[ -n "$2" && "$2" != --* ]]; then
-                KEEP_MONTHLY="$2"
-                shift 2
-            else
-                echo "[ERROR] --keep-monthly provided but no number given."
+        print_help
+        exit 1
+      fi
+      ;;
+    --keep-weekly)
+      if [[ -n "$2" && "$2" != --* ]]; then
+        KEEP_WEEKLY="$2"
+        shift 2
+      else
+        echo "[ERROR] --keep-weekly provided but no number given."
 
-                print_help
-                exit 1
-            fi
-            ;;
-        --dry-run)
-            DRY_RUN="true"; shift 1
-            ;;
-        -h|--help)
-            print_help; exit 0
-            ;;
-        *)
-            echo "[ERROR] Unknown argument: $1"
-            print_help; exit 1
-            ;;
-    esac
+        print_help
+        exit 1
+      fi
+      ;;
+    --keep-monthly)
+      if [[ -n "$2" && "$2" != --* ]]; then
+        KEEP_MONTHLY="$2"
+        shift 2
+      else
+        echo "[ERROR] --keep-monthly provided but no number given."
+
+        print_help
+        exit 1
+      fi
+      ;;
+    --dry-run)
+      DRY_RUN="true"
+      shift 1
+      ;;
+    -h | --help)
+      print_help
+      exit 0
+      ;;
+    *)
+      echo "[ERROR] Unknown argument: $1"
+      print_help
+      exit 1
+      ;;
+  esac
 done
 
 if [[ -z "$RESTIC_REPO_FILE" ]]; then
-    echo "[ERROR] --repository-file is required."
-    echo
-    print_help
-    exit 1
+  echo "[ERROR] --repository-file is required."
+  echo
+  print_help
+  exit 1
 fi
 
 if [[ -z "$RESTIC_PW_FILE" ]]; then
-    echo "[ERROR] --password-file is required."
-    echo
-    print_help
-    exit 1
+  echo "[ERROR] --password-file is required."
+  echo
+  print_help
+  exit 1
 fi
 
 if [[ -z "$KEEP_DAILY" ]] || [[ -z "$KEEP_WEEKLY" ]] || [[ -z "$KEEP_MONTHLY" ]]; then
-    echo "[ERROR] --keep-daily, --keep-weekly, and --keep-monthly are required."
-    echo
+  echo "[ERROR] --keep-daily, --keep-weekly, and --keep-monthly are required."
+  echo
 
-    print_help
-    exit 1
+  print_help
+  exit 1
 fi
 
 ## Export env vars for script
@@ -155,28 +162,28 @@ export RESTIC_PASSWORD_FILE="$RESTIC_PW_FILE"
 
 ## Build command
 cmd=(
-    restic
-    forget
-    --keep-daily $KEEP_DAILY
-    --keep-weekly $KEEP_WEEKLY
-    --keep-monthly $KEEP_MONTHLY
-    --prune
-    --repository-file $RESTIC_REPO_FILE
-    --password-file $RESTIC_PW_FILE
+  restic
+  forget
+  --keep-daily "$KEEP_DAILY"
+  --keep-weekly "$KEEP_WEEKLY"
+  --keep-monthly "$KEEP_MONTHLY"
+  --prune
+  --repository-file "$RESTIC_REPO_FILE"
+  --password-file "$RESTIC_PW_FILE"
 )
 
 if [[ -n "$DRY_RUN" ]]; then
-    echo "DRY RUN: Would run command:"
-    echo "  $> ${cmd[@]}"
-    
-    exit 0
+  echo "DRY RUN: Would run command:"
+  echo "  $> ${cmd[*]}"
+
+  exit 0
 else
-    echo "Running restic cleanup command: "
-    echo "  $> ${cmd[@]}"
-    echo ""
+  echo "Running restic cleanup command: "
+  echo "  $> ${cmd[*]}"
+  echo ""
 
-    ## Run the command
-    "${cmd[@]}"
+  ## Run the command
+  "${cmd[@]}"
 
-    exit $?    
+  exit $?
 fi

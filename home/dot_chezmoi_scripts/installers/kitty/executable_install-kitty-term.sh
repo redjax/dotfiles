@@ -27,6 +27,6 @@ sed -i "s|Exec=kitty|Exec=$(readlink -f ~)/.local/kitty.app/bin/kitty|g" \
   "${APPS_DIR}/kitty*.desktop"
 
 echo "Making kitty the xdg-terminal (if supported)"
-echo 'kitty.desktop' >"${CONFIG_DIR}/xdg-terminals.list"
+echo 'kitty.desktop' > "${CONFIG_DIR}/xdg-terminals.list"
 
 echo "All done. You may need to run 'update-desktop-database' or re-log for menus to refresh."

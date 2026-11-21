@@ -1,113 +1,113 @@
 #!/usr/bin/env bash
 
 function get_distro_id() {
-    if [[ -f /etc/os-release ]]; then
-        source /etc/os-release
-        echo "${ID}-${VERSION_ID:-unknown}"
-    else
-        echo "unknown"
-    fi
+  if [[ -f /etc/os-release ]]; then
+    source /etc/os-release
+    echo "${ID}-${VERSION_ID:-unknown}"
+  else
+    echo "unknown"
+  fi
 }
 
 function install_zellij_linux() {
-    LINUX_DISTRO="$(get_distro_id)"
-    echo "[INFO] Detected Linux distro: $LINUX_DISTRO"
+  LINUX_DISTRO="$(get_distro_id)"
+  echo "[INFO] Detected Linux distro: $LINUX_DISTRO"
 
-    # Detect architecture
-    ARCH="$(uname -m)"
-    echo "[INFO] Detected CPU architecture: $ARCH"
+  # Detect architecture
+  ARCH="$(uname -m)"
+  echo "[INFO] Detected CPU architecture: $ARCH"
 
-    case "$ARCH" in
-        x86_64)
-            ZELLIJ_ARCH="x86_64-unknown-linux-musl"
-            ;;
-        aarch64|arm64)
-            ZELLIJ_ARCH="aarch64-unknown-linux-musl"
-            ;;
-        armv7l)
-            ZELLIJ_ARCH="armv7-unknown-linux-gnueabihf"
-            ;;
-        *)
-            echo "[ERROR] Unsupported architecture: $ARCH"
-            return 1
-            ;;
-    esac
+  case "$ARCH" in
+    x86_64)
+      ZELLIJ_ARCH="x86_64-unknown-linux-musl"
+      ;;
+    aarch64 | arm64)
+      ZELLIJ_ARCH="aarch64-unknown-linux-musl"
+      ;;
+    armv7l)
+      ZELLIJ_ARCH="armv7-unknown-linux-gnueabihf"
+      ;;
+    *)
+      echo "[ERROR] Unsupported architecture: $ARCH"
+      return 1
+      ;;
+  esac
 
-    URL="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${ZELLIJ_ARCH}.tar.gz"
-    echo "[INFO] Downloading Zellij binary for $ARCH from $URL"
-    
-    curl -L "$URL" -o /tmp/zellij.tar.gz
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to download Zellij static binary"
-        return 1
-    fi
+  URL="https://github.com/zellij-org/zellij/releases/latest/download/zellij-${ZELLIJ_ARCH}.tar.gz"
+  echo "[INFO] Downloading Zellij binary for $ARCH from $URL"
 
-    echo "[INFO] Extracting Zellij static binary"
-    tar -xzf /tmp/zellij.tar.gz -C /tmp
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to extract Zellij static binary"
-        return 1
-    fi
+  curl -L "$URL" -o /tmp/zellij.tar.gz
+  if [[ $? -ne 0 ]]; then
+    echo "[ERROR] Failed to download Zellij static binary"
+    return 1
+  fi
 
-    sudo mv /tmp/zellij /usr/local/bin/
-    sudo chmod +x /usr/local/bin/zellij
+  echo "[INFO] Extracting Zellij static binary"
+  tar -xzf /tmp/zellij.tar.gz -C /tmp
+  if [[ $? -ne 0 ]]; then
+    echo "[ERROR] Failed to extract Zellij static binary"
+    return 1
+  fi
 
-    echo "[OK] Zellij installed to /usr/local/bin/zellij"
+  sudo mv /tmp/zellij /usr/local/bin/
+  sudo chmod +x /usr/local/bin/zellij
+
+  echo "[OK] Zellij installed to /usr/local/bin/zellij"
 }
 
 function install_zellij_mac() {
-    if ! command -v brew 2>&1 > /dev/null; then
-        echo "[ERROR] Homebrew not installed. Please install Homebrew and retry."
-        exit 1
-    fi
+  if ! command -v brew > /dev/null 2>&1; then
+    echo "[ERROR] Homebrew not installed. Please install Homebrew and retry."
+    exit 1
+  fi
 
-    echo "[INFO] Installing Zellij via Homebrew"
-    brew install zellij
-    if [[ $? -ne 0 ]]; then
-        echo "[ERROR] Failed to install Zellij via Homebrew"
-        return 1
-    fi
-    
-    echo "[OK] Zellij installed via Homebrew"
+  echo "[INFO] Installing Zellij via Homebrew"
+  brew install zellij
+  if [[ $? -ne 0 ]]; then
+    echo "[ERROR] Failed to install Zellij via Homebrew"
+    return 1
+  fi
+
+  echo "[OK] Zellij installed via Homebrew"
 }
 
 function main() {
-    OS_NAME="$(uname -s)"
-    echo "[INFO] Detected OS: $OS_NAME"
+  OS_NAME="$(uname -s)"
+  echo "[INFO] Detected OS: $OS_NAME"
 
-    if [[ "$OS_NAME" == "Darwin" ]]; then
-        install_zellij_mac
-        if [[ $? -ne 0 ]]; then
-            return 1
-        fi
-    elif [[ "$OS_NAME" == "Linux" ]]; then
-        install_zellij_linux
-        if [[ $? -ne 0 ]]; then
-            return 1
-        fi
-    else
-        echo "[ERROR] Unsupported OS: $OS_NAME"
-        return 1
+  if [[ "$OS_NAME" == "Darwin" ]]; then
+    install_zellij_mac
+    if [[ $? -ne 0 ]]; then
+      return 1
     fi
+  elif [[ "$OS_NAME" == "Linux" ]]; then
+    install_zellij_linux
+    if [[ $? -ne 0 ]]; then
+      return 1
+    fi
+  else
+    echo "[ERROR] Unsupported OS: $OS_NAME"
+    return 1
+  fi
 
-    return 0
+  return 0
 }
 
-if ! command -v curl 2>&1 > /dev/null; then
-    echo "[ERROR] curl is not installed. Please install curl and retry."
-    exit 1
+if ! command -v curl > /dev/null 2>&1; then
+  echo "[ERROR] curl is not installed. Please install curl and retry."
+  exit 1
 fi
 
-if ! command -v tar 2>&1 > /dev/null; then
-    echo "[ERROR] tar is not installed. Please install tar and retry."
-    exit 1
+if ! command -v tar > /dev/null 2>&1; then
+  echo "[ERROR] tar is not installed. Please install tar and retry."
+  exit 1
 fi
 
 main
 if [[ $SUCCESS -ne 0 ]]; then
-    echo "[ERROR] Failed to install Zellij"
-    exit 1
+  echo "[ERROR] Failed to install Zellij"
+  exit 1
 else
-    echo "[OK] Zellij installed successfully"
-    exit 0
+  echo "[OK] Zellij installed successfully"
+  exit 0
 fi

@@ -17,10 +17,10 @@ function cleanup() {
 
 if [[ -z "${GITHUB_USERNAME}" ]]; then
   echo "[ERROR] Missing GITHUB_USERNAME" >&2
-  
+
   while true; do
     read -r -p "Github username: " gh_user
-    
+
     if [[ -z "${gh_user}" ]]; then
       echo "Please enter a Github username"
       echo ""
@@ -36,7 +36,7 @@ if [[ -z "${HOST_USER}" ]]; then
 
   while true; do
     read -r -p "Linux user (for Chezmoi dotfile render): " hst_user
-    
+
     if [[ -z "${hst_user}" ]]; then
       echo "Please enter a Linux user"
       echo ""
@@ -47,7 +47,7 @@ if [[ -z "${HOST_USER}" ]]; then
   done
 fi
 
-if ! command -v docker &>/dev/null; then
+if ! command -v docker &> /dev/null; then
   echo "[ERROR] Docker is not installed" >&2
   exit 1
 fi

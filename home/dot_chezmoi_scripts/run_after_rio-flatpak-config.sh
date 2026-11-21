@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 ## Detect if flatpak is installed
-if command -v flatpak &>/dev/null; then
+if command -v flatpak &> /dev/null; then
 
   ## Detect if Rio is installed as a flatpak
-  if flatpak info com.rioterm.Rio &>/dev/null; then
+  if flatpak info com.rioterm.Rio &> /dev/null; then
     echo "Running Rio Flatpak config copy script..."
-    
+
     SRC="$HOME/.config/rio"
     DEST="$HOME/.var/app/com.rioterm.Rio/config/rio"
 
@@ -14,7 +14,7 @@ if command -v flatpak &>/dev/null; then
       mkdir -p "$DEST"
 
       if [[ -d "$DEST/" ]]; then
-        rm -r "$DEST/"
+        rm -r "${DEST:?}/"
       fi
 
       cp -a "$SRC/." "$DEST/"
@@ -30,4 +30,3 @@ if command -v flatpak &>/dev/null; then
 # else
 #   echo "Flatpak is not installed."
 fi
-

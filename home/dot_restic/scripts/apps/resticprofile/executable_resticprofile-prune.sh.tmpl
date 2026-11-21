@@ -4,7 +4,7 @@ PROFILE_PATH="{{ .chezmoi.homeDir}}/profiles.yaml"
 AS_ROOT=""
 DRY_RUN=""
 
-if ! command -v resticprofile &>/dev/null; then
+if ! command -v resticprofile &> /dev/null; then
   echo "[ERROR] resticprofile is not installed."
   exit 1
 fi
@@ -17,7 +17,7 @@ function print_help() {
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -p|--profile)
+    -p | --profile)
       if [[ -z "$2" ]]; then
         echo "[ERROR] --profile provided, but no profile path string given."
 
@@ -28,7 +28,7 @@ while [[ $# -gt 0 ]]; do
       PROFILE_PATH="$2"
       shift 2
       ;;
-    -s|--sudo|--root)
+    -s | --sudo | --root)
       AS_ROOT="true"
       shift
       ;;
@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]]; do
       DRY_RUN="true"
       shift
       ;;
-    -h|--help)
+    -h | --help)
       print_help
       exit 0
       ;;
@@ -67,12 +67,12 @@ if [[ -n "$AS_ROOT" ]]; then
   cmd=(sudo "${cmd[@]}")
 fi
 
-echo "Running resticprofile prune command: ${cmd[@]} --dry-run"
+echo "Running resticprofile prune command: ${cmd[*]} --dry-run"
 "${cmd[@]}"
 
 if [[ $? -ne 0 ]]; then
   echo "[ERROR] Failed pruning resticprofile backups."
-  exit $?
+  exit 1
 else
   echo "Backups pruned."
   exit 0

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  cat <<EOF
+  cat << EOF
 Usage: $0 -s <session_name> -l <layout_file>
 
 Options:
@@ -19,15 +19,15 @@ LAYOUT_FILE=""
 # Parse args
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -s|--session-name)
+    -s | --session-name)
       SESSION_NAME="$2"
       shift 2
       ;;
-    -l|--layout-file)
+    -l | --layout-file)
       LAYOUT_FILE="$2"
       shift 2
       ;;
-    -h|--help)
+    -h | --help)
       usage
       ;;
     *)
@@ -43,7 +43,7 @@ if [[ -z "$SESSION_NAME" ]] || [[ -z "$LAYOUT_FILE" ]]; then
   usage
 fi
 
-if ! command -v zellij &>/dev/null; then
+if ! command -v zellij &> /dev/null; then
   echo "[ERROR] Zellij is not installed."
   exit 1
 fi
@@ -55,14 +55,14 @@ fi
 
 # Return clean list of session names
 get_sessions() {
-  if zellij list-sessions --no-formatting --short 2>/dev/null; then
+  if zellij list-sessions --no-formatting --short 2> /dev/null; then
     return 0
   fi
-  zellij list-sessions \
-    | sed -E 's/\x1B\[[0-9;]*[[:alpha:]]//g' \
-    | sed -E 's/[[:space:]]*\[.*$//' \
-    | sed -E 's/[[:space:]]*\(EXITED.*$//' \
-    | sed -E '/^No active zellij sessions found\.$/d'
+  zellij list-sessions |
+    sed -E 's/\x1B\[[0-9;]*[[:alpha:]]//g' |
+    sed -E 's/[[:space:]]*\[.*$//' |
+    sed -E 's/[[:space:]]*\(EXITED.*$//' |
+    sed -E '/^No active zellij sessions found\.$/d'
 }
 
 SESSIONS="$(get_sessions || true)"
@@ -77,4 +77,3 @@ else
   echo "Session $SESSION_NAME does not exist. Creating new with layout..."
   exec zellij --new-session-with-layout "$LAYOUT_FILE" -s "$SESSION_NAME"
 fi
-

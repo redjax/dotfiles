@@ -7,42 +7,43 @@ PARENT_DIR="$(dirname "$SCRIPT_PATH")"
 LINUX_DISTRO=$(get_distro_id)
 
 install_wl_clipboard() {
-    if command -v wl-copy 2>&1 > /dev/null && command -v wl-paste 2>&1 > /dev/null; then
-        echo "wl-clipboard is already installed."
-        return 0
-    fi
-
-    echo "Installing wl-clipboard"
-
-    case "$LINUX_DISTRO" in
-      ubuntu|debian|pop|linuxmint)
-        sudo apt install -y wl-clipboard
-        if [[ $? -ne 0 ]]; then
-            echo "[ERROR] Failed to install wl-clipboard"
-            return 1
-        fi
-        ;;
-      fedora|rhel|centos|rocky|almalinux)
-        sudo dnf install -y wl-clipboard
-        if [[ $? -ne 0 ]]; then
-            echo "[ERROR] Failed to install wl-clipboard"
-            return 1
-        fi
-        ;;
-      *)
-        echo "[ERROR] Unsupported distro: $LINUX_DISTRO"
-        return 1
-        ;;
-    esac
-
-    echo "wl-clipboard installed"
+  if command -v wl-copy > /dev/null 2>&1 &&
+    command -v wl-paste > /dev/null 2>&1; then
+    echo "wl-clipboard is already installed."
     return 0
+  fi
+
+  echo "Installing wl-clipboard"
+
+  case "$LINUX_DISTRO" in
+    ubuntu | debian | pop | linuxmint)
+      sudo apt install -y wl-clipboard
+      if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed to install wl-clipboard"
+        return 1
+      fi
+      ;;
+    fedora | rhel | centos | rocky | almalinux)
+      sudo dnf install -y wl-clipboard
+      if [[ $? -ne 0 ]]; then
+        echo "[ERROR] Failed to install wl-clipboard"
+        return 1
+      fi
+      ;;
+    *)
+      echo "[ERROR] Unsupported distro: $LINUX_DISTRO"
+      return 1
+      ;;
+  esac
+
+  echo "wl-clipboard installed"
+  return 0
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    install_wl_clipboard "$@"
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to install wl-clipboard"
-        exit 1
-    fi
+  install_wl_clipboard "$@"
+  if [[ $? -ne 0 ]]; then
+    echo "Failed to install wl-clipboard"
+    exit 1
+  fi
 fi

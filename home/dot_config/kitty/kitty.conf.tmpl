@@ -18,19 +18,27 @@ font_family family='Hack Nerd Font Mono' postscript_name=HackNFM-Regular
 ## Hide cursor immediately when typing
 mouse_hide_wait -3.0
 
-## Require Ctrl+Click to open links
+## Disable ordinary left-click actions
 mouse_map left click ungrabbed no-op
+
+## Ctrl+click opens hyperlinks
 mouse_map ctrl+left click ungrabbed mouse_handle_click link
 
-## Let Kitty control cursor shape
+## Normal text selection
+mouse_map left press ungrabbed mouse_selection normal
+
+## Shift+drag selects text when an application captures the mouse
+mouse_map shift+left press grabbed mouse_selection normal
+
+## Right-click copies selection instead of extending it
+mouse_map right press ungrabbed copy_to_clipboard
+mouse_map right press grabbed copy_to_clipboard
+
+## Ctrl+right-click pastes
+mouse_map ctrl+right press ungrabbed,grabbed paste_from_clipboard
+
+## Disable cursor integration from shell so Kitty controls cursor shape
 shell_integration no-cursor
-
-## Copy selection with right-click
-mouse_map right release ungrabbed copy_to_clipboard
-mouse_map right release grabbed copy_to_clipboard
-
-## Paste with Ctrl+right-click
-mouse_map ctrl+right release ungrabbed,grabbed paste_from_clipboard
 
 ##############
 # Scrollback #
@@ -49,7 +57,29 @@ underline_hyperlinks always
 # Text selection #
 ##################
 
-# copy_on_select yes
+copy_on_select no
+
+## When the contents of the clipboard no longer reflect the current
+#  selection, clear it. This is primarily useful on platforms such as
+#  Linux where selecting text automatically copies it to a special
+#  "primary selection" clipboard or if you have copy_on_select set to
+#  clipboard.
+#  Note that on macOS the system does not provide notifications when
+#  the clipboard owner is changed, so there, copying to clipboard in a
+#  non-kitty application will not clear selections even if
+#  copy_on_select is enabled.
+clear_selection_on_clipboard_loss no
+
+## Remove spaces at the end of lines when copying to clipboard. A
+#  value of smart will do it when using normal selections, but not
+#  rectangle selections. A value of always will always do it.
+strip_trailing_spaces never
+
+#################
+# Terminal bell #
+#################
+
+enable_audio_bell no
 
 #################
 # Window layout #

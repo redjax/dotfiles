@@ -34,7 +34,7 @@ KEEP_MONTHLY=12
 
 ## Define -h/--help function
 function print_help() {
-  cat <<EOF
+  cat << EOF
 Usage: $(basename "$0") [OPTIONS]
 
 Restic backup script with support for multiple exclude files and patterns.
@@ -66,7 +66,7 @@ EOF
 ## Parse CLI args
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -s|--backup-src)
+    -s | --backup-src)
       if [[ -z $2 ]]; then
         echo "[ERROR] --backup-src provided but no path given."
 
@@ -77,7 +77,7 @@ while [[ $# -gt 0 ]]; do
       SRC_DIR="$2"
       shift 2
       ;;
-    -r|--repo-file|--repository-file)
+    -r | --repo-file | --repository-file)
       if [[ -z $2 ]]; then
         echo "[ERROR] --repository-file provided but no path given."
 
@@ -88,7 +88,7 @@ while [[ $# -gt 0 ]]; do
       RESTIC_REPO_FILE="$2"
       shift 2
       ;;
-    -p|--password-file)
+    -p | --password-file)
       if [[ -z $2 ]]; then
         echo "[ERROR] --password-file provided but no path given."
 
@@ -101,64 +101,64 @@ while [[ $# -gt 0 ]]; do
       ;;
     --exclude-file)
       if [[ -n "$2" && "$2" != --* ]]; then
-          EXCLUDE_FILES+=("$2")
-          shift 2
+        EXCLUDE_FILES+=("$2")
+        shift 2
       else
-          echo "[ERROR] --exclude-file provided but no path given."
+        echo "[ERROR] --exclude-file provided but no path given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
     --exclude-pattern)
       if [[ -n "$2" && "$2" != --* ]]; then
-          EXCLUDE_PATTERNS+=("$2")
-          shift 2
+        EXCLUDE_PATTERNS+=("$2")
+        shift 2
       else
-          echo "[ERROR] --exclude-pattern provided but no path given."
+        echo "[ERROR] --exclude-pattern provided but no path given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
     --keep-daily)
       if [[ -n "$2" && "$2" != --* ]]; then
-          KEEP_DAILY="$2"
-          shift 2
+        KEEP_DAILY="$2"
+        shift 2
       else
-          echo "[ERROR] --keep-daily provided but no number given."
+        echo "[ERROR] --keep-daily provided but no number given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
     --keep-weekly)
       if [[ -n "$2" && "$2" != --* ]]; then
-          KEEP_WEEKLY="$2"
-          shift 2
+        KEEP_WEEKLY="$2"
+        shift 2
       else
-          echo "[ERROR] --keep-weekly provided but no number given."
+        echo "[ERROR] --keep-weekly provided but no number given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
     --keep-monthly)
       if [[ -n "$2" && "$2" != --* ]]; then
-          KEEP_MONTHLY="$2"
-          shift 2
+        KEEP_MONTHLY="$2"
+        shift 2
       else
-          echo "[ERROR] --keep-monthly provided but no number given."
+        echo "[ERROR] --keep-monthly provided but no number given."
 
-          print_help
-          exit 1
+        print_help
+        exit 1
       fi
       ;;
-    -c|--cleanup)
+    -c | --cleanup)
       DO_CLEANUP="true"
       shift
       ;;
-    -F|--force)
+    -F | --force)
       RESTIC_FORCE="true"
       shift
       ;;
@@ -166,7 +166,7 @@ while [[ $# -gt 0 ]]; do
       DRY_RUN="true"
       shift
       ;;
-    -h|--help)
+    -h | --help)
       print_help
       exit 0
       ;;
@@ -209,7 +209,7 @@ fi
 ## Print or run command
 if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
   echo "Running restic backup command: "
-  echo "  $> ${cmd[@]}"
+  echo "  $> ${cmd[*]}"
 
   ## Run the command
   "${cmd[@]}"
@@ -234,7 +234,7 @@ if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
       )
 
       echo "Running restic cleanup command: "
-      echo "  $> ${cleanup_cmd[@]}"
+      echo "  $> ${cleanup_cmd[*]}"
 
       "${cleanup_cmd[@]}"
       if [[ $? -ne 0 ]]; then
@@ -247,7 +247,7 @@ if [[ -z "$DRY_RUN" ]] || [[ "$DRY_RUN" == "" ]]; then
   fi
 else
   echo "[DRY RUN] Would run restic backup command: "
-  echo "  $> ${cmd[@]}"
+  echo "  $> ${cmd[*]}"
 
   exit 0
 fi

@@ -2,7 +2,7 @@
 
 set -uo pipefail
 
-if ! command -v intelli-shell &>/dev/null; then
+if ! command -v intelli-shell &> /dev/null; then
   echo "[ERROR] intelli-shell is not installed."
 
   exit 1
@@ -27,38 +27,38 @@ function usage() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-  -o | --output-dir)
-    if [[ -z "$2" ]]; then
-      echo "[ERROR] --output-dir provided but no directory path given"
+    -o | --output-dir)
+      if [[ -z "$2" ]]; then
+        echo "[ERROR] --output-dir provided but no directory path given"
+
+        usage
+        exit 1
+      fi
+
+      EXPORT_DIR="$2"
+      shift 2
+      ;;
+    -f | --file)
+      if [[ -z "$2" ]]; then
+        echo "[ERROR] --file provided but no filename given"
+
+        usage
+        exit 1
+      fi
+
+      EXPORT_FILENAME="$2"
+      shift 2
+      ;;
+    -F | --force)
+      FORCE=true
+      shift
+      ;;
+    *)
+      echo "[ERROR] Invalid argument: $1"
 
       usage
       exit 1
-    fi
-
-    EXPORT_DIR="$2"
-    shift 2
-    ;;
-  -f | --file)
-    if [[ -z "$2" ]]; then
-      echo "[ERROR] --file provided but no filename given"
-
-      usage
-      exit 1
-    fi
-
-    EXPORT_FILENAME="$2"
-    shift 2
-    ;;
-  -F | --force)
-    FORCE=true
-    shift
-    ;;
-  *)
-    echo "[ERROR] Invalid argument: $1"
-
-    usage
-    exit 1
-    ;;
+      ;;
   esac
 done
 
@@ -78,16 +78,16 @@ if [[ "$FORCE" == false ]] && [[ -f "${EXPORT_FILE_PATH}" ]]; then
     echo ""
 
     case "$yn" in
-    [Yy])
-      break
-      ;;
-    [Nn])
-      echo "Exiting."
-      exit 0
-      ;;
-    *)
-      echo "[ERROR] Invalid choice: $yn. Please use 'y' or 'n'."
-      ;;
+      [Yy])
+        break
+        ;;
+      [Nn])
+        echo "Exiting."
+        exit 0
+        ;;
+      *)
+        echo "[ERROR] Invalid choice: $yn. Please use 'y' or 'n'."
+        ;;
     esac
   done
 fi
@@ -95,7 +95,7 @@ fi
 echo "[ Backup Intell-Shell Commands ]"
 if ! intelli-shell export "${EXPORT_FILE_PATH}"; then
   echo "[ERROR] Failed to export intell-shell commands to file '$EXPORT_FILE_PATH'"
-  exit $?
+  exit 1
 else
   echo "Intell-shell commands exported to: ${EXPORT_FILE_PATH}."
   exit 0
