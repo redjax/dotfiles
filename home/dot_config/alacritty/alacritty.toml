@@ -18,6 +18,9 @@ dynamic_padding = true
 ## Allow applications such as shells and editors to change the title.
 dynamic_title = true
 
+## Snap to character-cell increments when resizing on supported platforms.
+resize_increments = true
+
 [scrolling]
 ## Maximum number of lines kept in scrollback.
 history = 10000
