@@ -2,7 +2,13 @@
 # Theme #
 #########
 
+## Default theme
 include themes/seti-dark.conf
+
+## Local override, set theme in ~/.config/kitty/current-theme.conf.
+#  This file is ignored by chezmoi and can be used to override
+#  Kitty's theme per-machine.
+globinclude current-theme.conf
 
 #########
 # Fonts #
