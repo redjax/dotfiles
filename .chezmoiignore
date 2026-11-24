@@ -7,3 +7,6 @@ scripts/*
 .gitignore
 
 .config/tmux/plugins
+
+## Ignore kitty current_theme file
+.config/kitty/current-theme.conf
